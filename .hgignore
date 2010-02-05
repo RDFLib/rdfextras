@@ -3,6 +3,8 @@
 syntax: glob
 
 build/
+dist/
+MANIFEST
 *.egg-info/
 
 *.pyc
