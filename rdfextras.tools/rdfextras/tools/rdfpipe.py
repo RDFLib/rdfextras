@@ -13,7 +13,7 @@ import rdflib
 from rdflib import plugin
 from rdflib.store import Store
 from rdflib.graph import Graph
-from rdflib.namespace import Namespace, RDF, RDFS, OWL, _XSD_NS
+from rdflib.namespace import Namespace, RDF, RDFS, OWL, XSD
 from rdflib.syntax.parsers import Parser
 from rdflib.syntax.serializers import Serializer
 
@@ -30,7 +30,7 @@ NS_BINDINGS = {
     'rdf':  RDF,
     'rdfs': RDFS,
     'owl':  OWL,
-    'xsd':  _XSD_NS,
+    'xsd':  XSD,
     'dc':   "http://purl.org/dc/elements/1.1/",
     'dct':  "http://purl.org/dc/terms/",
     'foaf': "http://xmlns.com/foaf/0.1/",
