@@ -14,8 +14,8 @@ from rdflib import plugin
 from rdflib.store import Store
 from rdflib.graph import Graph
 from rdflib.namespace import Namespace, RDF, RDFS, OWL, XSD
-from rdflib.syntax.parsers import Parser
-from rdflib.syntax.serializers import Serializer
+from rdflib.parser import Parser
+from rdflib.serializer import Serializer
 
 from rdfextras.tools.pathutils import guess_format
 
