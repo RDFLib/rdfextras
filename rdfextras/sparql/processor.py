@@ -1,8 +1,8 @@
-from rdflib import sparql
-import rdflib.sparql.parser
-from rdflib.sparql.algebra import TopEvaluate
+from rdfextras import sparql
+import rdfextras.sparql.parser
+from rdfextras.sparql.algebra import TopEvaluate
 from rdflib.namespace import RDFS, RDF, OWL
-from rdflib.sparql.components import Query, Prolog
+from rdfextras.sparql.components import Query, Prolog
 
 class Processor(sparql.Processor):
 
@@ -21,7 +21,7 @@ class Processor(sparql.Processor):
 
         initNs.update({u'rdfs':RDFS.uri, u'owl':OWL.uri, u'rdf':RDF.uri}) 
 
-        assert isinstance(strOrQuery, (basestring, Query)),"%s must be a string or an rdflib.sparql.components.Query instance"%strOrQuery
+        assert isinstance(strOrQuery, (basestring, Query)),"%s must be a string or an rdfextras.sparql.components.Query instance"%strOrQuery
         if isinstance(strOrQuery, basestring):
             strOrQuery = sparql.parser.parse(strOrQuery)
         if not strOrQuery.prolog:

@@ -1,7 +1,15 @@
 import unittest
 
+import rdflib
+
 from rdflib import term
 from rdflib.graph import Graph
+
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 class FakeBlankNode(object):
     def __cmp__(self, other):

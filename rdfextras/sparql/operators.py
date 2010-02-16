@@ -28,8 +28,8 @@
 import sys, os, re
 from rdflib.term import Literal, BNode, URIRef, Variable
 from rdflib.namespace import Namespace, XSD
-from rdflib.sparql.graph import _createResource
-from rdflib.sparql import _questChar, Debug
+from rdfextras.sparql.graph import _createResource
+from rdfextras.sparql import _questChar, Debug
 
 
 ##

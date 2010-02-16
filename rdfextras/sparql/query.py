@@ -10,9 +10,9 @@ from rdflib.term import URIRef, BNode, Literal, Variable, Identifier
 from rdflib.namespace import RDF
 from rdflib.graph import Graph, ConjunctiveGraph, ReadOnlyGraphAggregate
 from rdflib.util import check_subject, list2set
-from rdflib.sparql import SPARQLError
-from rdflib.sparql.graph import SPARQLGraph
-from rdflib.sparql.graph import GraphPattern
+from rdfextras.sparql import SPARQLError
+from rdfextras.sparql.graph import SPARQLGraph
+from rdfextras.sparql.graph import GraphPattern
 
 class SessionBNode(BNode):
     """
@@ -44,9 +44,9 @@ def _checkOptionals(pattern,optionals) :
     relies on this, so checking it is a good idea...)
 
     @param pattern: graph pattern
-    @type pattern: L{GraphPattern<rdflib.sparql.GraphPattern>}
+    @type pattern: L{GraphPattern<rdfextras.sparql.GraphPattern>}
     @param optionals: graph pattern
-    @type optionals: L{GraphPattern<rdflib.sparql.GraphPattern>}
+    @type optionals: L{GraphPattern<rdfextras.sparql.GraphPattern>}
     @raise SPARQLError: if the requirement is not fulfilled
     """
     for i in xrange(0,len(optionals)) :
@@ -96,7 +96,7 @@ def _createInitialBindings(pattern) :
     query variable.
 
     @param pattern: graph pattern
-    @type pattern: L{GraphPattern<rdflib.sparql.GraphPattern>}
+    @type pattern: L{GraphPattern<rdfextras.sparql.GraphPattern>}
     """
     bindings = {}
     for c in pattern.unbounds :
@@ -217,7 +217,7 @@ class _SPARQLNode(object):
         for the current node, the rest for the children. If empty, then no
         expansion occurs (ie, the node is a leaf)
         @param tripleStore: the 'owner' triple store
-        @type tripleStore: L{graph<rdflib.sparql.graph.graph>}
+        @type tripleStore: L{graph<rdfextras.sparql.graph.graph>}
         """
         self.priorLeftJoin       = False
         self.expr = expr
@@ -372,7 +372,7 @@ class _SPARQLNode(object):
           construction of a separate triple store with the
           results. This means taking the bindings in the node, and
           constuct the graph via the
-          L{construct<rdflib.sparql.graph.GraphPattern.construct>}
+          L{construct<rdfextras.sparql.graph.GraphPattern.construct>}
           method. This happens on the valid leafs; intermediate nodes
           call the same method recursively - otherwise, a leaf returns
           an array of the bindings, and intermediate methods aggregate
@@ -382,9 +382,9 @@ class _SPARQLNode(object):
         trees that they may have.
 
         @param subTriples: the triples so far
-        @type subTriples: L{graph<rdflib.sparql.graph.graph>}
+        @type subTriples: L{graph<rdfextras.sparql.graph.graph>}
         @param pattern: a graph pattern used to construct a graph
-        @type pattern: L{GraphPattern<rdflib.sparql.graph.GraphPattern>}
+        @type pattern: L{GraphPattern<rdfextras.sparql.graph.GraphPattern>}
         @return: if pattern is not None, an array of binding dictionaries
         """
         def b(r,bind) :
@@ -785,12 +785,12 @@ def query(graph, selection, patterns, optionalPatterns=[], initialBindings = {})
     or a single string. Each entry is a string that begins with a"?".
 
     @param patterns: either a
-    L{GraphPattern<rdflib.sparql.graph.GraphPattern>}
+    L{GraphPattern<rdfextras.sparql.graph.GraphPattern>}
     instance or a list of instances thereof. Each pattern in the
     list represent an 'OR' (or 'UNION') branch in SPARQL.
 
     @param optionalPatterns: either a
-    L{GraphPattern<rdflib.sparql.graph.GraphPattern>}
+    L{GraphPattern<rdfextras.sparql.graph.GraphPattern>}
     instance or a list of instances thereof. For each elements in
     the 'patterns' parameter is combined with each of the optional
     patterns and the results are concatenated. The list may be
@@ -815,12 +815,12 @@ def queryObject(graph, patterns, optionalPatterns=[], initialBindings = None) :
     Creation of a L{Query} instance.
 
     @param patterns: either a
-    L{GraphPattern<rdflib.sparql.graph.GraphPattern>}
+    L{GraphPattern<rdfextras.sparql.graph.GraphPattern>}
     instance or a list of instances thereof. Each pattern in the
     list represent an 'OR' (or 'UNION') branch in SPARQL.
 
     @param optionalPatterns: either a
-    L{GraphPattern<rdflib.sparql.graph.GraphPattern>}
+    L{GraphPattern<rdfextras.sparql.graph.GraphPattern>}
     instance or a list of instances thereof. For each elements in
     the 'patterns' parameter is combined with each of the optional
     patterns and the results are concatenated. The list may be
@@ -885,7 +885,7 @@ class Query :
         @param sparqlnode: top of the expansion tree
         @type sparqlnode: _SPARQLNode
         @param triples: triple store
-        @type triples: L{graph<rdflib.sparql.graph>}
+        @type triples: L{graph<rdfextras.sparql.graph>}
         @param parent1: possible parent Query when queries are combined by summing them up
         @type parent1: L{Query}
         @param parent2: possible parent Query when queries are combined by summing them up
@@ -1133,9 +1133,9 @@ class Query :
 
         The result is a separate triple store containing the subgraph.
 
-        @param pattern: a L{GraphPattern<rdflib.sparql.graph.GraphPattern>} instance or None
+        @param pattern: a L{GraphPattern<rdfextras.sparql.graph.GraphPattern>} instance or None
         @return: a new triple store
-        @rtype: L{graph<rdflib.sparql.graph>}
+        @rtype: L{graph<rdfextras.sparql.graph>}
         """
         if self.parent1 != None and self.parent2 != None :
             return self.parent1.construct(pattern) + self.parent2.construct(pattern)
@@ -1159,7 +1159,7 @@ class Query :
         """
         Forward clustering, using all the results of the query as
         seeds (when appropriate). It is based on the usage of the
-        L{cluster forward<rdflib.sparql.graph.clusterForward>}
+        L{cluster forward<rdfextras.sparql.graph.clusterForward>}
         method for triple store.
 
         @param selection: a selection to define the seeds for
@@ -1167,7 +1167,7 @@ class Query :
         the clustering seed
 
         @return: a new triple store
-        @rtype: L{graph<rdflib.sparql.graph>}
+        @rtype: L{graph<rdfextras.sparql.graph>}
         """
         if self.parent1 != None and self.parent2 != None :
             return self.parent1.clusterForward(selection) + self.parent2.clusterForward(selection)
@@ -1186,7 +1186,7 @@ class Query :
         """
         Backward clustering, using all the results of the query as
         seeds (when appropriate). It is based on the usage of the
-        L{cluster backward<rdflib.sparql.graph.clusterBackward>}
+        L{cluster backward<rdfextras.sparql.graph.clusterBackward>}
         method for triple store.
 
         @param selection: a selection to define the seeds for
@@ -1194,7 +1194,7 @@ class Query :
         the clustering seed
 
         @return: a new triple store
-        @rtype: L{graph<rdflib.sparql.graph>}
+        @rtype: L{graph<rdfextras.sparql.graph>}
         """
         if self.parent1 != None and self.parent2 != None :
             return self.parent1.clusterBackward(selection) + self.parent2.clusterBackward(selection)
@@ -1243,7 +1243,7 @@ class Query :
 
 from rdflib.term import URIRef, BNode, Literal
 from rdflib.namespace import Namespace
-from rdflib.query.result import QueryResult
+from rdflib.query import Result
 from rdflib.graph import Graph
 from xml.dom import XML_NAMESPACE
 from xml.sax.saxutils import XMLGenerator
@@ -1384,7 +1384,7 @@ def bindingJSON(name, val):
 #    retval += '}\n'
     return retval
 
-class SPARQLQueryResult(QueryResult):
+class SPARQLQueryResult(Result):
     """
     Query result class for SPARQL
 

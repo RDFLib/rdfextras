@@ -167,7 +167,7 @@ from types import *
 from rdflib.namespace import NamespaceManager
 from rdflib.graph import Graph
 
-from rdflib.sparql import _questChar, Debug, SPARQLError
+from rdfextras.sparql import _questChar, Debug, SPARQLError
 
 def _createResource(v) :
     """Create an RDFLib Literal instance with the corresponding XML

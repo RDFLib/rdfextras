@@ -9,9 +9,9 @@ from pyparsing import (Regex, Suppress, Combine, Optional, CaselessKeyword,
                        ParseException, col, lineno, restOfLine)
 
 import rdflib
-from rdflib.term import URIRef
+#from rdflib.term import URIRef
 from rdflib.namespace import XSD
-from rdflib.sparql import components
+from rdfextras.sparql import components
 
 
 # Debug utilities:

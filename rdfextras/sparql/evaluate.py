@@ -1,18 +1,18 @@
 ### Utilities for evaluating a parsed SPARQL expression using sparql-p
 import rdflib
-from rdflib.sparql import graph, operators, SPARQLError
-from rdflib.sparql.operators import getValue
-from rdflib.sparql.graph import BasicGraphPattern
-#from rdflib.sparql.Unbound import Unbound
-from rdflib.sparql.query import _variablesToArray, queryObject, SessionBNode
+from rdfextras.sparql import graph, operators, SPARQLError
+from rdfextras.sparql.operators import getValue
+from rdfextras.sparql.graph import BasicGraphPattern
+#from rdfextras.sparql.Unbound import Unbound
+from rdfextras.sparql.query import _variablesToArray, queryObject, SessionBNode
 from rdflib.graph import ConjunctiveGraph, Graph, BackwardCompatGraph,ReadOnlyGraphAggregate
 from rdflib import plugin
 from rdflib.namespace import RDF
 from rdflib.store import Store
 from rdflib.term import URIRef, Variable, BNode, Literal, Identifier
 from rdflib.term import XSDToPython
-from rdflib.sparql.components import NamedGraph, RemoteGraph, IRIRef
-from rdflib.sparql.components import *
+from rdfextras.sparql.components import NamedGraph, RemoteGraph, IRIRef
+from rdfextras.sparql.components import *
 #from GraphPattern import *
 #from Resource import *
 #from Triples import ParsedConstrainedTriples
@@ -24,7 +24,7 @@ from rdflib.sparql.components import *
 #from SolutionModifier import ASCENDING_ORDER
 #from Query import AskQuery, SelectQuery
 
-from rdflib.sparql import _questChar
+from rdfextras.sparql import _questChar
 
 
 class Unbound :
@@ -86,7 +86,7 @@ def convertTerm(term,queryProlog):
     """
     Utility function  for converting parsed Triple components into Unbound 
     """
-    #from rdflib.sparql.sql.RdfSqlBuilder import BNodeRef
+    #from rdfextras.sparql.sql.RdfSqlBuilder import BNodeRef
     if isinstance(term,Variable):
         if hasattr(queryProlog,'variableBindings') and term in queryProlog.variableBindings:
             #Resolve pre-bound variables at SQL generation time for SPARQL-to-SQL invokations
@@ -97,7 +97,7 @@ def convertTerm(term,queryProlog):
     elif isinstance(term,BNodeRef):
         return term
     elif isinstance(term,BNode):
-        #from rdflib.sparql.sql.RdfSqlBuilder import RdfSqlBuilder 
+        #from rdfextras.sparql.sql.RdfSqlBuilder import RdfSqlBuilder 
         if isinstance(queryProlog,RdfSqlBuilder):
             return BNode(term + '_bnode') # ensure namespace doesn't overlap with variables
         return term
@@ -117,7 +117,7 @@ def convertTerm(term,queryProlog):
                 return URIRef(Resolver().normalize(term.localname,base))
         elif term.prefix == '_':
             #Told BNode See: http://www.w3.org/2001/sw/DataAccess/issues#bnodeRef
-            #from rdflib.sparql.sql.RdfSqlBuilder import RdfSqlBuilder, EVAL_OPTION_ALLOW_BNODE_REF, BNodeRef 
+            #from rdfextras.sparql.sql.RdfSqlBuilder import RdfSqlBuilder, EVAL_OPTION_ALLOW_BNODE_REF, BNodeRef 
             if isinstance(queryProlog,RdfSqlBuilder):
                 if queryProlog.UseEvalOption(EVAL_OPTION_ALLOW_BNODE_REF):
                     # this is a 'told' BNode referencing a BNode in the data set (i.e. previously returned by a query)

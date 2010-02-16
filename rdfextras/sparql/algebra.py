@@ -19,17 +19,17 @@ from rdflib import plugin
 from rdflib.term import URIRef, Variable, BNode, Literal
 from rdflib.util import first
 from rdflib.store import Store 
-from rdflib.sparql.components import AskQuery, SelectQuery, DescribeQuery, Query, Prolog
-from rdflib.sparql.components import NamedGraph,RemoteGraph
-from rdflib.sparql.components import ASCENDING_ORDER
-from rdflib.sparql import graph, operators, SPARQLError, DESCRIBE
-from rdflib.sparql import query as sparql_query
-from rdflib.sparql.evaluate import unRollTripleItems, _variablesToArray
-from rdflib.sparql.components import ParsedGroupGraphPattern, BlockOfTriples, GraphPattern, ParsedOptionalGraphPattern, ParsedAlternativeGraphPattern, ParsedGraphGraphPattern
+from rdfextras.sparql.components import AskQuery, SelectQuery, DescribeQuery, Query, Prolog
+from rdfextras.sparql.components import NamedGraph,RemoteGraph
+from rdfextras.sparql.components import ASCENDING_ORDER
+from rdfextras.sparql import graph, operators, SPARQLError, DESCRIBE
+from rdfextras.sparql import query as sparql_query
+from rdfextras.sparql.evaluate import unRollTripleItems, _variablesToArray
+from rdfextras.sparql.components import ParsedGroupGraphPattern, BlockOfTriples, GraphPattern, ParsedOptionalGraphPattern, ParsedAlternativeGraphPattern, ParsedGraphGraphPattern
 
-from rdflib.sparql.graph import BasicGraphPattern
-from rdflib.sparql.components import ParsedConstrainedTriples
-from rdflib.sparql.evaluate import createSPARQLPConstraint,\
+from rdfextras.sparql.graph import BasicGraphPattern
+from rdfextras.sparql.components import ParsedConstrainedTriples
+from rdfextras.sparql.evaluate import createSPARQLPConstraint,\
      CONSTRUCT_NOT_SUPPORTED,convertTerm
 #A variable to determine whether we obey SPARQL definition of RDF dataset
 #which does not allow matching of default graphs (or any graph with a BNode for a name)
@@ -370,7 +370,7 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
         assert isinstance(result,sparql_query.Query),repr(result)
 
     if exportTree:
-        from rdflib.sparql.Visualization import ExportExpansionNode
+        from rdfextras.sparql.Visualization import ExportExpansionNode
         if result.top:
             ExportExpansionNode(result.top,fname='out.svg',verbose=True)
         else:
@@ -1258,9 +1258,9 @@ class TestSPARQLAlgebra(unittest.TestCase):
         self.unionGraph = ReadOnlyGraphAggregate(graphs=[self.graph1,self.graph2],store=self.store)
         
 #    def testScoping(self):
-#        from rdflib.sparql.processor import Parse
-#        from rdflib.sparql.QueryResult import SPARQLQueryResult
-#        from rdflib.sparql.components import Prolog  
+#        from rdfextras.sparql.processor import Parse
+#        from rdfextras.sparql.QueryResult import SPARQLQueryResult
+#        from rdfextras.sparql.components import Prolog  
 #        p = Parse(scopingQuery)
 #        prolog = p.prolog
 #        if prolog is None:
@@ -1274,37 +1274,37 @@ class TestSPARQLAlgebra(unittest.TestCase):
 #                            "Unexpected ?mbox binding :\n %s" % ppd)
 
     def testExpressions(self):
-        from rdflib.sparql.processor import Parse
+        from rdfextras.sparql.processor import Parse
         global prolog
         for inExpr,outExpr in ExprTests:
             p = Parse(inExpr)
             prolog = p.prolog
             p = p.query.whereClause.parsedGraphPattern.graphPatterns
             if prolog is None:
-                from rdflib.sparql.components import Prolog  
+                from rdfextras.sparql.components import Prolog  
                 prolog = Prolog(u'',[])
             if not hasattr(prolog,'DEBUG'):                
                 prolog.DEBUG = False
             self.assertEquals(repr(reduce(ReduceToAlgebra,p,None)),outExpr)
 
     def testSimpleGraphPattern(self):
-        from rdflib.sparql.processor import Parse
+        from rdfextras.sparql.processor import Parse
         global prolog
         p = Parse("BASE <http://example.com/> SELECT ?ptrec WHERE { GRAPH ?ptrec { ?data :foo 'bar'. } }")
         prolog = p.prolog
         p = p.query.whereClause.parsedGraphPattern.graphPatterns
         if prolog is None:
-            from rdflib.sparql.components import Prolog  
+            from rdfextras.sparql.components import Prolog  
             prolog = Prolog(u'',[])
             prolog.DEBUG = True
         assert isinstance(reduce(ReduceToAlgebra,p,None),GraphExpression)
 
 #    def testGraphEvaluation(self):
-#        from rdflib.sparql.processor import Parse
+#        from rdfextras.sparql.processor import Parse
 #        p = Parse(TEST10)
 #        print TEST10
 #        rt = TopEvaluate(p,self.unionGraph,passedBindings = {})
-#        from rdflib.sparql.QueryResult import SPARQLQueryResult
+#        from rdfextras.sparql.QueryResult import SPARQLQueryResult
 #        rt = SPARQLQueryResult(rt).serialize(format='python')
 #        self.failUnless(len(rt) == 1,"Expected 1 item solution set")
 #        for mbox,nick,ppd in rt:
