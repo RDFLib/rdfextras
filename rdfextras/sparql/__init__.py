@@ -103,7 +103,7 @@ History
 @version: 2.2
 
 """
-from rdflib.term import URIRef
+from rdflib import URIRef
 
 DESCRIBE=URIRef('http://www.w3.org/TR/rdf-sparql-query/#describe')
 

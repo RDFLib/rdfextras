@@ -7,7 +7,6 @@ except NameError:
 import types, sys
 from pprint import pprint
 from rdflib.term import URIRef, BNode, Literal, Variable, Identifier
-from rdflib.namespace import RDF
 from rdflib.graph import Graph, ConjunctiveGraph, ReadOnlyGraphAggregate
 from rdflib.util import check_subject, list2set
 from rdfextras.sparql import SPARQLError
@@ -1395,7 +1394,7 @@ class SPARQLQueryResult(Result):
     """
     def __init__(self,qResult):
         """
-        The constructor is the result straight from sparql-p, which is uple of 1) a list of tuples
+        The constructor is the result straight from sparql-p, which is a tuple of 1) a list of tuples
         (in select order, each item is the valid binding for the corresponding variable or 'None') for SELECTs
         , a SPARQLGraph for DESCRIBE/CONSTRUCT, and boolean for ASK  2) the variables selected 3) *all*
         the variables in the Graph Patterns 4) the order clause 5) the DISTINCT clause
