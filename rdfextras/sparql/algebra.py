@@ -397,7 +397,7 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
                     orderAsc.append(ASCENDING_ORDER)
                 # is it another expression, only variables are supported
                 else:
-                    order_expr = orderCond.expression
+                    order_expr = orderCond.expression.reduce()
                     assert isinstance(order_expr,Variable),\
                     "Support for ORDER BY with anything other than a variable is not supported: %s"%order_expr
                     orderBy.append(order_expr)                    
