@@ -19,6 +19,7 @@ config = dict(
     packages = ['rdfextras',
                 'rdfextras.tools',
                 'rdfextras.sparql',
+                'rdfextras.sparql.results',
                 ],
 )
 
