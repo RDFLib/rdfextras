@@ -117,46 +117,6 @@ Debug = False
 _questChar  = "?"
 
 
-def generateCollectionConstraint(triplets,collection,item) :
-    """
-
-    Generate a function that can then be used as a global constaint in
-    sparql to check whether the 'item' is an element of the
-    'collection' (a.k.a. list). Both collection and item can be a real
-    resource or a query string. Furthermore, item might be a plain
-    string, that is then turned into a literal run-time.
-
-    The function returns an adapted filter method that can then be
-    plugged into a sparql request.
-
-    @param triplets: the
-    L{SPARQLGraph<graph.SPARQLGraph>} instance
-
-    @param collection: is either a query string (that has to be bound
-    by the query) or an RDFLib Resource representing the collection
-
-    @param item: is either a query string (that has to be bound by the
-    query) or an RDFLib Resource that must be tested to be part of the
-    collection
-
-    @rtype: a function suitable as a sparql filter
-
-    @raises SPARQLError: if the collection or the
-    item parameters are illegal (not valid resources for a collection
-    or an object)
-    """	
-    return isOnCollection(collection,item, triples)
-
-############################################################################################
-
-class Processor(object):
-
-    def __init__(self, graph):
-        pass
-
-    def query(self, strOrQuery, initBindings={}, initNs={}, DEBUG=False):
-        pass
-
 from rdflib.exceptions  import Error
 
 ##

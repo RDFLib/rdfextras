@@ -47,7 +47,9 @@ class JSONResultSerializer(ResultSerializer):
     def _bindingToJSON(self, b):
         res={}
         for var in b: 
-            res[var]=termToJSON(self,b[var])
+            j=termToJSON(self,b[var])
+            if j!=None:
+                res[var]=termToJSON(self,b[var])
         return res
 
 
@@ -118,6 +120,8 @@ def termToJSON(self,term):
 
     elif isinstance(term, BNode):
         return { 'type': 'bnode', 'value': str(term) }
+    elif term==None: 
+        return None
     else: 
         raise ResultException('Unknown term type: %s (%s)'%(term, type(term)))
 

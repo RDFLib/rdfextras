@@ -1,10 +1,13 @@
 from rdfextras import sparql
+
 import rdfextras.sparql.parser
+
 from rdfextras.sparql.algebra import TopEvaluate
-from rdflib.namespace import RDFS, RDF, OWL
+from rdflib import RDFS, RDF, OWL
+from rdflib.query import Processor
 from rdfextras.sparql.components import Query, Prolog
 
-class Processor(sparql.Processor):
+class Processor(Processor):
 
     def __init__(self, graph):
         self.graph = graph

@@ -1395,175 +1395,36 @@ class SPARQLQueryResult(Result):
     """
     def __init__(self,qResult):
         """
-        The constructor is the result straight from sparql-p, which is uple of 1) a list of tuples
+        The constructor is the result straight from sparql-p, which is tuple of 1) a list of tuples
         (in select order, each item is the valid binding for the corresponding variable or 'None') for SELECTs
         , a SPARQLGraph for DESCRIBE/CONSTRUCT, and boolean for ASK  2) the variables selected 3) *all*
         the variables in the Graph Patterns 4) the order clause 5) the DISTINCT clause
         """
-        self.construct=False
+
         if isinstance(qResult,bool):
-            self.askAnswer = [qResult]
-            result=None
-            selectionF=None
-            allVars=None
-            orderBy=None
-            distinct=None
-            topUnion = None
+            type_='ASK'            
         elif isinstance(qResult,Graph):
-            self.askAnswer = []
-            result=qResult
-            self.construct=True
-            selectionF=None
-            allVars=None
-            orderBy=None
-            distinct=None
-            topUnion = None            
+            type_='CONSTRUCT'
         else:
-            self.askAnswer = []
+            type_='SELECT'
+            
+        Result.__init__(self,type_)
+
+        if self.type=='ASK':
+            self.askAnswer = qResult
+        elif self.type=='SELECT':
             result,selectionF,allVars,orderBy,distinct,topUnion = qResult
-        self.result = result
-        self.topUnion = topUnion
-        self.selected = result
-        self.selectionF = selectionF
-        self.allVariables = allVars
-        self.orderBy = orderBy
-        self.distinct = distinct
-        
+            if topUnion==None:
+                raise Exception("No top union! %s"%topUnion)
+            if selectionF==[]: # select * 
+                self.vars=allVars
+            else: 
+                self.vars=selectionF
+            self.bindings=[ dict( [ (v, b.get(v)) for v in self.vars ] ) for b in topUnion ]
+            # remove rows where all bindings are None
+            self.bindings=filter(lambda x: x.values()!=[None]*len(x), self.bindings)
+        else: 
+            self.graph=qResult
 
-    def __len__(self):
-        if isinstance(self.selected,list):
-            return len(self.selected)
-        else:
-            return 1
 
-    def __iter__(self):
-        """Iterates over the result entries"""
-        if isinstance(self.selected,list):
-            if self.topUnion:
-                for binding in self.topUnion:
-                    if not binding:
-                        continue
-                    if len(self.selectionF)==1:
-                        yield binding[self.selectionF[0]]
-                    else:
-                        yield [binding.get(i) for i in self.selectionF]
-            else:
-                for item in self.selected:
-                    if isinstance(item,basestring):
-                        yield (item,)
-                    else:
-                        yield item
-        else:
-            yield self.selected
-
-    def serialize(self,format='xml'):
-        if isinstance(self.result,Graph):
-            return self.result.serialize(format=format)
-        elif format == 'python':
-            if self.askAnswer:
-                return self.askAnswer[0]
-            else:
-                return self
-        elif format in ['json','xml']:
-           retval = ""
-           allvarsL = self.allVariables
-           if format == "json" :
-               retval += '    "results" : {\n'
-               retval += '          "ordered" : %s,\n' % (self.orderBy and 'true' or 'false')
-               retval += '          "distinct" : %s,\n' % (self.distinct and 'true' or 'false')
-               retval += '          "bindings" : [\n'
-               for i in xrange(0,len(self.selected)):
-                   hit = self.selected[i]
-                   retval += '               {\n'
-                   bindings = []
-                   if len(self.selectionF) == 0:
-                        for j in xrange(0, len(allvarsL)):
-                            b = bindingJSON(allvarsL[j],hit[j])
-                            if b != "":
-                                bindings.append(b)
-                   elif len(self.selectionF) == 1:
-                       bindings.append(bindingJSON(self.selectionF[0],hit))
-                   else:
-                        for j in xrange(0, len(self.selectionF)):
-                            b = bindingJSON(self.selectionF[j],hit[j])
-                            if b != "":
-                                bindings.append(b)
-
-                   retval += "},\n".join(bindings)
-                   retval += "}\n"
-                   retval += '                }'
-                   if i != len(self.selected) -1:
-                       retval += ',\n'
-                   else:
-                       retval += '\n'
-               retval += '           ]\n'
-               retval += '    }\n'
-               retval += '}\n'
-
-               selected_vars = self.selectionF
-
-               if len(selected_vars) == 0:
-                   selected_vars = allvarsL
-
-               header = ""
-               header += '{\n'
-               header += '   "head" : {\n        "vars" : [\n'
-               for i in xrange(0,len(selected_vars)) :
-                   header += '             "%s"' % selected_vars[i]
-                   if i == len(selected_vars) - 1 :
-                       header += '\n'
-                   else :
-                       header += ',\n'
-               header += '         ]\n'
-               header += '    },\n'
-
-               retval = header + retval
-
-           elif format == "xml" :
-               # xml output
-               out = StringIO()
-               writer = SPARQLXMLWriter(out)
-               if self.askAnswer:
-                   writer.write_header(allvarsL)
-                   writer.write_ask(self.askAnswer[0])
-               else:
-                   writer.write_header(allvarsL)
-                   writer.write_results_header(self.orderBy,self.distinct)
-                   if self.topUnion:
-                       for binding in self.topUnion:
-                           writer.write_start_result()
-                           assert isinstance(binding,dict),repr(binding)                           
-                           for key,val in binding.items():
-                               if not self.selectionF or key in self.selectionF:
-                                   writer.write_binding(key,val)
-                           writer.write_end_result()
-                   else:
-                       for i in xrange(0,len(self.selected)) :
-                           hit = self.selected[i]
-                           if len(self.selectionF) == 0 :
-                               if self.topUnion:
-                                   print topUnion
-                                   raise
-                               writer.write_start_result()
-                               if len(allvarsL) == 1:
-                                   hit = (hit,) # Not an iterable - a parser bug?
-                               for j in xrange(0,len(allvarsL)) :
-                                   if not len(hit) < j+1:
-                                       writer.write_binding(allvarsL[j],hit[j])
-                               writer.write_end_result()
-                           elif len(self.selectionF) == 1 :
-                               writer.write_start_result()
-                               writer.write_binding(self.selectionF[0],hit)
-                               writer.write_end_result()
-                           else:
-                               writer.write_start_result()
-                               for j in xrange(0,len(self.selectionF)) :
-                                   writer.write_binding(self.selectionF[j],hit[j])
-                               writer.write_end_result()
-               writer.close()
-               return out.getvalue()
-
-           return retval
-        else:
-           raise Exception("Result format not implemented: %s"%format)
 

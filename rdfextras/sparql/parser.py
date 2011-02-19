@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import base64
-import sys, re
+import sys
 
 from pyparsing import (Regex, Suppress, Combine, Optional, CaselessKeyword,
                        ZeroOrMore, OneOrMore, removeQuotes, quotedString,

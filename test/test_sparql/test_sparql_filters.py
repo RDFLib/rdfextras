@@ -2,6 +2,12 @@ from rdflib.graph import ConjunctiveGraph
 from rdflib.term import URIRef, Literal
 from StringIO import StringIO
 
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 testContent = """
     @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -35,7 +41,7 @@ def test_filter_by_lang():
 
     for lang, literal in testdata:
         res = graph.query(query % lang)
-        actual = [binding.n3() for binding in res.selected]
+        actual = [binding[0].n3() for binding in res]
         expected = [literal]
         yield assert_equal, actual, expected
 

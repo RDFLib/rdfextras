@@ -26,8 +26,7 @@ def testSPARQLNotEquals():
                            initNs={'rdf': RDF.uri},
                            DEBUG=False)
     for row in rt:        
-        #item = row[0]
-        item = row
+        item = row[0]
         assert item == URIRef("http://example.org/bar"), "unexpected item of '%s'" % repr(item)
 
 if __name__ == '__main__':

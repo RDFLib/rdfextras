@@ -70,11 +70,11 @@ class DateFilterTest(unittest.TestCase):
             #pQuery = Parse(query)
             #print RenderSPARQLAlgebra(pQuery)
             results = self.graph.query(query,
-                                       DEBUG=False).serialize(format='python')
+                                       DEBUG=False)
             results = list(results)
             self.failUnless(
-                len(results) and results == [ANSWER1],
-                "expecting : %s .  Got: %s"%([ANSWER1],repr(results)))
+                len(results) and results == [(ANSWER1,)],
+                "expecting : %s .  Got: %s"%([(ANSWER1,)],repr(results)))
 
 if __name__ == "__main__":
     unittest.main()
