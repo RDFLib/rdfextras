@@ -1,12 +1,11 @@
-# -*- coding: UTF-8 -*-
+
 from cStringIO import StringIO
 from rdflib import plugin
-from rdflib.term import URIRef, Literal
-from rdflib.namespace import RDFS
+from rdflib import URIRef
 from rdflib.graph import Graph, ConjunctiveGraph
 from optparse import OptionParser
-from xml.sax import  SAXParseException
-from rdflib.store import Store, VALID_STORE, CORRUPTED_STORE, NO_STORE, UNKNOWN
+
+from rdflib.store import Store, NO_STORE
 
 import unittest, getpass
 

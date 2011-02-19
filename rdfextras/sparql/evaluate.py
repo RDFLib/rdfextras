@@ -98,8 +98,8 @@ def convertTerm(term,queryProlog):
         return term
     elif isinstance(term,BNode):
         #from rdfextras.sparql.sql.RdfSqlBuilder import RdfSqlBuilder 
-        if isinstance(queryProlog,RdfSqlBuilder):
-            return BNode(term + '_bnode') # ensure namespace doesn't overlap with variables
+        #if isinstance(queryProlog,RdfSqlBuilder):
+        #    return BNode(term + '_bnode') # ensure namespace doesn't overlap with variables
         return term
     elif isinstance(term,QName):
         #QNames and QName prefixes are the same in the grammar
@@ -107,7 +107,7 @@ def convertTerm(term,queryProlog):
             if queryProlog is None:
                 return URIRef(term.localname)
             else:
-                if queryProlog.baseDeclaration and queryProlog.prefixBindings[u'']:
+                if queryProlog.baseDeclaration and u'' in queryProlog.prefixBindings and queryProlog.prefixBindings[u'']:
                     base=URIRef(Resolver().normalize(queryProlog.prefixBindings[u''],
                                               queryProlog.baseDeclaration))
                 elif queryProlog.baseDeclaration:
@@ -118,13 +118,13 @@ def convertTerm(term,queryProlog):
         elif term.prefix == '_':
             #Told BNode See: http://www.w3.org/2001/sw/DataAccess/issues#bnodeRef
             #from rdfextras.sparql.sql.RdfSqlBuilder import RdfSqlBuilder, EVAL_OPTION_ALLOW_BNODE_REF, BNodeRef 
-            if isinstance(queryProlog,RdfSqlBuilder):
-                if queryProlog.UseEvalOption(EVAL_OPTION_ALLOW_BNODE_REF):
-                    # this is a 'told' BNode referencing a BNode in the data set (i.e. previously returned by a query)
-                    return BNodeRef(term.localname) 
-                else:
-                     # follow the spec and treat it as a variable
-                    return BNode(term.localname + '_bnode')  # ensure namespace doesn't overlap with variables                      
+            # if isinstance(queryProlog,RdfSqlBuilder):
+            #     if queryProlog.UseEvalOption(EVAL_OPTION_ALLOW_BNODE_REF):
+            #         # this is a 'told' BNode referencing a BNode in the data set (i.e. previously returned by a query)
+            #         return BNodeRef(term.localname) 
+            #     else:
+            #          # follow the spec and treat it as a variable
+            #         return BNode(term.localname + '_bnode')  # ensure namespace doesn't overlap with variables                      
             import warnings
             warnings.warn("The verbatim interpretation of explicit bnode identifiers is contrary to (current) DAWG stance",SyntaxWarning)
             return SessionBNode(term.localname)        
@@ -260,7 +260,7 @@ def mapToOperator(expr,prolog,combinationArg=None,constraint=False):
         return 'operators.regex(%s,%s%s)%s'%(
                  mapToOperator(expr.arg1,prolog,combinationArg,constraint=constraint),
                  mapToOperator(expr.arg2,prolog,combinationArg,constraint=constraint),
-                 expr.arg3 and ',"'+expr.arg3 + '"' or '',
+                 expr.arg3 and ',"'+str(expr.arg3) + '"' or '',
                  combinationInvokation)
     elif isinstance(expr,BuiltinFunctionCall):
         normBuiltInName = FUNCTION_NAMES[expr.name].lower()

@@ -1,12 +1,18 @@
-import sys
-
-from rdflib.sparql import parser, components
+from rdfextras.sparql import parser, components
 from rdflib.term import Literal, URIRef, Variable, BNode
 from rdflib.namespace import RDF
 
 from nose import tools, with_setup
 
-import pyparsing
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
+
+
+
 
 match_definitions = [
     (parser.BaseDecl,

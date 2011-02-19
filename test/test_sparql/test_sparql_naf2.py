@@ -1,8 +1,13 @@
-from rdflib.graph import ConjunctiveGraph
-from rdflib.term import URIRef, Literal
-from rdflib.namespace import RDFS
+from rdflib import ConjunctiveGraph, URIRef
 from StringIO import StringIO
 import unittest
+
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 testContent = """
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
