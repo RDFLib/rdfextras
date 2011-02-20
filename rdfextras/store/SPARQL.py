@@ -22,9 +22,11 @@ __contact__ = 'Ivan Herman, ivan_herman@users.sourceforge.net'
 __date__    = "2011-01-30"
 
 import re
-from SPARQLWrapper import SPARQLWrapper, XML
-from SPARQLWrapper.Wrapper import QueryResult
-
+try:
+    from SPARQLWrapper import SPARQLWrapper, XML
+    from SPARQLWrapper.Wrapper import QueryResult
+except ImportError:
+    raise Exception("SPARQLWrapper not found! SPARQL Store will not work. Install with 'easy_install SPARQLWrapper'")
 
 import xml.etree.ElementTree
 
@@ -146,6 +148,7 @@ class SPARQLStore(SPARQLWrapper,Store):
     def __init__(self,identifier=None,bNodeAsURI = False):
         super(SPARQLStore, self).__init__(identifier,returnFormat=XML)
         self.bNodeAsURI = bNodeAsURI
+        self.nsBindings={}
 
     #Database Management Methods
     def create(self, configuration):

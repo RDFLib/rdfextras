@@ -140,8 +140,9 @@ class TestSimpleQueries(unittest.TestCase):
         _:x foaf:name "Alice" .
         _:y foaf:name "Bob" .
         """)
-
-        self.assertEqual(results, expected_results)
+        
+        
+        self.assertEqual(rdflib.compare.to_isomorphic(results.graph), rdflib.compare.to_isomorphic(expected_results))
 
 class TestRDFLiterals(unittest.TestCase):
     """

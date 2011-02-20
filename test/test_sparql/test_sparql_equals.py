@@ -1,8 +1,14 @@
-# -*- coding: UTF-8 -*-
+
 from rdflib.graph import ConjunctiveGraph
 from rdflib.term import URIRef
 from StringIO import StringIO
 import unittest
+
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
 
 class TestSparqlEquals(unittest.TestCase):
 
@@ -17,7 +23,7 @@ class TestSparqlEquals(unittest.TestCase):
             <http://example.org/doc/2> rdfs:label "Document 2"@en .
             <http://example.org/doc/3> rdfs:label "Document 3"@en .
         """ % self.PREFIXES
-        self.graph = graph = ConjunctiveGraph()
+        self.graph = ConjunctiveGraph()
         self.graph.load(StringIO(testContent), format='n3')
 
     def test_uri_equals(self):
@@ -31,8 +37,8 @@ class TestSparqlEquals(unittest.TestCase):
             }
         """) % self.PREFIXES
         res = self.graph.query(query)
-        expected = [uri]
-        self.assertEqual(res.selected,expected)
+        expected = [(uri,)]
+        self.assertEqual(list(res),expected)
 
 if __name__ == "__main__":
     unittest.main()

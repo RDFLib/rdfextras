@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import base64
-import sys, re
+import sys
 
 from pyparsing import (Regex, Suppress, Combine, Optional, CaselessKeyword,
                        ZeroOrMore, OneOrMore, removeQuotes, quotedString,
@@ -536,7 +535,7 @@ if DEBUG:
 Expression << ConditionalOrExpression
 
 # Constraint (used only in Filter):
-Constraint = ((BrackettedExpression).setParseAction(
+Constraint = ((BrackettedExpression.copy()).setParseAction(
     refer_component(components.ParsedExpressionFilter)) |
   (BuiltInCall | FunctionCall).setParseAction(
     refer_component(components.ParsedFunctionFilter)))

@@ -1,0 +1,11 @@
+body { margin: 1cm; }
+
+table { border-collapse: collapse; }
+thead tr { border-bottom: 2px solid #aaa; }
+th, td { padding: 10px; color: #333; }
+tbody tr { border-bottom: 1px solid #ccc; }
+
+#query { 
+    padding: 10px; 
+    display: inline-block;
+}

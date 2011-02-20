@@ -1,10 +1,16 @@
-from rdflib.graph import ConjunctiveGraph
-from rdflib.term import URIRef, Literal
-from rdflib.namespace import RDFS
-from rdflib.sparql.algebra import RenderSPARQLAlgebra
+
+from rdflib import ConjunctiveGraph, URIRef, Literal
 from StringIO import StringIO
-import unittest, sys
+import unittest
 import nose
+
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
+
 
 testContent = """
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
@@ -67,8 +73,8 @@ class RecursionTests(unittest.TestCase):
         graph = ConjunctiveGraph()
         graph.load(StringIO(BASIC_KNOWS_DATA), format='n3')
         results = graph.query(KNOWS_QUERY,
-                              DEBUG=False).serialize(format='python')
-        results = set([tuple(result) for result in results])
+                              DEBUG=False)
+        results = set(results)
         person1 = URIRef('ex:person.1')
         person2 = URIRef('ex:person.2')
         nose.tools.assert_equal(
@@ -80,8 +86,8 @@ class RecursionTests(unittest.TestCase):
         graph = ConjunctiveGraph()
         graph.load(StringIO(SUBCLASS_DATA), format='n3')
         results = graph.query(SUBCLASS_QUERY,
-                              DEBUG=False).serialize(format='python')
-        results = set([tuple(result) for result in results])
+                              DEBUG=False)
+        results = set(results)
         ob = URIRef('ex:ob')
         class1 = URIRef('ex:class.1')
         class2 = URIRef('ex:class.2')

@@ -1,7 +1,14 @@
+import rdflib
 from rdflib.graph import ConjunctiveGraph
 from StringIO import StringIO
 import re
 import unittest
+
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 test_data = """
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -27,7 +34,7 @@ SELECT ?s ?o WHERE { ?s ?p ?o . }
 expected_fragments = [
     #u"""<sparql:sparql xmlns="http://www.w3.org/2005/sparql-results#"><sparql:head>""",
 
-    u"""</sparql:head><sparql:results distinct="false" ordered="false">""",
+    u"""</sparql:head><sparql:results>""",
 
     u"""<sparql:binding name="s"><sparql:uri>http://example.org/word</sparql:uri></sparql:binding>""",
 

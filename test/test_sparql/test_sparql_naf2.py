@@ -1,8 +1,13 @@
-from rdflib.graph import ConjunctiveGraph
-from rdflib.term import URIRef, Literal
-from rdflib.namespace import RDFS
+from rdflib import ConjunctiveGraph, URIRef
 from StringIO import StringIO
 import unittest
+
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 testContent = """
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
@@ -32,11 +37,11 @@ class TestSparqlOPT_FILTER2(unittest.TestCase):
         self.graph.load(StringIO(testContent), format='n3')
     def test_OPT_FILTER(self):
         results = self.graph.query(QUERY,
-                                   DEBUG=False).serialize(format='python')
+                                   DEBUG=False)
         results = list(results)
         self.failUnless(
-            results == [doc1],
-            "expecting : %s .  Got: %s"%([doc1],repr(results)))
+            results == [(doc1,)],
+            "expecting : %s .  Got: %s"%([(doc1,)],repr(results)))
 
 if __name__ == "__main__":
     unittest.main()
