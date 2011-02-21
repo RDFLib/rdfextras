@@ -12,6 +12,12 @@ rdflib.plugin.register('sparql', rdflib.query.Processor,
 rdflib.plugin.register('sparql', rdflib.query.Result,
                        'rdfextras.sparql.query', 'SPARQLQueryResult')
 
+"""
+This test is actually completely broken 
+SPARQL defines bnode IDs in queries to be distinct from all other bnodes, 
+i.e. using bnode IDs in filter expressions like done here is not meant to work
+"""
+
 
 class TestSPARQLToldBNodes(unittest.TestCase):
 
