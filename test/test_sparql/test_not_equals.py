@@ -1,11 +1,14 @@
-from rdflib.term import URIRef, Literal
-from rdflib.namespace import Namespace, RDF, RDFS
-from rdflib import plugin
-from rdflib.parser import StringInputSource
-from rdflib.graph import Graph, ReadOnlyGraphAggregate, ConjunctiveGraph
+from rdflib import URIRef, RDF, ConjunctiveGraph
 
-import sys
-from pprint import pprint
+from rdflib.parser import StringInputSource
+
+
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 def testSPARQLNotEquals():
     NS = u"http://example.org/"

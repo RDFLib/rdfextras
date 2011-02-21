@@ -5,6 +5,13 @@ from StringIO import StringIO
 from datetime import date
 #=======================================================================
 
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
+
 
 testRdf = """
     @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .

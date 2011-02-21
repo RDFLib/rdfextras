@@ -1,11 +1,17 @@
-from rdflib.term import URIRef, BNode, Literal, Variable
-from rdflib.namespace import Namespace, RDF, RDFS
-from rdflib.store import Store, VALID_STORE, CORRUPTED_STORE, NO_STORE, UNKNOWN
+from rdflib.term import Variable
+from rdflib.namespace import RDF, RDFS
+from rdflib.store import Store
 from rdflib import plugin
 from rdflib.parser import StringInputSource
-from rdflib.graph import Graph, ReadOnlyGraphAggregate, ConjunctiveGraph
+from rdflib import Graph
 import unittest,sys
-from pprint import pprint
+
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 class TestSPARQLToldBNodes(unittest.TestCase):
 
@@ -26,6 +32,7 @@ class TestSPARQLToldBNodes(unittest.TestCase):
         query = """SELECT ?obj WHERE { %s ?prop ?obj }"""%s.n3()
         print query
         rt = self.graph.query(query,DEBUG=debug)
+        print list(rt)
         self.failUnless(len(rt) == 1,"BGP should only match the 'told' BNode by name (result set size: %s)"%len(rt))
         bindings = {Variable('subj'):s}
         query = """SELECT ?obj WHERE { ?subj ?prop ?obj }"""
@@ -43,6 +50,9 @@ class TestSPARQLToldBNodes(unittest.TestCase):
 
     def tearDown(self):
         self.graph.store.rollback()
+
+store="IOMemory"
+debug=False
 
 if __name__ == '__main__':
     import doctest, sys

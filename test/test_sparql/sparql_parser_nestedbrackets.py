@@ -1,4 +1,5 @@
-from rdflib.sparql.parser import parse
+from rdfextras.sparql.parser import parse
+
 
 # second query from here:
 # http://www.w3.org/TR/rdf-sparql-query/#GroupPatterns

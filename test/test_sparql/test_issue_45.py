@@ -1,9 +1,8 @@
 import unittest
 
 from rdflib.graph import ConjunctiveGraph as Graph
-from rdflib.namespace import Namespace as NS
 
-from rdflib.sparql import algebra
+from rdfextras.sparql import algebra
 
 from StringIO import StringIO
 

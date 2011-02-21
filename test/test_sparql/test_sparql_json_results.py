@@ -2,6 +2,13 @@ from rdflib.graph import ConjunctiveGraph
 from StringIO import StringIO
 import unittest
 
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
+
 # json is only available as of python2.6, but simplejson is available 
 # via PyPI for older pythons
 try:

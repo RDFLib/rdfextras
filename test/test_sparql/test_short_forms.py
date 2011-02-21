@@ -1,11 +1,16 @@
-from rdflib.namespace import Namespace, RDF, RDFS
-from rdflib.store import Store, VALID_STORE, CORRUPTED_STORE, NO_STORE, UNKNOWN
+from rdflib.namespace import RDF, RDFS
+from rdflib.store import Store
 from rdflib import plugin
-from rdflib.term import URIRef, Literal, BNode, Variable
 from rdflib.parser import StringInputSource
-from rdflib.graph import Graph, ReadOnlyGraphAggregate, ConjunctiveGraph
+from rdflib.graph import Graph
 import unittest,sys
-from pprint import pprint
+
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 problematic_query=\
 """
@@ -40,7 +45,7 @@ class TestSPARQLAbbreviations(unittest.TestCase):
            @prefix rdf: <%s> .
            @prefix rdfs: <%s> .
            [ :prop :val ].
-           [ a rdfs:Class ]."""%(RDF.RDFNS,RDFS.RDFSNS)), format="n3")
+           [ a rdfs:Class ]."""%(RDF,RDFS)), format="n3")
 
     def testTypeAbbreviation(self):
         query = """SELECT ?subj WHERE { ?subj a rdfs:Class }"""
@@ -74,6 +79,9 @@ class TestSPARQLAbbreviations(unittest.TestCase):
         
     def tearDown(self):
         self.graph.store.rollback()
+
+store="IOMemory"
+debug=False
 
 if __name__ == '__main__':
     import doctest, sys

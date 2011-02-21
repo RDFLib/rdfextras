@@ -1,10 +1,14 @@
-import unittest
 import doctest
 from rdflib.namespace import RDF, RDFS, Namespace
 from rdflib.term import Variable
-from rdflib.sparql import DESCRIBE
 from rdflib.graph import Graph
 from cStringIO import StringIO
+
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
 
 testData="""
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
