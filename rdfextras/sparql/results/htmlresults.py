@@ -1,9 +1,19 @@
+import rdflib
 from rdflib.query import ResultSerializer
 from rdflib.serializer import Serializer
 
 import warnings
 
-from jinja2 import Template
+from jinja2 import Environment, contextfilter
+
+@contextfilter
+def term_to_string(ctx, t): 
+    if isinstance(t, rdflib.URIRef):
+        return "<a href='%s'>%s</a>"%(t,ctx.parent["graph"].namespace_manager.qname(t))
+    return t
+
+env=Environment()
+env.filters["term_to_string"]=term_to_string
 
 
 GRAPH_TEMPLATE="""
@@ -19,7 +29,7 @@ GRAPH_TEMPLATE="""
  {% for t in graph %}
   <tr>
   {% for x in t %}
-   <td>{{x}}</td>
+   <td>{{x|term_to_string}}</td>
   {% endfor %}
   </tr>
  {% endfor %}
@@ -40,7 +50,7 @@ SELECT_TEMPLATE="""
  {% for row in result.bindings %}
   <tr>
   {% for var in result.vars %}
-   <td>{{row[var]}}</td>
+   <td>{{row[var]|term_to_string}}</td>
   {% endfor %}
   </tr>
  {% endfor %}
@@ -48,6 +58,8 @@ SELECT_TEMPLATE="""
 </table>
 
 """
+
+
 class HTMLResultSerializer(ResultSerializer):
 
     def __init__(self, result): 
@@ -58,7 +70,7 @@ class HTMLResultSerializer(ResultSerializer):
             stream.write("<strong>true</strong>".encode(encoding))
             return
         if self.result.type=='SELECT':
-            template = Template(SELECT_TEMPLATE)
+            template = env.from_string(SELECT_TEMPLATE)
             stream.write(template.render(result=self.result).encode(encoding))
 
 
@@ -77,7 +89,7 @@ class HTMLSerializer(Serializer):
         if encoding is not None:
             warnings.warn("HTMLSerializer does not use custom encoding.")
 
-        template = Template(GRAPH_TEMPLATE)
+        template = env.from_string(GRAPH_TEMPLATE)
         stream.write(template.render(graph=self.store).encode(encoding))
 
 
