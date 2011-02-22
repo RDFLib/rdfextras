@@ -8,10 +8,15 @@
 
     <title>{% block title %}{% endblock %}</title>
     
-    <link rel="stylesheet" href="static/style.css" type="text/css" />
+    <link rel="stylesheet" href="/static/style.css" type="text/css" />
   </head>
   <body>
     {% block body %}
     {% endblock %}
+    <hr/>
+    {% block footer %}
+    <div id="versions">running rdflib {{rdflib_version}}, rdfextras {{rdfextras_version}} on python {{python_version}}</div>
+    {% endblock %}
+    
   </body>
 </html>

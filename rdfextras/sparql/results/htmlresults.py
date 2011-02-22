@@ -4,12 +4,16 @@ from rdflib.serializer import Serializer
 
 import warnings
 
-from jinja2 import Environment, contextfilter
+from jinja2 import Environment, contextfilter, Markup
 
 @contextfilter
 def term_to_string(ctx, t): 
     if isinstance(t, rdflib.URIRef):
-        return "<a href='%s'>%s</a>"%(t,ctx.parent["graph"].namespace_manager.qname(t))
+        try:
+            l=ctx.parent["graph"].namespace_manager.qname(t)
+        except: 
+            l=t
+        return Markup("<a href='%s'>%s</a>"%(t,l))
     return t
 
 env=Environment()

@@ -3,17 +3,24 @@ try:
 except:
     raise Exception("Flask not found - install with 'easy_install flask'")
 
+import rdflib
+import rdfextras
+import sys
+
 endpoint = Flask(__name__)
 
-graph=None
+endpoint.jinja_env.globals["rdflib_version"]=rdflib.__version__
+endpoint.jinja_env.globals["rdfextras_version"]=rdfextras.__version__
+endpoint.jinja_env.globals["python_version"]=sys.version
 
 JSON_MIME="application/sparql-results+json"
 XML_MIME="application/sparql-results+xml"
 HTML_MIME="text/html"
-N3_MIME="text/plain"
+N3_MIME="text/n3"
 RDFXML_MIME="application/rdf+xml"
+NTRIPLES_MIME="text/plain"
 
-def formatToMime(format): 
+def format_to_mime(format): 
     if format=='xml': return XML_MIME
     if format=='json': return JSON_MIME
     if format=='html': return HTML_MIME
@@ -34,7 +41,7 @@ def query():
     # output parameter overrides header
     format=request.values.get("output", format) 
 
-    mimetype=formatToMime(format)
+    mimetype=format_to_mime(format)
     
     # force-accept parameter overrides mimetype
     mimetype=request.values.get("force-accept", mimetype)
@@ -45,7 +52,7 @@ def query():
 
     # default-graph-uri
 
-    results=graph.query(q).serialize(format=format)
+    results=endpoint.config["graph"].query(q).serialize(format=format)
     if format=='html':
         response=make_response(render_template("results.html", results=Markup(results), q=q))
     else:
@@ -60,13 +67,10 @@ def index():
     return render_template("index.html")
 
 def serve(graph_,debug=False):
-    global graph 
-    graph=graph_
-    endpoint.run(debug=debug)
+    get(graph_).run(debug=debug)
 
 def get(graph_):
-    global graph
-    graph=graph_
+    endpoint.config["graph"]=graph_
     return endpoint
 
 if __name__=='__main__':
