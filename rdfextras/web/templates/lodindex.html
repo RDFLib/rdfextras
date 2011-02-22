@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}RDFLib LOD Server{% endblock %}
+
+ {% block body %}
+<h1>Welcome to a RDFLib LOD Server</h1>
+
+<h2>Resources</h2>
+{% if types!=["None"] %}
+
+{% for t in types %}
+<h3>{{t|term_to_string}}</h3>
+<ul>
+{% for r in resources[t] %}
+<li><a href="/resource/{{types[t]}}/{{resources[t][r]}}">{{resources[t][r]}}</a></li>
+{% endfor %}
+</ul>
+{% endfor %}
+{% else %}
+
+<ul>
+{% for r in resources[None] %}
+<li><a href="/resource/{{r}}">{{r|term_to_string}}</a></li>
+{% endfor %}
+</ul>
+
+{% endif %}
+
+{% endblock %}
+
