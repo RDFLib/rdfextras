@@ -5,6 +5,11 @@
  {% block body %}
 <h1>Welcome to a RDFLib LOD Server</h1>
 
+<p>This is a <a href="http://linkeddata.org">Linked Open Data</a> like server for <a href="http://code.google.com/p/rdflib/">rdflib</a>.
+    A <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> endpoint, conforming to the <a href="http://www.w3.org/TR/rdf-sparql-protocol/">SPARQL Protocol</a> with <a href="http://www.joseki.org/">Joseki</a> extensions is also included.</p>
+
+
+
 <h2>Resources</h2>
 {% if types!=["None"] %}
 
@@ -23,6 +28,28 @@
 <li><a href="/resource/{{r}}">{{r|term_to_string}}</a></li>
 {% endfor %}
 </ul>
+
+<h2>SPARQL</h2>
+<p>SPARQL Endpoint at <a href="/sparql">/sparql</a></p>
+    <form action="sparql" name="query" method="POST">
+      <textarea rows="10" cols="80" name="query">
+PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+PREFIX dc: &lt;http://purl.org/dc/elements/1.1/&gt;
+
+SELECT * WHERE { ?x dc:title ?label . }
+      </textarea><br/>
+      <label>Result format:</label> <select name="output">
+        <option>xml</option>
+        <option>json</option>
+        <option>html</option>
+      </select>
+      <br/>
+      <label>Force text/plain:</label><input type="checkbox" name="force-accept" /><br/>
+      <input type="submit" value="query">
+    </form>
+
+
 
 {% endif %}
 

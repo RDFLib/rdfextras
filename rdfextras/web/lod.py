@@ -2,10 +2,15 @@ import re
 import rdflib
 import warnings
 
-from endpoint import endpoint as lod
-import endpoint
+from endpoint import HTML_MIME, RDFXML_MIME, N3_MIME, NTRIPLES_MIME, endpoint as lod
 
 from flask import render_template, request, make_response, redirect
+
+try: 
+    import mimeparse
+except: 
+    warnings.warn("mimeparse not found - I need this for content negotiation, install with 'easy_install mimeparse'")
+    mimeparse=None
 
 from rdfextras.sparql.results.htmlresults import term_to_string
 
@@ -14,6 +19,8 @@ lod.jinja_env.filters["term_to_string"]=term_to_string
 LABEL_PROPERTIES=[rdflib.RDFS.label, 
                   rdflib.URIRef("http://purl.org/dc/elements/1.1/title"), 
                   rdflib.URIRef("http://xmlns.com/foaf/0.1/name")]
+
+
 
 def get_label(t): 
     for l in lod.config["label_properties"]:
@@ -69,13 +76,18 @@ def reverse_resources(resources):
     return rresources
 
 
+FORMAT_MIMETYPE={ "rdf": RDFXML_MIME, "n3": N3_MIME, "nt": NTRIPLES_MIME }
+MIMETYPE_FORMAT=dict(map(reversed,FORMAT_MIMETYPE.items()))
 
+def mime_to_format(mimetype): 
+    if mimetype in MIMETYPE_FORMAT:
+        return MIMETYPE_FORMAT[mimetype]
+    return "rdf"
+    
 def format_to_mime(format): 
-    if format=="rdf": return format, endpoint.RDFXML_MIME
-    if format=="n3": return format, endpoint.N3_MIME
-    if format=="nt": return format, endpoint.NTRIPLES_MIME
-
-    return "rdf", endpoint.RDFXML_MIME
+    if format in FORMAT_MIMETYPE:
+        return format, FORMAT_MIMETYPE[format]
+    return "rdf", RDFXML_MIME
 
 def get_resource(label, type_): 
     if type_ and type_ not in lod.config["rtypes"]:
@@ -111,7 +123,10 @@ def page(label, type_=None):
     if isinstance(r,tuple): # 404
         return r
 
-    outprops=list(lod.config["graph"].predicate_objects(r))
+    outprops=[ x for x in lod.config["graph"].predicate_objects(r) 
+               if x[0]!=rdflib.RDF.type]
+    types=lod.config["graph"].objects(r,rdflib.RDF.type)
+    
     inprops=list(lod.config["graph"].subject_predicates(r))
 
     return render_template("lodpage.html", 
@@ -120,15 +135,33 @@ def page(label, type_=None):
                            label=label, 
                            graph=lod.config["graph"],
                            type_=type_, 
+                           types=types,
                            resource=r)
 
 @lod.route("/resource/<type_>/<label>")
 @lod.route("/resource/<label>")
 def resource(label, type_=None): 
-    if type_:
-        return redirect("/page/%s/%s"%(type_,label),303)
+    """
+    Do ContentNegotiation for some resource and 
+    redirect to the appropriate place
+    """
+    mimetype=None
+    if mimeparse:
+        print [RDFXML_MIME, N3_MIME, NTRIPLES_MIME, HTML_MIME], request.headers["Accept"]
+        mimetype=mimeparse.best_match([RDFXML_MIME, N3_MIME, NTRIPLES_MIME, HTML_MIME], request.headers["Accept"])
+        
+    if mimetype and mimetype!=HTML_MIME:
+        path="data"
+        ext="."+mime_to_format(mimetype)
     else:
-        return redirect("/page/%s"%label,303)
+        path="page"
+        ext=""
+
+    if type_:
+        return redirect("/%s/%s/%s%s"%(path,type_,label,ext),303)
+    else:
+        return redirect("/%s/%s%s"%(path,label,ext),303)
+        
         
 
 @lod.route("/")
