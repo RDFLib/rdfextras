@@ -7,24 +7,14 @@ import rdflib
 import rdfextras
 import sys
 
+import mimeutils
+
 endpoint = Flask(__name__)
 
 endpoint.jinja_env.globals["rdflib_version"]=rdflib.__version__
 endpoint.jinja_env.globals["rdfextras_version"]=rdfextras.__version__
 endpoint.jinja_env.globals["python_version"]=sys.version
 
-JSON_MIME="application/sparql-results+json"
-XML_MIME="application/sparql-results+xml"
-HTML_MIME="text/html"
-N3_MIME="text/n3"
-RDFXML_MIME="application/rdf+xml"
-NTRIPLES_MIME="text/plain"
-
-def format_to_mime(format): 
-    if format=='xml': return XML_MIME
-    if format=='json': return JSON_MIME
-    if format=='html': return HTML_MIME
-    return "text/plain"
 
 @endpoint.route("/sparql", methods=['GET', 'POST'])
 def query():
@@ -33,15 +23,15 @@ def query():
     a=request.headers["Accept"]
     
     format="xml" # xml is default
-    if HTML_MIME in a:
+    if mimeutils.HTML_MIME in a:
         format="html"
-    if JSON_MIME in a: 
+    if mimeutils.JSON_MIME in a: 
         format="json"
 
     # output parameter overrides header
     format=request.values.get("output", format) 
 
-    mimetype=format_to_mime(format)
+    mimetype=mimeutils.resultformat_to_mime(format)
     
     # force-accept parameter overrides mimetype
     mimetype=request.values.get("force-accept", mimetype)

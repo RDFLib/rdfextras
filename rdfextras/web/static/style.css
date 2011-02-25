@@ -32,3 +32,7 @@ h1 .url {
     font-size: 0.6em;
     color: #bbb;
 }
+
+hr { 
+    border-color: #ddd;
+}

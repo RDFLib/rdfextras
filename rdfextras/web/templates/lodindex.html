@@ -14,10 +14,10 @@
 {% if types!=["None"] %}
 
 {% for t in types %}
-<h3>{{t|term_to_string}}</h3>
+<h3><a href='{{t.url}}'>{{t.label}} ({{resources[t.realuri]|length}})</h3>
 <ul>
-{% for r in resources[t] %}
-<li><a href="/resource/{{types[t]}}/{{resources[t][r]}}">{{resources[t][r]}}</a></li>
+{% for r in resources[t.realurl] %}
+<li><a href="{{r.url}}">{{r.label}}</a></li>
 {% endfor %}
 </ul>
 {% endfor %}

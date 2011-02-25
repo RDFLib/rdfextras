@@ -2,15 +2,11 @@ import re
 import rdflib
 import warnings
 
-from endpoint import HTML_MIME, RDFXML_MIME, N3_MIME, NTRIPLES_MIME, endpoint as lod
+from endpoint import endpoint as lod
 
 from flask import render_template, request, make_response, redirect
 
-try: 
-    import mimeparse
-except: 
-    warnings.warn("mimeparse not found - I need this for content negotiation, install with 'easy_install mimeparse'")
-    mimeparse=None
+import mimeutils 
 
 from rdfextras.sparql.results.htmlresults import term_to_string
 
@@ -18,11 +14,34 @@ lod.jinja_env.filters["term_to_string"]=term_to_string
 
 LABEL_PROPERTIES=[rdflib.RDFS.label, 
                   rdflib.URIRef("http://purl.org/dc/elements/1.1/title"), 
-                  rdflib.URIRef("http://xmlns.com/foaf/0.1/name")]
+                  rdflib.URIRef("http://xmlns.com/foaf/0.1/name"),
+                  rdflib.URIRef("http://www.w3.org/2006/vcard/ns#fn"),
+                  rdflib.URIRef("http://www.w3.org/2006/vcard/ns#org")
+                  
+                  ]
 
-
+def resolve(r):
+    """
+    return (realurl, localurl, label)
+    """
+    if isinstance(r, rdflib.Literal): 
+        return { 'url': None, 'realurl': None, 'localurl': None, 'label': get_label(r) }
+        
+    localurl=None
+    if lod.config["types"]==[None]: 
+        if (r, rdflib.RDF.type, None) in lod.config["graph"]:
+            localurl="/%s"%label_to_url(r)
+    else:
+        for t in lod.config["graph"].objects(r,rdflib.RDF.type):
+            if t in lod.config["types"]: 
+                localurl="/resource/%s/%s"%(lod.config["types"][t], label_to_url(get_label(r)))
+                break
+    url=r
+    if localurl: url=localurl
+    return { 'url': url, 'realurl': r, 'localurl': url, 'label': get_label(r) }
 
 def get_label(t): 
+    if isinstance(t, rdflib.Literal): return unicode(t)
     for l in lod.config["label_properties"]:
         try: 
             return lod.config["graph"].objects(t,l).next()
@@ -34,6 +53,7 @@ def get_label(t):
         return t
 
 def label_to_url(label):
+    label=re.sub(re.compile('[^\w ]',re.U), '',label)
     return re.sub(" ", "_", label)
 
 def detect_types(graph): 
@@ -47,7 +67,7 @@ def reverse_types(types):
     rtypes={}
     for t,l in types.iteritems(): 
         while l in rtypes: 
-            warnings.warn("Multiple types for label '%s': (%s) rewriting to '%s_'"%(l,rtypes[l], l))           
+            warnings.warn(u"Multiple types for label '%s': (%s) rewriting to '%s_'"%(l,rtypes[l], l))           
             l+="_"
         rtypes[l]=t
     return rtypes
@@ -61,6 +81,7 @@ def find_resources():
         resources[t]={}
         for x in graph.subjects(rdflib.RDF.type, t): 
             resources[t][x]=label_to_url(get_label(x))
+            
     return resources
 
 def reverse_resources(resources): 
@@ -69,32 +90,20 @@ def reverse_resources(resources):
         rresources[t]={}
         for r, l in res.iteritems():
             while l in rresources[t]: 
-                warnings.warn("Multiple resources for label '%s': (%s) rewriting to '%s_'"%(l,rresources[t][l], l))           
+                warnings.warn(u"Multiple resources for label '%s': (%s) rewriting to '%s_'"%(repr(l),rresources[t][l], repr(l+'_')))           
                 l+="_"
+                
             rresources[t][l]=r
 
     return rresources
 
 
-FORMAT_MIMETYPE={ "rdf": RDFXML_MIME, "n3": N3_MIME, "nt": NTRIPLES_MIME }
-MIMETYPE_FORMAT=dict(map(reversed,FORMAT_MIMETYPE.items()))
-
-def mime_to_format(mimetype): 
-    if mimetype in MIMETYPE_FORMAT:
-        return MIMETYPE_FORMAT[mimetype]
-    return "rdf"
-    
-def format_to_mime(format): 
-    if format in FORMAT_MIMETYPE:
-        return format, FORMAT_MIMETYPE[format]
-    return "rdf", RDFXML_MIME
 
 def get_resource(label, type_): 
     if type_ and type_ not in lod.config["rtypes"]:
         return "No such type_ %s"%type_, 404
     try: 
         t=lod.config["rtypes"][type_]
-        print lod.config["rresources"][t], label
         return lod.config["rresources"][t][label]
 
     except: 
@@ -109,7 +118,7 @@ def data(label, format, type_=None):
     if isinstance(r,tuple): # 404
         return r
     graph=lod.config["graph"].query('DESCRIBE %s'%r.n3())
-    format,mimetype_=format_to_mime(format)
+    format,mimetype_=mimeutils.format_to_mime(format)
     response=make_response(graph.serialize(format=format))
 
     response.headers["Content-Type_"]=mimetype_
@@ -123,16 +132,16 @@ def page(label, type_=None):
     if isinstance(r,tuple): # 404
         return r
 
-    outprops=[ x for x in lod.config["graph"].predicate_objects(r) 
-               if x[0]!=rdflib.RDF.type]
-    types=lod.config["graph"].objects(r,rdflib.RDF.type)
+    outprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in lod.config["graph"].predicate_objects(r) 
+               if x[0]!=rdflib.RDF.type])
+    types=sorted([ resolve(x) for x in lod.config["graph"].objects(r,rdflib.RDF.type)])
     
-    inprops=list(lod.config["graph"].subject_predicates(r))
-
+    inprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in lod.config["graph"].subject_predicates(r)])
+    
     return render_template("lodpage.html", 
                            outprops=outprops, 
                            inprops=inprops, 
-                           label=label, 
+                           label=get_label(r), 
                            graph=lod.config["graph"],
                            type_=type_, 
                            types=types,
@@ -145,14 +154,13 @@ def resource(label, type_=None):
     Do ContentNegotiation for some resource and 
     redirect to the appropriate place
     """
-    mimetype=None
-    if mimeparse:
-        print [RDFXML_MIME, N3_MIME, NTRIPLES_MIME, HTML_MIME], request.headers["Accept"]
-        mimetype=mimeparse.best_match([RDFXML_MIME, N3_MIME, NTRIPLES_MIME, HTML_MIME], request.headers["Accept"])
+    
+    mimetype=mimeutils.best_match([mimeutils.RDFXML_MIME, mimeutils.N3_MIME, 
+        mimeutils.NTRIPLES_MIME, mimeutils.HTML_MIME], request.headers["Accept"])
         
-    if mimetype and mimetype!=HTML_MIME:
+    if mimetype and mimetype!=mimeutils.HTML_MIME:
         path="data"
-        ext="."+mime_to_format(mimetype)
+        ext="."+mimeutils.mime_to_format(mimetype)
     else:
         path="page"
         ext=""
@@ -166,9 +174,16 @@ def resource(label, type_=None):
 
 @lod.route("/")
 def index(): 
+    types=sorted([resolve(x) for x in lod.config["types"]], key=lambda x: x['label'])
+    resources={}
+    for t in lod.config["types"]:
+        resources[t]=sorted([resolve(x) for x in lod.config["resources"][t]], 
+            key=lambda x: x.get('label'))
+    
+    
     return render_template("lodindex.html", 
-                           types=lod.config["types"], 
-                           resources=lod.config["resources"],
+                           types=types, 
+                           resources=resources,
                            graph=lod.config["graph"])
 
 ##################
@@ -195,6 +210,10 @@ def get(graph_, types='auto',image_patterns=["\.[png|jpg|gif]$"], label_properti
     
     return lod
 
+def format_from_filename(f):
+    if f.endswith('n3'): return 'n3'
+    return 'xml'
+    
 
 if __name__=='__main__':
     import rdflib
@@ -220,7 +239,13 @@ if __name__=='__main__':
                            'rdfextras.sparql.results.jsonresults','JSONResultParser')
     rdflib.plugin.register('json', rdflib.query.ResultSerializer, 
                            'rdfextras.sparql.results.jsonresults','JSONResultSerializer')
-    import bookdb
-    g=bookdb.bookdb
+    
+    import sys, codecs
+    if len(sys.argv)>1:
+        g=rdflib.Graph()
+        g.load(sys.argv[1], format=format_from_filename(sys.argv[1]))
+    else:
+        import bookdb
+        g=bookdb.bookdb
     
     serve(g, True)
