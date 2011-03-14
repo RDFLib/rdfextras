@@ -21,7 +21,13 @@ config = dict(
                 'rdfextras.sparql',
                 'rdfextras.sparql.results',
                 'rdfextras.store',
-                ],
+		'rdfextras.web',],
+    package_dir = { 'rdfextras.web': 'rdfextras/web' },
+    package_data={ 'rdfextras.web': [
+            'templates/*.html',
+            'static/*',
+]}
+
 )
 
 try:
