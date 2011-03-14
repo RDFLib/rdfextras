@@ -4,7 +4,7 @@ import warnings
 
 from endpoint import endpoint as lod
 
-from flask import render_template, request, make_response, redirect
+from flask import render_template, request, make_response, redirect, url_for
 
 import mimeutils 
 
@@ -34,7 +34,7 @@ def resolve(r):
     else:
         for t in lod.config["graph"].objects(r,rdflib.RDF.type):
             if t in lod.config["types"]: 
-                localurl="/resource/%s/%s"%(lod.config["types"][t], label_to_url(get_label(r)))
+                localurl=url_for("resource", type_=lod.config["types"][t], label=label_to_url(get_label(r)))
                 break
     url=r
     if localurl: url=localurl
@@ -166,9 +166,17 @@ def resource(label, type_=None):
         ext=""
 
     if type_:
-        return redirect("/%s/%s/%s%s"%(path,type_,label,ext),303)
+        if format!="":
+            url=url_for(path, type_=type_, label=label, format=ext)
+        else:
+            url=url_for(path, type_=type_, label=label)
     else:
-        return redirect("/%s/%s%s"%(path,label,ext),303)
+        if format!="":
+            url=url_for(path, label=label, format=ext)
+        else: 
+            url=url_for(path, label=label)
+
+    return redirect(url, 303)
         
         
 
