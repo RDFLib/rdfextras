@@ -166,12 +166,12 @@ def resource(label, type_=None):
         ext=""
 
     if type_:
-        if format!="":
+        if ext!='' :
             url=url_for(path, type_=type_, label=label, format=ext)
         else:
             url=url_for(path, type_=type_, label=label)
     else:
-        if format!="":
+        if ext!='':
             url=url_for(path, label=label, format=ext)
         else: 
             url=url_for(path, label=label)
