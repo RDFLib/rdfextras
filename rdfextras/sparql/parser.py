@@ -726,7 +726,7 @@ if DEBUG:
 DESCRIBE = Suppress(CaselessKeyword('DESCRIBE'))
 
 DescribeQuery = (DESCRIBE + 
-  (Group(OneOrMore(Var)) | Literal('*').setParseAction(as_empty)) +
+  (Group(OneOrMore(VarOrIRIref)) | Literal('*').setParseAction(as_empty)) +
   Group(ZeroOrMore(DatasetClause)) + Optional(WhereClause, None) +
   SolutionModifier).setParseAction(
     refer_component(components.DescribeQuery))
