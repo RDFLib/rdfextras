@@ -48,7 +48,8 @@ def get_label(t):
         except: 
             pass
     try: 
-        return lod.config["graph"].namespace_manager.compute_qname(t)[2]
+        #return lod.config["graph"].namespace_manager.compute_qname(t)[2]
+        return t[max(t.rfind("/"), t.rfind("#"))+1:]
     except: 
         return t
 
