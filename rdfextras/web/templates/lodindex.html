@@ -27,7 +27,7 @@
 </ul>
 
 {% for t in types %}
-<h3><a name="type{{loop.index0}}"><a href='{{t.url}}'>{{t.label}} ({{resources[t.realuri]|length}})</a></a></h3>
+<h3><a name="type{{loop.index0}}"><a href='{{t.url}}'>{{t.label}} ({{resources[t.realurl]|count}})</a></a></h3>
 <ul>
 {% for r in resources[t.realurl] %}
 <li><a href="{{r.url}}">{{r.label}}</a></li>
