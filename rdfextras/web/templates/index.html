@@ -3,10 +3,13 @@
  {% block title %}RDFLib SPARQL Endpoint{% endblock %}
 
  {% block body %}
+   {% block intro %}
     <h1>RDFLib SPARQL Endpoint</h1>
 
     <p>This is a <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> endpoint, conforming to the <a href="http://www.w3.org/TR/rdf-sparql-protocol/">SPARQL Protocol</a> powered by <a href="http://code.google.com/p/rdflib/">rdflib</a>. Some extension from <a href="http://www.joseki.org/">Joseki</a> are also included.</p>
-
+{% endblock %}
+{% block query %}
+<h2><a name='query'>Query:</a></h2>
     <form action="sparql" name="query" method="POST">
       <textarea rows="10" cols="80" name="query">
 PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
@@ -24,4 +27,5 @@ SELECT * WHERE { ?x dc:title ?label . }
       <label>Force text/plain:</label><input type="checkbox" name="force-accept" /><br/>
       <input type="submit" value="query">
     </form>
+{% endblock %}
 {% endblock %}
