@@ -109,19 +109,27 @@ def get_resource(label, type_):
     except: 
         return "No such resource %s"%label, 404
 
+@lod.route("/download/<format_>")
+def download(format_):
+    format_,mimetype_=mimeutils.format_to_mime(format_)
+    response=make_response(lod.config["graph"].serialize(format=format_))
+
+    response.headers["Content-Type"]=mimetype_
+
+    return response        
 
 
-@lod.route("/data/<type_>/<label>.<format>")
-@lod.route("/data/<label>.<format>")
-def data(label, format, type_=None):
+@lod.route("/data/<type_>/<label>.<format_>")
+@lod.route("/data/<label>.<format_>")
+def data(label, format_, type_=None):
     r=get_resource(label, type_)
     if isinstance(r,tuple): # 404
         return r
     graph=lod.config["graph"].query('DESCRIBE %s'%r.n3())
-    format,mimetype_=mimeutils.format_to_mime(format)
-    response=make_response(graph.serialize(format=format))
+    format_,mimetype_=mimeutils.format_to_mime(format_)
+    response=make_response(graph.serialize(format=format_))
 
-    response.headers["Content-Type_"]=mimetype_
+    response.headers["Content-Type"]=mimetype_
 
     return response
 
@@ -167,12 +175,12 @@ def resource(label, type_=None):
 
     if type_:
         if ext!='' :
-            url=url_for(path, type_=type_, label=label, format=ext)
+            url=url_for(path, type_=type_, label=label, format_=ext)
         else:
             url=url_for(path, type_=type_, label=label)
     else:
         if ext!='':
-            url=url_for(path, label=label, format=ext)
+            url=url_for(path, label=label, format_=ext)
         else: 
             url=url_for(path, label=label)
 
@@ -199,10 +207,13 @@ def index():
 def serve(graph_,debug=False):
     get(graph_).run(debug=debug)
 
-def get(graph_, types='auto',image_patterns=["\.[png|jpg|gif]$"], label_properties=LABEL_PROPERTIES):
+def get(graph_, types='auto',image_patterns=["\.[png|jpg|gif]$"], 
+        label_properties=LABEL_PROPERTIES, 
+        hierarchy_properties=[ rdflib.RDFS.subClassOf, rdflib.RDFS.subPropertyOf ] ):
 
     lod.config["graph"]=graph_
     lod.config["label_properties"]=label_properties
+    lod.config["hierarchy_properties"]=hierarchy_properties
     
     if types=='auto':
         lod.config["types"]=detect_types(graph_)

@@ -26,7 +26,7 @@ def mime_to_format(mimetype):
 def format_to_mime(format): 
     if format in FORMAT_MIMETYPE:
         return format, FORMAT_MIMETYPE[format]
-    return "rdf", RDFXML_MIME
+    return "xml", RDFXML_MIME
     
     
 

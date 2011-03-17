@@ -8,10 +8,16 @@
 <p>This is a <a href="http://linkeddata.org">Linked Open Data</a> like server for <a href="http://code.google.com/p/rdflib/">rdflib</a>.
     A <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL</a> endpoint, conforming to the <a href="http://www.w3.org/TR/rdf-sparql-protocol/">SPARQL Protocol</a> with <a href="http://www.joseki.org/">Joseki</a> extensions is also included.</p>
 
-<p><a href="#query">pose a SPARQL query</a></p>
+<h3>Menu:</h3>
+<ul>
+  <li><a href="#resources">browse</a></li>
+  <li><a href="#download">download</a></li>
+  <li><a href="#query">query</a></li>
+</ul>
 
+<hr/>
 
-<h2>Resources</h2>
+<h2><a name="resources">Resources</a></h2>
 {% if types!=["None"] %}
 
 <ul>
@@ -32,13 +38,25 @@
 
 <ul>
 {% for r in resources[None] %}
-<li><a href="/resource/{{r}}">{{r|term_to_string}}</a></li>
+<li><a href="{{r.url}}">{{r.label}}</a></li>
 {% endfor %}
 </ul>
 
 
 {% endif %}
 
+<hr/>
+
+<h2><a name="download">Bulk Download</a></h2>
+
+<p>You can download this entire dataset as: 
+
+<ul>
+  <li><a href="download/xml">RDF/XML</a></li>
+  <li><a href="download/n3">N3</a></li>
+  <li><a href="download/nt">N-Triples</a></li>
+</ul>
+<hr/>
 
 {% endblock %}
 
