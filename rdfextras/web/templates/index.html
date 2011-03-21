@@ -10,7 +10,7 @@
 {% endblock %}
 {% block query %}
 <h2><a name='query'>Query:</a></h2>
-    <form action="sparql" name="query" method="POST">
+    <form action="{{url_for("query")}}" name="query" method="POST">
       <textarea rows="10" cols="80" name="query">
 PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
 PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
