@@ -13,14 +13,14 @@ def term_to_string(ctx, t):
             l=ctx.parent["graph"].namespace_manager.qname(t)
         except: 
             l=t
-        return Markup("<a href='%s'>%s</a>"%(t,l))
+        return Markup(u"<a href='%s'>%s</a>"%(t,l))
     return t
 
 env=Environment()
 env.filters["term_to_string"]=term_to_string
 
 
-GRAPH_TEMPLATE="""
+GRAPH_TEMPLATE=u"""
 <table>
 <thead>
  <tr>
@@ -41,7 +41,7 @@ GRAPH_TEMPLATE="""
 </table>
 """
 
-SELECT_TEMPLATE="""
+SELECT_TEMPLATE=u"""
 <table>
 <thead>
  <tr>
@@ -75,7 +75,7 @@ class HTMLResultSerializer(ResultSerializer):
             return
         if self.result.type=='SELECT':
             template = env.from_string(SELECT_TEMPLATE)
-            stream.write(template.render(result=self.result).encode(encoding))
+            stream.write(template.render(result=self.result))
 
 
             
@@ -94,6 +94,6 @@ class HTMLSerializer(Serializer):
             warnings.warn("HTMLSerializer does not use custom encoding.")
 
         template = env.from_string(GRAPH_TEMPLATE)
-        stream.write(template.render(graph=self.store).encode(encoding))
+        stream.write(template.render(graph=self.store))
 
 

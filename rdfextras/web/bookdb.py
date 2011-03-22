@@ -23,7 +23,7 @@ bookrdf="""
 
 <http://example.org/book/book5> a book:Book ;
     dc:creator "J.K. Rowling";
-    dc:title "Harry Potter and the Order of the Phoenix" .
+    dc:title "Harry Potter and the Order of the Ph\xc3\xb6nix" .
 
 <http://example.org/book/book6> a book:Book ;
     dc:creator "J.K. Rowling";

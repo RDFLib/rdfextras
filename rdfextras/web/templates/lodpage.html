@@ -54,15 +54,15 @@ is-a
 <div id="footer">
 	<a href='/'>back to index</a> - 	
 Download as: 
-{% if type %}
-<a href="/data/{{type}}/{{label}}.nt">ntriples</a> |
-<a href="/data/{{type}}/{{label}}.n3">n3</a> |
-<a href="/data/{{type}}/{{label}}.rdf">rdf/xml</a>
+{% if type_ %}
+<a href="{{url_for('data', type_=type_, label=urilabel, format_='nt') }}">ntriples</a> |
+<a href="{{url_for('data', type_=type_, label=urilabel, format_='n3') }}">n3</a> |
+<a href="{{url_for('data', type_=type_, label=urilabel, format_='xml') }}">rdf/xml</a>
 {% else %}         
 
-<a href="/data/{{label}}.nt">ntriples</a> |
-<a href="/data/{{label}}.n3">n3</a> |
-<a href="/data/{{label}}.rdf">rdf/xml</a>
+<a href="{{url_for('data', label=urilabel, format_='nt') }}">ntriples</a> |
+<a href="{{url_for('data', label=urilabel, format_='n3') }}">n3</a> |
+<a href="{{url_for('data', label=urilabel, format_='xml') }}">rdf/xml</a>
 </div>
 {% endif %}
 {% endblock %}

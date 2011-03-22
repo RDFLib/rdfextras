@@ -126,7 +126,13 @@ def data(label, format_, type_=None):
     r=get_resource(label, type_)
     if isinstance(r,tuple): # 404
         return r
-    graph=lod.config["graph"].query('DESCRIBE %s'%r.n3())
+    #graph=lod.config["graph"].query('DESCRIBE %s'%r.n3())
+    # DESCRIBE <uri> is broken. 
+    # 
+    graph=lod.config["graph"].query('CONSTRUCT { %s ?p ?o . } WHERE { %s ?p ?o } '%(r.n3(), r.n3())).graph
+    graph+=lod.config["graph"].query('CONSTRUCT { ?s ?p %s . } WHERE { ?s ?p %s } '%(r.n3(), r.n3()))
+    format_,mimetype_=mimeutils.format_to_mime(format_)
+
     format_,mimetype_=mimeutils.format_to_mime(format_)
     response=make_response(graph.serialize(format=format_))
 
@@ -150,7 +156,8 @@ def page(label, type_=None):
     return render_template("lodpage.html", 
                            outprops=outprops, 
                            inprops=inprops, 
-                           label=get_label(r), 
+                           label=get_label(r),
+                           urilabel=label,
                            graph=lod.config["graph"],
                            type_=type_, 
                            types=types,
