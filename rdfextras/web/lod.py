@@ -128,10 +128,9 @@ def data(label, format_, type_=None):
         return r
     #graph=lod.config["graph"].query('DESCRIBE %s'%r.n3())
     # DESCRIBE <uri> is broken. 
-    # 
+    # http://code.google.com/p/rdfextras/issues/detail?id=25
     graph=lod.config["graph"].query('CONSTRUCT { %s ?p ?o . } WHERE { %s ?p ?o } '%(r.n3(), r.n3())).graph
     graph+=lod.config["graph"].query('CONSTRUCT { ?s ?p %s . } WHERE { ?s ?p %s } '%(r.n3(), r.n3()))
-    format_,mimetype_=mimeutils.format_to_mime(format_)
 
     format_,mimetype_=mimeutils.format_to_mime(format_)
     response=make_response(graph.serialize(format=format_))
