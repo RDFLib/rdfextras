@@ -315,8 +315,11 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
                                    for item in query.query.variables]
     else:
         query.query.variables = []
-    expr = reduce(ReduceToAlgebra,query.query.whereClause.parsedGraphPattern.graphPatterns,
-                  None)
+
+    if query.query.whereClause: 
+        expr = reduce(ReduceToAlgebra,query.query.whereClause.parsedGraphPattern.graphPatterns, None)
+    else: 
+        expr=None
 
     limit = None
     offset = 0
@@ -351,7 +354,9 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
 #            print_tree(tree)
 #        print "---------------"
         result = sparql_query.Query(top, tripleStore)
-    else:
+    elif expr==None:
+        result=None # this is fine - describe needs no where-clause
+    else: 
         assert isinstance(expr,AlgebraExpression), repr(expr)
         if DEBUG:
             print "## Full SPARQL Algebra expression ##"
@@ -376,7 +381,7 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
         else:
             ExportExpansionNode(result.parent1.top,fname='out1.svg',verbose=True)
             ExportExpansionNode(result.parent2.top,fname='out2.svg',verbose=True)
-    if result == None :
+    if not isinstance(query.query, DescribeQuery) and result == None :
         # generate some proper output for the exception :-)
         msg = "Errors in the patterns, no valid query object generated; "
         msg += ("pattern:\n%s\netc..." % basicPatterns[0])
