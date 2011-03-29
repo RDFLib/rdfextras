@@ -44,7 +44,7 @@ def query():
 
     results=endpoint.config["graph"].query(q).serialize(format=format)
     if format=='html':
-        response=make_response(render_template("results.html", results=Markup(results), q=q))
+        response=make_response(render_template("results.html", results=Markup(unicode(results,"utf-8")), q=q))
     else:
         response=make_response(results)
 

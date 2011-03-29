@@ -1,6 +1,7 @@
 import re
 import rdflib
 import warnings
+import urllib2
 
 from endpoint import endpoint as lod
 
@@ -10,6 +11,13 @@ import mimeutils
 
 from rdfextras.sparql.results.htmlresults import term_to_string
 
+from werkzeug.routing import BaseConverter
+from werkzeug.urls import url_quote
+class RDFUrlConverter(BaseConverter):
+    def to_url(self, value):
+        return url_quote(value, self.map.charset, safe=":")
+
+lod.url_map.converters['rdf'] = RDFUrlConverter
 lod.jinja_env.filters["term_to_string"]=term_to_string
 
 LABEL_PROPERTIES=[rdflib.RDFS.label, 
@@ -30,15 +38,19 @@ def resolve(r):
     localurl=None
     if lod.config["types"]==[None]: 
         if (r, rdflib.RDF.type, None) in lod.config["graph"]:
-            localurl="/%s"%label_to_url(r)
+            localurl=url_for("resource", label=localname(r))
     else:
         for t in lod.config["graph"].objects(r,rdflib.RDF.type):
             if t in lod.config["types"]: 
-                localurl=url_for("resource", type_=lod.config["types"][t], label=label_to_url(get_label(r)))
+                localurl=url_for("resource", type_=lod.config["types"][t], label=urllib2.unquote(localname(r)))
                 break
     url=r
     if localurl: url=localurl
     return { 'url': url, 'realurl': r, 'localurl': url, 'label': get_label(r) }
+
+def localname(t): 
+    """qname computer is not quite what we want"""
+    return t[max(t.rfind("/"), t.rfind("#"))+1:]
 
 def get_label(t): 
     if isinstance(t, rdflib.Literal): return unicode(t)
@@ -49,7 +61,7 @@ def get_label(t):
             pass
     try: 
         #return lod.config["graph"].namespace_manager.compute_qname(t)[2]
-        return t[max(t.rfind("/"), t.rfind("#"))+1:]
+        return urllib2.unquote(localname(t))
     except: 
         return t
 
@@ -60,7 +72,7 @@ def label_to_url(label):
 def detect_types(graph): 
     types={}
     for t in set(graph.objects(None, rdflib.RDF.type)):
-        types[t]=label_to_url(get_label(t))
+        types[t]=localname(t)
 
     return types
 
@@ -81,7 +93,7 @@ def find_resources():
     for t in lod.config["types"]: 
         resources[t]={}
         for x in graph.subjects(rdflib.RDF.type, t): 
-            resources[t][x]=label_to_url(get_label(x))
+            resources[t][x]=localname(x)
             
     return resources
 
@@ -101,6 +113,7 @@ def reverse_resources(resources):
 
 
 def get_resource(label, type_): 
+    label=urllib2.quote(label, safe="")
     if type_ and type_ not in lod.config["rtypes"]:
         return "No such type_ %s"%type_, 404
     try: 
@@ -179,7 +192,8 @@ def resource(label, type_=None):
     else:
         path="page"
         ext=""
-
+        
+    #print "label", label
     if type_:
         if ext!='' :
             url=url_for(path, type_=type_, label=label, format_=ext)
@@ -199,10 +213,12 @@ def resource(label, type_=None):
 def index(): 
     types=sorted([resolve(x) for x in lod.config["types"]], key=lambda x: x['label'])
     resources={}
-    for t in lod.config["types"]:
-        resources[t]=sorted([resolve(x) for x in lod.config["resources"][t]], 
+    for t in types:
+        turl=t["realurl"]
+        resources[turl]=sorted([resolve(x) for x in lod.config["resources"][turl]][:10], 
             key=lambda x: x.get('label'))
-    
+        if len(lod.config["resources"][turl])>10:
+            resources[turl].append({ 'url': t["url"], 'label': "..." })
     
     return render_template("lodindex.html", 
                            types=types, 
@@ -238,6 +254,7 @@ def get(graph_, types='auto',image_patterns=["\.[png|jpg|gif]$"],
 
 def format_from_filename(f):
     if f.endswith('n3'): return 'n3'
+    if f.endswith('nt'): return 'nt'
     return 'xml'
     
 
