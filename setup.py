@@ -21,6 +21,8 @@ config = dict(
                 'rdfextras.serializers',
                 'rdfextras.tools',
                 'rdfextras.sparql',
+                'rdfextras.sparql.results',
+                'rdfextras.store',
                 ],
 )
 
@@ -49,7 +51,7 @@ else:
         #test_suite = 'nose.collector',
         #namespace_packages = ['rdfextras'], # TODO: really needed?
         install_requires = [
-            'rdflib >= 3.0',
+            'rdflib >= 3.5',
             'pyparsing'
         ],
     )

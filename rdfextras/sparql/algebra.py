@@ -1,4 +1,4 @@
-﻿#!/usr/local/bin/python
+#!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 """
 An implementation of the W3C SPARQL Algebra on top of sparql-p's expansion trees
@@ -485,7 +485,7 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
             raise NotImplemented("Solution modifiers cannot be used with DESCRIBE")
         else:
             rt=result.top.returnResult(None)
-        rtGraph=Graph()
+        rtGraph=Graph(namespace_manager=dataset.namespace_manager)
         for binding in rt:        
             g=extensionFunctions[DESCRIBE](query.query.describeVars,
                                                binding,
@@ -513,7 +513,7 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
             raise NotImplemented("Solution modifiers cannot be used with CONSTRUCT")
         else:
             rt=result.top.returnResult(None)
-        rtGraph=Graph()
+        rtGraph=Graph(namespace_manager=dataset.namespace_manager)
         for binding in rt:        
             for s,p,o,func in ReduceGraphPattern(query.query.triples,prolog).patterns:
                 s,p,o=map(lambda x:isinstance(x,Variable) and binding.get(x) or

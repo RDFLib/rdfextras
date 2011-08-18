@@ -34,7 +34,7 @@ SELECT ?s ?o WHERE { ?s ?p ?o . }
 expected_fragments = [
     #u"""<sparql:sparql xmlns="http://www.w3.org/2005/sparql-results#"><sparql:head>""",
 
-    u"""</sparql:head><sparql:results distinct="false" ordered="false">""",
+    u"""</sparql:head><sparql:results>""",
 
     u"""<sparql:binding name="s"><sparql:uri>http://example.org/word</sparql:uri></sparql:binding>""",
 

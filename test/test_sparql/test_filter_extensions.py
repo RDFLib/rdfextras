@@ -2,6 +2,12 @@ from rdflib.graph import ConjunctiveGraph
 from rdflib.namespace import Namespace, RDF, XSD
 from rdflib.term import BNode, Literal
 
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 DC = Namespace(u"http://purl.org/dc/elements/1.1/")
 FUNC = Namespace(u"http://example.org/functions#")
@@ -37,7 +43,7 @@ def test_even_extension():
 
     """))
     res.sort()
-    expected = [Literal(0), Literal(2)]
+    expected = [(Literal(0),), (Literal(2),)]
     assert res == expected, "Expected %s but got %s" % (expected, res)
 
 test_even_extension.sparql = True

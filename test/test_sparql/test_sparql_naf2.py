@@ -37,11 +37,11 @@ class TestSparqlOPT_FILTER2(unittest.TestCase):
         self.graph.load(StringIO(testContent), format='n3')
     def test_OPT_FILTER(self):
         results = self.graph.query(QUERY,
-                                   DEBUG=False).serialize(format='python')
+                                   DEBUG=False)
         results = list(results)
         self.failUnless(
-            results == [doc1],
-            "expecting : %s .  Got: %s"%([doc1],repr(results)))
+            results == [(doc1,)],
+            "expecting : %s .  Got: %s"%([(doc1,)],repr(results)))
 
 if __name__ == "__main__":
     unittest.main()

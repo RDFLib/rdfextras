@@ -65,19 +65,19 @@ class AdvancedTests(unittest.TestCase):
         from sets import Set
         OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
         rt =  self.testGraph.query(sparqlQ4)
-        self.assertEquals(Set(rt.serialize('python')),Set([OWL_NS.OntologyProperty,OWL_NS.Class,OWL_NS.Ontology,OWL_NS.AnnotationProperty,RDF.Property,RDFS.Class]))
+        self.assertEquals(Set(rt),Set([OWL_NS.OntologyProperty,OWL_NS.Class,OWL_NS.Ontology,OWL_NS.AnnotationProperty,RDF.Property,RDFS.Class]))
 
     def testScopedBNodes(self):
         rt =  self.testGraph.query(sparqlQ1)
-        self.assertEquals(rt.serialize('python')[0],URIRef("http://test/foo"))
+        self.assertEquals(list(rt)[0],URIRef("http://test/foo"))
 
     def testCollectionContentWithinAndWithout(self):
         rt =  self.testGraph.query(sparqlQ3)
-        self.assertEquals(rt.serialize('python')[0],URIRef("http://test/bar"))
+        self.assertEquals(list(rt)[0],URIRef("http://test/bar"))
 
     def testCollectionAsObject(self):
         rt =  self.testGraph.query(sparqlQ2)
-        self.assertEquals(rt.serialize('python')[0],URIRef("http://test/foo"))
+        self.assertEquals(list(rt)[0],URIRef("http://test/foo"))
         self.assertEquals(1,len(rt))
 
 if __name__ == '__main__':

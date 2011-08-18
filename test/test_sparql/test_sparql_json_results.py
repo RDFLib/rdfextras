@@ -9,6 +9,10 @@ rdflib.plugin.register('sparql', rdflib.query.Result,
                        'rdfextras.sparql.query', 'SPARQLQueryResult')
 
 
+rdflib.plugin.register('json', rdflib.query.ResultParser, 'rdfextras.sparql.results.jsonresults','JSONResultParser')
+rdflib.plugin.register('json', rdflib.query.ResultSerializer, 'rdfextras.sparql.results.jsonresults','JSONResultSerializer')
+
+
 # json is only available as of python2.6, but simplejson is available 
 # via PyPI for older pythons
 try:
@@ -45,7 +49,7 @@ test_material['optional'] = (PROLOGUE+"""
             OPTIONAL { ?x foaf:knows ?friend . }
     }
     """,
-    {u'head': {u'vars': [u'name', u'x', u'friend']}, u'results': {u'distinct': False, u'bindings': [{u'x': {u'type': u'uri', u'value': u'http://example.org/alice'}, u'name': {u'xml:lang': u'None', u'type': u'literal', u'value': u'Alice'}, u'friend': {u'type': u'uri', u'value': u'http://example.org/bob'}}, {u'x': {u'type': u'uri', u'value': u'http://example.org/bob'}, u'name': {u'xml:lang': u'None', u'type': u'literal', u'value': u'Bob'}}], u'ordered': False}} 
+    {u'head': {u'vars': [u'name', u'x', u'friend']}, u'results': { u'bindings': [{u'x': {u'type': u'uri', u'value': u'http://example.org/alice'}, u'name': { u'type': u'literal', u'value': u'Alice'}, u'friend': {u'type': u'uri', u'value': u'http://example.org/bob'}}, {u'x': {u'type': u'uri', u'value': u'http://example.org/bob'}, u'name': { u'type': u'literal', u'value': u'Bob'}}], }} 
     )
 
 test_material['select_vars'] = (PROLOGUE+"""
@@ -53,19 +57,19 @@ test_material['select_vars'] = (PROLOGUE+"""
     WHERE { ?x foaf:name ?name .
             OPTIONAL { ?x foaf:knows ?friend . }
     }""",
-    {u'head': {u'vars': [u'name', u'friend']}, u'results': {u'distinct': False, u'bindings': [{u'name': {u'xml:lang': u'None', u'type': u'literal', u'value': u'Bob'}}, {u'name': {u'xml:lang': u'None', u'type': u'literal', u'value': u'Alice'}, u'friend': {u'type': u'uri', u'value': u'http://example.org/bob'}}], u'ordered': False}} 
+    {u'head': {u'vars': [u'name', u'friend']}, u'results': { u'bindings': [{u'name': { u'type': u'literal', u'value': u'Bob'}}, {u'name': { u'type': u'literal', u'value': u'Alice'}, u'friend': {u'type': u'uri', u'value': u'http://example.org/bob'}}], }} 
     )
 
 test_material['wildcard'] = (PROLOGUE+"""
     SELECT * WHERE { ?x foaf:name ?name . }
     """,
-    {u'head': {u'vars': [u'x', u'name']}, u'results': {u'distinct': False, u'bindings': [{u'x': {u'type': u'uri', u'value': u'http://example.org/bob'}, u'name': {u'xml:lang': u'None', u'type': u'literal', u'value': u'Bob'}}, {u'x': {u'type': u'uri', u'value': u'http://example.org/alice'}, u'name': {u'xml:lang': u'None', u'type': u'literal', u'value': u'Alice'}}], u'ordered': False}} 
+    {u'head': {u'vars': [u'x', u'name']}, u'results': { u'bindings': [{u'x': {u'type': u'uri', u'value': u'http://example.org/bob'}, u'name': { u'type': u'literal', u'value': u'Bob'}}, {u'x': {u'type': u'uri', u'value': u'http://example.org/alice'}, u'name': { u'type': u'literal', u'value': u'Alice'}}], }} 
     )
 
 test_material['wildcard_vars'] = (PROLOGUE+"""
     SELECT * WHERE { ?x foaf:name ?name . }
     """,
-    {u'head': {u'vars': [u'x', u'name']}, u'results': {u'distinct': False, u'bindings': [{u'x': {u'type': u'uri', u'value': u'http://example.org/alice'}, u'name': {u'xml:lang': u'None', u'type': u'literal', u'value': u'Alice'}}, {u'x': {u'type': u'uri', u'value': u'http://example.org/bob'}, u'name': {u'xml:lang': u'None', u'type': u'literal', u'value': u'Bob'}}], u'ordered': False}} 
+    {u'head': {u'vars': [u'x', u'name']}, u'results': { u'bindings': [{u'x': {u'type': u'uri', u'value': u'http://example.org/alice'}, u'name': { u'type': u'literal', u'value': u'Alice'}}, {u'x': {u'type': u'uri', u'value': u'http://example.org/bob'}, u'name': { u'type': u'literal', u'value': u'Bob'}}], }} 
     )
 
 test_material['union'] = (PROLOGUE+"""
@@ -73,7 +77,7 @@ test_material['union'] = (PROLOGUE+"""
                 { <http://example.org/alice> foaf:name ?name . } UNION { <http://example.org/bob> foaf:name ?name . }
     }
     """,
-    {u'head': {u'vars': [u'name']}, u'results': {u'distinct': True, u'bindings': [{u'name': {u'xml:lang': u'None', u'type': u'literal', u'value': u'Bob'}}, {u'name': {u'xml:lang': u'None', u'type': u'literal', u'value': u'Alice'}}], u'ordered': False}} 
+    {u'head': {u'vars': [u'name']}, u'results': { u'bindings': [{u'name': { u'type': u'literal', u'value': u'Bob'}}, {u'name': { u'type': u'literal', u'value': u'Alice'}}], }} 
     )
 
 test_material['union3'] = (PROLOGUE+"""
@@ -83,7 +87,7 @@ test_material['union3'] = (PROLOGUE+"""
                 UNION { <http://example.org/nobody> foaf:name ?name . }
     }
             """, 
-    {u'head': {u'vars': [u'name']}, u'results': {u'distinct': True, u'bindings': [{u'name': {u'xml:lang': u'None', u'type': u'literal', u'value': u'Bob'}}, {u'name': {u'xml:lang': u'None', u'type': u'literal', u'value': u'Alice'}}], u'ordered': False}}
+    {u'head': {u'vars': [u'name']}, u'results': { u'bindings': [{u'name': { u'type': u'literal', u'value': u'Bob'}}, {u'name': { u'type': u'literal', u'value': u'Alice'}}], }}
     )
 
 
