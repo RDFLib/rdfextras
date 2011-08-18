@@ -13,7 +13,11 @@ from rdfextras.sparql.results.htmlresults import term_to_string
 
 from werkzeug.routing import BaseConverter
 from werkzeug.urls import url_quote
+
 class RDFUrlConverter(BaseConverter):
+    def __init__(self, url_map):
+        BaseConverter.__init__(self,url_map)
+        self.regex="[^/].*?"
     def to_url(self, value):
         return url_quote(value, self.map.charset, safe=":")
 
@@ -50,7 +54,12 @@ def resolve(r):
 
 def localname(t): 
     """qname computer is not quite what we want"""
-    return t[max(t.rfind("/"), t.rfind("#"))+1:]
+    
+    r=t[max(t.rfind("/"), t.rfind("#"))+1:]
+    # pending apache 2.2.18 being available 
+    # work around %2F encoding bug for AllowEncodedSlashes apache option
+    r=r.replace("%2F", "_")
+    return r
 
 def get_label(t): 
     if isinstance(t, rdflib.Literal): return unicode(t)
@@ -71,8 +80,13 @@ def label_to_url(label):
 
 def detect_types(graph): 
     types={}
+    types[rdflib.RDFS.Class]=localname(rdflib.RDFS.Class)
     for t in set(graph.objects(None, rdflib.RDF.type)):
         types[t]=localname(t)
+
+    # make sure type triples are in graph
+    for t in types: 
+        graph.add((t, rdflib.RDF.type, rdflib.RDFS.Class))
 
     return types
 
@@ -89,12 +103,14 @@ def reverse_types(types):
 def find_resources(): 
     resources={}
     graph=lod.config["graph"]
-
+    
     for t in lod.config["types"]: 
         resources[t]={}
         for x in graph.subjects(rdflib.RDF.type, t): 
             resources[t][x]=localname(x)
-            
+
+    #resources[rdflib.RDFS.Class]=lod.config["types"].copy()
+
     return resources
 
 def reverse_resources(resources): 
@@ -133,8 +149,8 @@ def download(format_):
     return response        
 
 
-@lod.route("/data/<type_>/<label>.<format_>")
-@lod.route("/data/<label>.<format_>")
+@lod.route("/data/<type_>/<rdf:label>.<format_>")
+@lod.route("/data/<rdf:label>.<format_>")
 def data(label, format_, type_=None):
     r=get_resource(label, type_)
     if isinstance(r,tuple): # 404
@@ -152,8 +168,8 @@ def data(label, format_, type_=None):
 
     return response
 
-@lod.route("/page/<type_>/<label>")
-@lod.route("/page/<label>")
+@lod.route("/page/<type_>/<rdf:label>")
+@lod.route("/page/<rdf:label>")
 def page(label, type_=None):
     r=get_resource(label, type_)
     if isinstance(r,tuple): # 404
@@ -175,8 +191,8 @@ def page(label, type_=None):
                            types=types,
                            resource=r)
 
-@lod.route("/resource/<type_>/<label>")
-@lod.route("/resource/<label>")
+@lod.route("/resource/<type_>/<rdf:label>")
+@lod.route("/resource/<rdf:label>")
 def resource(label, type_=None): 
     """
     Do ContentNegotiation for some resource and 
@@ -286,7 +302,9 @@ if __name__=='__main__':
     import sys, codecs
     if len(sys.argv)>1:
         g=rdflib.Graph()
-        g.load(sys.argv[1], format=format_from_filename(sys.argv[1]))
+        for f in sys.argv[1:]:
+            sys.stderr.write("Loading %s\n"%f)
+            g.load(f, format=format_from_filename(f))
     else:
         import bookdb
         g=bookdb.bookdb

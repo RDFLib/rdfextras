@@ -6,6 +6,7 @@ except:
 import rdflib
 import rdfextras
 import sys
+import traceback
 
 import mimeutils
 
@@ -18,38 +19,41 @@ endpoint.jinja_env.globals["python_version"]=sys.version
 
 @endpoint.route("/sparql", methods=['GET', 'POST'])
 def query():
-    q=request.values["query"]
-    
-    a=request.headers["Accept"]
-    
-    format="xml" # xml is default
-    if mimeutils.HTML_MIME in a:
-        format="html"
-    if mimeutils.JSON_MIME in a: 
-        format="json"
+    try: 
+        q=request.values["query"]
 
-    # output parameter overrides header
-    format=request.values.get("output", format) 
+        a=request.headers["Accept"]
 
-    mimetype=mimeutils.resultformat_to_mime(format)
-    
-    # force-accept parameter overrides mimetype
-    mimetype=request.values.get("force-accept", mimetype)
+        format="xml" # xml is default
+        if mimeutils.HTML_MIME in a:
+            format="html"
+        if mimeutils.JSON_MIME in a: 
+            format="json"
 
-    # pretty=None
-    # if "force-accept" in request.values: 
-    #     pretty=True
+        # output parameter overrides header
+        format=request.values.get("output", format) 
 
-    # default-graph-uri
+        mimetype=mimeutils.resultformat_to_mime(format)
 
-    results=endpoint.config["graph"].query(q).serialize(format=format)
-    if format=='html':
-        response=make_response(render_template("results.html", results=Markup(unicode(results,"utf-8")), q=q))
-    else:
-        response=make_response(results)
+        # force-accept parameter overrides mimetype
+        mimetype=request.values.get("force-accept", mimetype)
 
-    response.headers["Content-Type"]=mimetype
-    return response
+        # pretty=None
+        # if "force-accept" in request.values: 
+        #     pretty=True
+
+        # default-graph-uri
+
+        results=endpoint.config["graph"].query(q).serialize(format=format)
+        if format=='html':
+            response=make_response(render_template("results.html", results=Markup(unicode(results,"utf-8")), q=q))
+        else:
+            response=make_response(results)
+
+        response.headers["Content-Type"]=mimetype
+        return response
+    except: 
+        return "<pre>"+traceback.format_exc()+"</pre>", 400
 
 
 @endpoint.route("/")
