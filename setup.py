@@ -17,6 +17,8 @@ config = dict(
                    "Operating System :: OS Independent",
                    ],
     packages = ['rdfextras',
+                'rdfextras.parsers',
+                'rdfextras.serializers',
                 'rdfextras.tools',
                 'rdfextras.sparql',
                 'rdfextras.sparql.results',
@@ -42,7 +44,15 @@ else:
             ],
             'nose.plugins': [
                 'EARLPlugin = rdfextras.tools.EARLPlugin:EARLPlugin',
-            ]
+            ],
+            'rdf.plugins.parser': [
+                'rdf-json = rdfextras.parsers.rdfjson:RdfJsonParser',
+                'json-ld = rdfextras.parsers.jsonld:JsonLDParser',
+            ],
+            'rdf.plugins.serializer': [
+                'rdf-json = rdfextras.serializers.rdfjson:RdfJsonSerializer',
+                'json-ld = rdfextras.serializers.jsonld:JsonLDSerializer', 
+            ],
         },
         #test_suite = 'nose.collector',
         #namespace_packages = ['rdfextras'], # TODO: really needed?

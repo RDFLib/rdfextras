@@ -49,13 +49,13 @@ NOSE_ARGS = [
     ]
 
 COVERAGE_EXTRA_ARGS = [
-        '--cover-package=rdflib',
+        '--cover-package=rdfextras',
         '--cover-inclusive',
     ]
 
 DEFAULT_ATTRS = [] # ['!known_issue', '!sparql']
 
-DEFAULT_DIRS = ['test', 'rdflib']
+DEFAULT_DIRS = ['test', 'rdfextras']
 
 
 if __name__ == '__main__':
