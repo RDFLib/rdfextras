@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 """
 A Describer is a stateful utility for creating RDF statements in a
 semi-declarative manner. It has methods for creating literal values, rel and
@@ -91,7 +91,7 @@ Full example in the ``to_rdf`` method below::
     ... </rdf:RDF>
     ... ''')
     >>>
-    >>> from rdflib.graphutils import isomorphic
+    >>> from rdflib.compare import isomorphic
     >>> isomorphic(person_graph, expected)
     True
 

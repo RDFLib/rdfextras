@@ -3,6 +3,7 @@ import unittest
 import rdflib
 
 from rdflib import term
+import rdflib.compare
 from rdflib.graph import Graph
 
 rdflib.plugin.register('sparql', rdflib.query.Processor,

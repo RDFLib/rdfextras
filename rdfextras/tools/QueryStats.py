@@ -1,11 +1,11 @@
 import rdflib
-from rdflib.sparql.bison import Parse
-from rdflib.sparql.bison.Query import *
-from rdflib.sparql.bison.GraphPattern import *
-from rdflib.sparql.bison.Operators import *
-from rdflib.sparql.bison.FunctionLibrary import *
-from rdflib.sparql.bison.Util import ListRedirect
-from rdflib.sparql.bison.Expression import *
+from rdfextras.sparql.bison import Parse
+from rdfextras.sparql.bison.Query import *
+from rdfextras.sparql.bison.GraphPattern import *
+from rdfextras.sparql.bison.Operators import *
+from rdfextras.sparql.bison.FunctionLibrary import *
+from rdfextras.sparql.bison.Util import ListRedirect
+from rdfextras.sparql.bison.Expression import *
 from rdflib.Variable import Variable
 from rdflib.Literal import Literal
 
