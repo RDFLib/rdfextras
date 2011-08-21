@@ -60,7 +60,7 @@ def test_generator():
 
         yield assert_equal, name, sparql, list(res), expected
 
-test_generator.known_issue = True
+
 test_generator.sparql = True
 
 #=======================================================================

@@ -3,6 +3,12 @@ from rdflib.term import Literal
 from StringIO import StringIO
 import unittest
 
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 test_data = """
 @prefix foaf:       <http://xmlns.com/foaf/0.1/> .
@@ -19,7 +25,6 @@ WHERE { [ a :Person ; :name ?name ] }"""
 
 class TestSparqlJsonResults(unittest.TestCase):
 
-    known_issue = True
     sparql = True
 
     def setUp(self):

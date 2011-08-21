@@ -1,6 +1,6 @@
 from rdfextras.sparql import parser, components
 from rdflib.term import Literal, URIRef, Variable, BNode
-from rdflib.namespace import RDF
+from rdflib.namespace import RDF, XSD
 
 from nose import tools, with_setup
 
@@ -47,9 +47,9 @@ match_definitions = [
     (parser.NumericLiteral,
       [
         ('0', Literal(0)),
-        ('3.1415', Literal(3.1415)),
+        ('3.1415', Literal(3.1415, datatype=XSD.decimal)),
         ('+901', Literal(901)),
-        ('-9.8e-2', Literal(-9.8e-2)),
+        ('-9.8e-2', Literal(-9.8e-2, datatype=XSD.double)),
       ]),
     (parser.BooleanLiteral,
       [

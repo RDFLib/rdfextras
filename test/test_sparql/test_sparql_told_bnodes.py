@@ -21,6 +21,7 @@ i.e. using bnode IDs in filter expressions like done here is not meant to work
 
 class TestSPARQLToldBNodes(unittest.TestCase):
 
+    known_issue=True
     sparql = True
 
     def setUp(self):

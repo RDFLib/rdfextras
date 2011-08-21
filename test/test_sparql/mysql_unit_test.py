@@ -66,6 +66,9 @@ ex:interval3 ptrec:hasDateTimeMax "2008-01-01"^^xsd:date .
 #involves a comparison that requires the lexical value of a term
 #(not just its hash as is the case with a simple equality comparison)
 class TestOPTVariableCorrelationTest(AbstractSPARQLUnitTestCase):
+
+    known_issue=True
+
     TEST_FACT=StringIO(BROKEN_OPTIONAL_DATA)
     TEST_FACT_FORMAT = 'n3'
     def test_OPT_FILTER(self):

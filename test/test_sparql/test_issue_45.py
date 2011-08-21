@@ -6,6 +6,12 @@ from rdfextras.sparql import algebra
 
 from StringIO import StringIO
 
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 class TestSparqlASK(unittest.TestCase):
     def setUp(self):
         self.graph = Graph()
@@ -33,8 +39,6 @@ class TestSparqlASK(unittest.TestCase):
         """
         res = self.graph.query('ASK { <http://goonmill.org/2007/skill.n3#bar> a <http://goonmill.org/2007/skill.n3#Foo> } ')
         self.assertEquals(res.askAnswer, True, "The answer should have been that the triple was found")
-
-    test_ask_true.known_issue = True
 
     def test_ask_false(self):
         """
