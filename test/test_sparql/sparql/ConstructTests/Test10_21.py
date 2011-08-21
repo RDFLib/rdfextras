@@ -15,9 +15,9 @@ from testSPARQL import ns_vcard
 from testSPARQL import ns_person
 
 from rdflib.Literal     import Literal
-from rdflib.sparql.sparqlOperators import lt, ge
+from rdfextras.sparql.sparqlOperators import lt, ge
 import datetime
-from rdflib.sparql.graphPattern import GraphPattern
+from rdfextras.sparql.graphPattern import GraphPattern
 
 thresholdDate = datetime.date(2005,01,01)
 

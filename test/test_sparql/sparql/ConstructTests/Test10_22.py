@@ -16,10 +16,10 @@ from testSPARQL import ns_person
 
 from rdflib.Literal     import Literal
 from rdflib import BNode
-from rdflib.sparql.sparql import PatternBNode
-from rdflib.sparql.sparqlOperators import lt, ge
+from rdfextras.sparql.sparql import PatternBNode
+from rdfextras.sparql.sparqlOperators import lt, ge
 import datetime
-from rdflib.sparql.graphPattern import GraphPattern
+from rdfextras.sparql.graphPattern import GraphPattern
 
 thresholdDate = datetime.date(2005,01,01)
 rdfData = """<?xml version="1.0" encoding="UTF-8"?>

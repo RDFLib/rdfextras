@@ -108,7 +108,7 @@ if __name__ == "__main__":
         op.error("options -l/--liveDB and -f/--facts are mutually exclusive!")    
     
     #SPARQL queries w/out GRAPH operators should range over all named graphs
-    from rdflib.sparql import algebra
+    from rdfextras.sparql import algebra
     algebra.DAWG_DATASET_COMPLIANCE = False
     
     #We setup a global store.  A store is what a Graph instance uses to manage the persistence of RDF statements

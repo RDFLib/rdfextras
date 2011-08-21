@@ -46,7 +46,7 @@ from testSPARQL import ns_book
 
 from rdflib.Literal     import Literal
 
-from rdflib.sparql.graphPattern import GraphPattern
+from rdfextras.sparql.graphPattern import GraphPattern
 
 select      = ["?x", "?name"]
 pattern     = GraphPattern([("?x", ns_foaf["name"],"?name")])

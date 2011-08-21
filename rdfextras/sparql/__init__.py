@@ -18,7 +18,7 @@ SPARQL implementation on top of RDFLib
 
 Implementation of the `W3C SPARQL <http://www.w3.org/TR/rdf-sparql-query/>`_ 
 language (version April 2005). The basic class here is supposed to be a 
-superclass of rdflib.sparql.graph; it has been separated only for 
+superclass of rdfextras.sparql.graph; it has been separated only for 
 a better maintainability.
 
 There is a separate

@@ -11,14 +11,14 @@ import sys, os, time, datetime
 
 from rdflib.constants   import RDFNS  as ns_rdf
 from rdflib.constants   import RDFSNS as ns_rdfs
-#from rdflib.sparql import ns_dc   as ns_dc
-#from rdflib.sparql import ns_owl  as ns_owl
+#from rdfextras.sparql import ns_dc   as ns_dc
+#from rdfextras.sparql import ns_owl  as ns_owl
 
-from rdflib.sparql.sparql import type_integer
-from rdflib.sparql.sparql import type_double
-from rdflib.sparql.sparql import type_float
-from rdflib.sparql.sparql import type_decimal
-from rdflib.sparql.sparql import type_dateTime
+from rdfextras.sparql.sparql import type_integer
+from rdfextras.sparql.sparql import type_double
+from rdfextras.sparql.sparql import type_float
+from rdfextras.sparql.sparql import type_decimal
+from rdfextras.sparql.sparql import type_dateTime
 
 from rdflib.Namespace import Namespace
 

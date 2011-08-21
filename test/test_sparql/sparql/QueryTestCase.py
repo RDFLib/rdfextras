@@ -11,7 +11,7 @@ class QueryTestCase(unittest.TestCase):
         pass
 
     def testUnicodeString(self):
-        from rdflib.sparql.parser import parse
+        from rdfextras.sparql.parser import parse
         from cStringIO import StringIO
 
         q = \

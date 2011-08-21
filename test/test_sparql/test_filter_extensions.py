@@ -25,7 +25,7 @@ NUMERIC_TYPES = [type_uri for type_uri in _toPythonMapping if \
 
 def func_even(a):
     # Should this be required, or be done automatically?
-    from rdflib.sparql.sparqlOperators import getValue
+    from rdfextras.sparql.sparqlOperators import getValue
     value = getValue(a)
 
     if isinstance(value, Literal) and value.datatype in NUMERIC_TYPES:

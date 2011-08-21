@@ -592,7 +592,7 @@ class RDFTerm(object):
 class Resource(RDFTerm):
     """
     Represents a sigle resource in a triple pattern.  It consists of an identifier
-    (URIRef or BNode) and a list of rdflib.sparql.bison.Triples.PropertyValue instances
+    (URIRef or BNode) and a list of rdfextras.sparql.bison.Triples.PropertyValue instances
     """
     def __init__(self,identifier=None,propertyValueList=None):
         self.identifier = identifier is not None and identifier or BNode()

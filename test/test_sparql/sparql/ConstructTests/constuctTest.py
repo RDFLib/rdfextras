@@ -16,7 +16,7 @@ from testSPARQL import ns_foaf
 from testSPARQL import ns_vcard
 from testSPARQL import ns_person
 
-from rdflib.sparql import sparqlGraph
+from rdfextras.sparql import sparqlGraph
 from rdflib.FileInputSource import FileInputSource
 
 tests = {
