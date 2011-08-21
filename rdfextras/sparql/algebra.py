@@ -120,8 +120,11 @@ def ReduceToAlgebra(left,right):
                         return Join(LJright,rightTriples)
                     else:
                         # LeftJoin({},right) => {}
-                        #see http://lists.w3.org/Archives/Public/public-rdf-dawg/2007AprJun/0046.html
-                        return EmptyGraphPatternExpression()
+                        rightTriples = ReduceGraphPattern(right,prolog)
+                        return Join(reduce(ReduceToAlgebra,
+                                                    right.nonTripleGraphPattern.graphPatterns,
+                                                    None),
+                                    rightTriples)
                                             
                 elif isinstance(right.nonTripleGraphPattern,
                                 ParsedAlternativeGraphPattern):
@@ -193,8 +196,9 @@ def ReduceToAlgebra(left,right):
                                                None))
                     else:
                         # LeftJoin({},right)
-                        #see - http://lists.w3.org/Archives/Public/public-rdf-dawg/2007AprJun/0046.html
-                        return EmptyGraphPatternExpression()
+                        return reduce(ReduceToAlgebra,
+                                      right.nonTripleGraphPattern.graphPatterns,
+                                      None)
                 elif isinstance(right.nonTripleGraphPattern,
                                 ParsedAlternativeGraphPattern):
                     #right = Union(..)
