@@ -344,20 +344,20 @@ if DEBUG:
 
 # NumericLiteral:
 #
-# TODO: sort this out so that xsd:decimals and xsd:floats are properly
-# segregated.
 EXPONENT_re = r'(?:[eE][+-]?[0-9]+)'
 INT_re = r'[+-]?[0-9]+'
 INT = Regex(INT_re).setParseAction(composition(
   [refer_component(int), rdflib.term.Literal]))
 INTEGER = Regex(r'[0-9]+').setParseAction(composition(
   [refer_component(int), rdflib.term.Literal]))
-FLOAT_re = (r'[+-]?(?:(?:[0-9]+\.[0-9]*%s?)|' +
-                    r'(?:\.[0-9]+%s?)|(?:[0-9]+%s))') % (
+DECIMAL_re = r'[+-]?(?:[0-9]+\.[0-9]*|\.[0-9]+)'
+FLOAT_re = r'[+-]?(?:[0-9]+\.[0-9]*%s|\.[0-9]+%s|[0-9]+%s)' % (
   (EXPONENT_re,) * 3)
+DECIMAL = Regex(DECIMAL_re).setParseAction(composition(
+        [refer_component(float), lambda x: rdflib.term.Literal(x, datatype=XSD.decimal)]))
 FLOAT = Regex(FLOAT_re).setParseAction(composition(
-  [refer_component(float), rdflib.term.Literal]))
-NumericLiteral = (FLOAT | INT)
+  [refer_component(float), lambda x: rdflib.term.Literal(x, datatype=XSD.double)]))
+NumericLiteral = (FLOAT | DECIMAL | INT)
 if DEBUG:
     NumericLiteral.setName('NumericLiteral')
 

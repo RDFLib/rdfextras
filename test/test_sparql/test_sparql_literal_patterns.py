@@ -1,6 +1,6 @@
 #=======================================================================
-from rdflib.graph import ConjunctiveGraph
-from rdflib.term import URIRef
+from rdflib import ConjunctiveGraph
+from rdflib import URIRef
 from StringIO import StringIO
 
 #=======================================================================
@@ -21,7 +21,8 @@ testRdf = """
     <http://example.org/thing>
         :plain "plain";
         :integer 1;
-        :float 1.1;
+        :float 1.1e0;
+        :decimal 1.1 ; 
         :string "string"^^xsd:string;
         :date "2007-04-28"^^xsd:date;
         rdfs:label "Thing"@en, "Sak"@sv .
@@ -41,7 +42,8 @@ SPARQL = PROLOGUE+" SELECT ?uri WHERE { ?uri %s . } "
 TEST_DATA = [
     ('plain', SPARQL % 't:plain "plain"', [(thing,)]),
     ('integer', SPARQL % 't:integer 1', [(thing,)]),
-    ('float', SPARQL % 't:float 1.1', [(thing,)]),
+    ('decimal', SPARQL % 't:decimal 1.1', [(thing,)]),
+    ('float', SPARQL % 't:float 1.1e0', [(thing,)]),
     ('langlabel_en', SPARQL % 'rdfs:label "Thing"@en', [(thing,)]),
     ('langlabel_sv', SPARQL % 'rdfs:label "Sak"@sv', [(thing,)]),
     ('string', SPARQL % 't:string "string"^^xsd:string', [(thing,)]),

@@ -57,7 +57,7 @@ else:
         #test_suite = 'nose.collector',
         #namespace_packages = ['rdfextras'], # TODO: really needed?
         install_requires = [
-            'rdflib >= 3.2-dev',
+            'rdflib >= 3.2.0-dev',
             'pyparsing'
         ],
     )
