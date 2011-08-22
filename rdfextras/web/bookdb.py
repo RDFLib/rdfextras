@@ -33,6 +33,10 @@ bookrdf="""
     dc:creator "J.K. Rowling";
     dc:title "Harry Potter and the Deathly Hallows" .
 
+<http://example.org/book/b\xc3\xb6\xc3\xb6k8> a book:Book ; 
+    dc:creator "Moosy"; 
+    dc:title "M\xc3\xb6se bite can be very nasty." .
+
 _:RDhmeZZC16 vcard:Family "Rowling";
     vcard:Given "Joanna" .
 
