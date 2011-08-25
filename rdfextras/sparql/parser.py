@@ -243,7 +243,7 @@ PN_CHARS_BASE_re = '[a-zA-Z]'
 PN_CHARS_U_re = PN_CHARS_BASE_re + '|_'
 PN_CHARS_re = PN_CHARS_U_re + '|-|[0-9]'
 PN_PREFIX_re = (PN_CHARS_BASE_re +
-  '(?:(?:' + PN_CHARS_re + '\\.)*' + PN_CHARS_re + ')?')
+  '(?:(?:' + PN_CHARS_re + '|\\.)*' + '(?:'+PN_CHARS_re + '))?')
 PN_PREFIX = Regex(PN_PREFIX_re)
 
 PNAME_NS = Combine(Optional(PN_PREFIX, '') + COLON)
