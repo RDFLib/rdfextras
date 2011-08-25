@@ -25,6 +25,7 @@ testRdf = """
         :decimal 1.1 ; 
         :string "string"^^xsd:string;
         :date "2007-04-28"^^xsd:date;
+        :escape "a \\"test\\"";
         rdfs:label "Thing"@en, "Sak"@sv .
 """
 graph = ConjunctiveGraph()
@@ -48,6 +49,7 @@ TEST_DATA = [
     ('langlabel_sv', SPARQL % 'rdfs:label "Sak"@sv', [(thing,)]),
     ('string', SPARQL % 't:string "string"^^xsd:string', [(thing,)]),
     ('date', SPARQL % 't:date "2007-04-28"^^xsd:date', [(thing,)]),
+    ('escape', SPARQL % 't:escape "a \\"test\\""', [(thing,)])
 ]
 
 def assert_equal(name, sparql, real, expected):
