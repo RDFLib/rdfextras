@@ -314,11 +314,66 @@ def lang(a) :
             val = bindings[v]
             if val == None:
                 return ""
+            elif val.language==None:
+                return ""
             else :
                 return val.language
         except :
             return ""
     return f
+
+def langmatches(lang, _range) :
+    lv = getValue(lang)
+    rv = getValue(_range)
+    def f(bindings) :
+        if lv == None: return False
+        if rv == None: return False
+        return _langMatch(lv(bindings), rv(bindings))
+    return f
+
+def _langMatch(lang, _range) :
+	"""
+
+        Borrowed from http://dev.w3.org/2004/PythonLib-IH/RDFClosure/RestrictedDatatype.py
+        Author: Ivan Herman
+
+	Implementation of the extended filtering algorithm, as defined in point 3.3.2,
+	of U{RFC 4647<http://www.rfc-editor.org/rfc/rfc4647.txt>}, on matching language ranges and language tags.
+	Needed to handle the C{rdf:PlainLiteral} datatype.
+	@param range: language range
+	@param lang: language tag
+	@rtype: boolean
+	"""
+	def _match(r,l) :
+		"""Matching of a range and language item: either range is a wildcard or the two are equal
+		@param r: language range item
+		@param l: language tag item
+		@rtype: boolean
+		"""
+		return r == '*' or r == l
+	
+	rangeList = _range.strip().lower().split('-')
+	langList  = lang.strip().lower().split('-')
+	if not _match(rangeList[0], langList[0]) : return False
+	
+	rI = 1
+	rL = 1
+	while rI < len(rangeList) :
+		if rangeList[rI] == '*' :
+			rI += 1
+			continue
+		if rL >= len(langList) :
+			return False
+		if _match(rangeList[rI], langList[rL]) :
+			rI += 1
+			rL += 1
+			continue
+		if len(langList[rL]) == 1 :
+			return False
+		else :
+			rL += 1
+			continue
+	return True
 
 ##
 # Return the datatype URI of a literal
