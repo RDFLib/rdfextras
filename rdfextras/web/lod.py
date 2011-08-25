@@ -35,7 +35,7 @@ LABEL_PROPERTIES=[rdflib.RDFS.label,
 
 def resolve(r):
     """
-    return (realurl, localurl, label)
+    return {url, realurl, localurl, label}
     """
     if isinstance(r, rdflib.Literal): 
         return { 'url': None, 'realurl': None, 'localurl': None, 'label': get_label(r) }
@@ -82,6 +82,7 @@ def label_to_url(label):
 def detect_types(graph): 
     types={}
     types[rdflib.RDFS.Class]=localname(rdflib.RDFS.Class)
+    types[rdflib.RDF.Property]=localname(rdflib.RDF.Property)
     for t in set(graph.objects(None, rdflib.RDF.type)):
         types[t]=localname(t)
 
