@@ -243,7 +243,7 @@ PN_CHARS_BASE_re = '[a-zA-Z]'
 PN_CHARS_U_re = PN_CHARS_BASE_re + '|_'
 PN_CHARS_re = PN_CHARS_U_re + '|-|[0-9]'
 PN_PREFIX_re = (PN_CHARS_BASE_re +
-  '(?:(?:' + PN_CHARS_re + '\\.)*' + PN_CHARS_re + ')?')
+  '(?:(?:' + PN_CHARS_re + '|\\.)*' + '(?:'+PN_CHARS_re + '))?')
 PN_PREFIX = Regex(PN_PREFIX_re)
 
 PNAME_NS = Combine(Optional(PN_PREFIX, '') + COLON)
@@ -335,10 +335,27 @@ LANGTAG = AT + Regex(PN_CHARS_BASE_re + '+' +
                      regex_group('-[a-zA-Z0-9]+') + '*')
 
 DOUBLE_HAT = Suppress('^^')
+
+unescape_dict = ((r'\t', '\t'),
+                 (r'\n', '\n'),
+                 (r'\r', '\r'),
+                 (r'\b', '\b'),
+                 (r'\f', '\f'),
+                 (r'\"', '"'),
+                 (r"\'", "'"),
+                 (r'\\', '\\'))  # must be done last!
+
+
+def unescaped_literal(value, dType):
+    for (frm, to) in unescape_dict:
+        value = value.replace(frm, to)
+
+    return rdflib.term.Literal(value, dType)
+
 RDFLiteral = ((String + DOUBLE_HAT + IRIref).setParseAction(
     refer_component(components.ParsedDatatypedLiteral)) |
   (String + Optional(LANGTAG, None)).setParseAction(
-    refer_component(rdflib.term.Literal)))
+    refer_component(unescaped_literal)))
 if DEBUG:
     RDFLiteral.setName('RDFLiteral')
 

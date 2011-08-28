@@ -2,6 +2,7 @@ import re
 import rdflib
 import warnings
 import urllib2
+import collections
 
 from endpoint import endpoint as lod
 
@@ -34,7 +35,7 @@ LABEL_PROPERTIES=[rdflib.RDFS.label,
 
 def resolve(r):
     """
-    return (realurl, localurl, label)
+    return {url, realurl, localurl, label}
     """
     if isinstance(r, rdflib.Literal): 
         return { 'url': None, 'realurl': None, 'localurl': None, 'label': get_label(r) }
@@ -81,6 +82,7 @@ def label_to_url(label):
 def detect_types(graph): 
     types={}
     types[rdflib.RDFS.Class]=localname(rdflib.RDFS.Class)
+    types[rdflib.RDF.Property]=localname(rdflib.RDF.Property)
     for t in set(graph.objects(None, rdflib.RDF.type)):
         types[t]=localname(t)
 
@@ -101,13 +103,13 @@ def reverse_types(types):
 
             
 def find_resources(): 
-    resources={}
+    resources=collections.defaultdict(dict)
     graph=lod.config["graph"]
     
     for t in lod.config["types"]: 
         resources[t]={}
         for x in graph.subjects(rdflib.RDF.type, t): 
-            resources[t][x]=localname(x)
+            resources[t][x]=_quote(localname(x))
 
     #resources[rdflib.RDFS.Class]=lod.config["types"].copy()
 
@@ -127,9 +129,14 @@ def reverse_resources(resources):
     return rresources
 
 
+def _quote(l): 
+    if isinstance(l,unicode): 
+        l=l.encode("utf-8")
+    return urllib2.quote(l, safe="")
+        
 
 def get_resource(label, type_): 
-    label=urllib2.quote(label, safe="")
+    label=_quote(label)
     if type_ and type_ not in lod.config["rtypes"]:
         return "No such type_ %s"%type_, 404
     try: 

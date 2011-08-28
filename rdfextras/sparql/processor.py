@@ -1,4 +1,3 @@
-from rdfextras import sparql
 
 import rdfextras.sparql.parser
 
@@ -26,7 +25,7 @@ class Processor(Processor):
 
         assert isinstance(strOrQuery, (basestring, Query)),"%s must be a string or an rdfextras.sparql.components.Query instance"%strOrQuery
         if isinstance(strOrQuery, basestring):
-            strOrQuery = sparql.parser.parse(strOrQuery)
+            strOrQuery = rdfextras.sparql.parser.parse(strOrQuery)
         if not strOrQuery.prolog:
             strOrQuery.prolog = Prolog(None, [])
             strOrQuery.prolog.prefixBindings.update(initNs)
