@@ -73,8 +73,8 @@ def toProperty(label):
 
 def index(l, i): 
     """return a set of indexes from a list
-    >>> index([1,2,3],(0,2)] 
-    (1,3)
+    >>> index([1,2,3],(0,2))
+    (1, 3)
     """
     return tuple([l[x] for x in i])
 

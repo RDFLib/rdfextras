@@ -4,9 +4,19 @@ from rdflib.namespace import Namespace,RDF,RDFS
 from rdflib.term import URIRef
 from rdflib.store import Store
 from cStringIO import StringIO
-from rdflib.graph import Graph,ReadOnlyGraphAggregate,ConjunctiveGraph
-import sys
-from pprint import pprint
+from rdflib import Graph
+
+import rdflib
+rdflib.plugin.register('sparql', rdflib.query.Processor,
+                       'rdfextras.sparql.processor', 'Processor')
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
+try:
+    set
+except NameError:
+    from sets import Set as set
+
 
 testGraph1N3="""
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -62,22 +72,23 @@ class AdvancedTests(unittest.TestCase):
         self.testGraph.parse(StringIO(testGraph1N3),format='n3')
         
     def testNamedGraph(self):
-        from sets import Set
+        # I am not sure this is the behaviour we DO want. 
+        # see http://code.google.com/p/rdfextras/issues/detail?id=26
         OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
         rt =  self.testGraph.query(sparqlQ4)
-        self.assertEquals(Set(rt),Set([OWL_NS.OntologyProperty,OWL_NS.Class,OWL_NS.Ontology,OWL_NS.AnnotationProperty,RDF.Property,RDFS.Class]))
+        self.assertEquals(set(rt),set((x,) for x in [OWL_NS.DatatypeProperty, OWL_NS.ObjectProperty, OWL_NS.OntologyProperty,OWL_NS.Class,OWL_NS.Ontology,OWL_NS.AnnotationProperty,RDF.Property,RDFS.Class]))
 
     def testScopedBNodes(self):
         rt =  self.testGraph.query(sparqlQ1)
-        self.assertEquals(list(rt)[0],URIRef("http://test/foo"))
+        self.assertEquals(list(rt)[0][0],URIRef("http://test/foo"))
 
     def testCollectionContentWithinAndWithout(self):
         rt =  self.testGraph.query(sparqlQ3)
-        self.assertEquals(list(rt)[0],URIRef("http://test/bar"))
+        self.assertEquals(list(rt)[0][0],URIRef("http://test/bar"))
 
     def testCollectionAsObject(self):
         rt =  self.testGraph.query(sparqlQ2)
-        self.assertEquals(list(rt)[0],URIRef("http://test/foo"))
+        self.assertEquals(list(rt)[0][0],URIRef("http://test/foo"))
         self.assertEquals(1,len(rt))
 
 if __name__ == '__main__':

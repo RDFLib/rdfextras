@@ -29,8 +29,9 @@ class Query(unittest.TestCase):
     def testQueryPlus(self):
         graph = ConjunctiveGraph()
         graph.parse(StringIO(test_data), format="n3")
-        result_json = graph.query(test_query).serialize(format='json')
-        self.failUnless(result_json.find(correct) > 0)
+        results = graph.query(test_query)
+        
+        self.failUnless(results.bindings[0]["name"]=="Alice")
 
 if __name__ == "__main__":
     unittest.main()

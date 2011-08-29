@@ -5,7 +5,7 @@ SELECT ?s
 WHERE { ?s ?p ?o }"""
 
 def test_bad_sparql():
-    from rdflib.Graph import Graph
+    from rdflib import Graph
     Graph().query(BAD_SPARQL)
 test_bad_sparql.unstable = True
 
