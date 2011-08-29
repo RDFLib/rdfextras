@@ -1419,7 +1419,11 @@ class SPARQLQueryResult(Result):
                 self.vars=allVars
             else: 
                 self.vars=selectionF
-            self.bindings=[ dict( [ (v, b.get(v)) for v in self.vars ] ) for b in topUnion ]
+            # self.bindings=[ dict( [ (v, b.get(v)) for v in self.vars ] ) for b in topUnion ]
+            if len(self.vars)==1:
+                self.bindings=[ dict( zip(self.vars,[b]) ) for b in result ]
+            else:
+                self.bindings=[ dict( zip(self.vars,b) ) for b in result ]
             # remove rows where all bindings are None
             self.bindings=filter(lambda x: x.values()!=[None]*len(x), self.bindings)
         else: 
