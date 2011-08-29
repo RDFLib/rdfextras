@@ -61,7 +61,9 @@ def index():
     return render_template("index.html")
 
 def serve(graph_,debug=False):
-    get(graph_).run(debug=debug)
+    a=get(graph_)
+    a.run(debug=debug)
+    return a
 
 def get(graph_):
     endpoint.config["graph"]=graph_
