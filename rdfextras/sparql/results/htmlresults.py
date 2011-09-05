@@ -14,6 +14,13 @@ def term_to_string(ctx, t):
         except: 
             l=t
         return Markup(u"<a href='%s'>%s</a>"%(t,l))
+    elif isinstance(t, rdflib.Literal): 
+        if t.language: 
+            return '"%s"@%s'%(t,t.language)
+        elif t.datatype: 
+            return '"%s"^^<%s>'%(t,t.datatype)
+        else:
+            return '"%s"'%t
     return t
 
 env=Environment()

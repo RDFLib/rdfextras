@@ -1,5 +1,5 @@
 try:
-    from flask import Flask, render_template, request, make_response, Markup
+    from flask import Flask, render_template, request, make_response, Markup, g
 except:
     raise Exception("Flask not found - install with 'easy_install flask'")
 
@@ -44,7 +44,7 @@ def query():
 
         # default-graph-uri
 
-        results=endpoint.config["graph"].query(q).serialize(format=format)
+        results=g.graph.query(q).serialize(format=format)
         if format=='html':
             response=make_response(render_template("results.html", results=Markup(unicode(results,"utf-8")), q=q))
         else:
@@ -64,6 +64,14 @@ def serve(graph_,debug=False):
     a=get(graph_)
     a.run(debug=debug)
     return a
+
+@endpoint.before_request
+def _set_graph():
+    """ This sets the g.graph if we are using a static graph
+    set in the configuration"""
+    if "graph" in endpoint.config and endpoint.config["graph"]!=None: 
+        g.graph=endpoint.config["graph"]
+
 
 def get(graph_):
     endpoint.config["graph"]=graph_

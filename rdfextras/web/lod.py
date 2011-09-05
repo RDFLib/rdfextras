@@ -6,7 +6,7 @@ import collections
 
 from endpoint import endpoint as lod
 
-from flask import render_template, request, make_response, redirect, url_for
+from flask import render_template, request, make_response, redirect, url_for, g
 
 import mimeutils 
 
@@ -35,23 +35,26 @@ LABEL_PROPERTIES=[rdflib.RDFS.label,
 
 def resolve(r):
     """
-    return {url, realurl, localurl, label}
+    URL is the potentially local URL
+    realurl is the one used in the data. 
+
+    return {url, realurl, label}
     """
     if isinstance(r, rdflib.Literal): 
-        return { 'url': None, 'realurl': None, 'localurl': None, 'label': get_label(r) }
+        return { 'url': None, 'realurl': None, 'label': get_label(r), 'lang': r.language }
         
     localurl=None
     if lod.config["types"]==[None]: 
-        if (r, rdflib.RDF.type, None) in lod.config["graph"]:
-            localurl=url_for("resource", label=localname(r))
+        if (r, rdflib.RDF.type, None) in g.graph:
+            localurl=url_for("resource", label=urllib2.unquote(localname(r)))
     else:
-        for t in lod.config["graph"].objects(r,rdflib.RDF.type):
+        for t in g.graph.objects(r,rdflib.RDF.type):
             if t in lod.config["types"]: 
                 localurl=url_for("resource", type_=lod.config["types"][t], label=urllib2.unquote(localname(r)))
                 break
     url=r
     if localurl: url=localurl
-    return { 'url': url, 'realurl': r, 'localurl': url, 'label': get_label(r) }
+    return { 'url': url, 'realurl': r, 'label': get_label(r) }
 
 def localname(t): 
     """qname computer is not quite what we want"""
@@ -66,11 +69,11 @@ def get_label(t):
     if isinstance(t, rdflib.Literal): return unicode(t)
     for l in lod.config["label_properties"]:
         try: 
-            return lod.config["graph"].objects(t,l).next()
+            return g.graph.objects(t,l).next()
         except: 
             pass
     try: 
-        #return lod.config["graph"].namespace_manager.compute_qname(t)[2]
+        #return g.graph.namespace_manager.compute_qname(t)[2]
         return urllib2.unquote(localname(t))
     except: 
         return t
@@ -102,9 +105,8 @@ def reverse_types(types):
     return rtypes
 
             
-def find_resources(): 
+def find_resources(graph): 
     resources=collections.defaultdict(dict)
-    graph=lod.config["graph"]
     
     for t in lod.config["types"]: 
         resources[t]={}
@@ -149,7 +151,7 @@ def get_resource(label, type_):
 @lod.route("/download/<format_>")
 def download(format_):
     format_,mimetype_=mimeutils.format_to_mime(format_)
-    response=make_response(lod.config["graph"].serialize(format=format_))
+    response=make_response(g.graph.serialize(format=format_))
 
     response.headers["Content-Type"]=mimetype_
 
@@ -162,11 +164,11 @@ def data(label, format_, type_=None):
     r=get_resource(label, type_)
     if isinstance(r,tuple): # 404
         return r
-    #graph=lod.config["graph"].query('DESCRIBE %s'%r.n3())
+    #graph=g.graph.query('DESCRIBE %s'%r.n3())
     # DESCRIBE <uri> is broken. 
     # http://code.google.com/p/rdfextras/issues/detail?id=25
-    graph=lod.config["graph"].query('CONSTRUCT { %s ?p ?o . } WHERE { %s ?p ?o } '%(r.n3(), r.n3())).graph
-    graph+=lod.config["graph"].query('CONSTRUCT { ?s ?p %s . } WHERE { ?s ?p %s } '%(r.n3(), r.n3()))
+    graph=g.graph.query('CONSTRUCT { %s ?p ?o . } WHERE { %s ?p ?o } '%(r.n3(), r.n3())).graph
+    graph+=g.graph.query('CONSTRUCT { ?s ?p %s . } WHERE { ?s ?p %s } '%(r.n3(), r.n3()))
 
     format_,mimetype_=mimeutils.format_to_mime(format_)
     response=make_response(graph.serialize(format=format_))
@@ -182,18 +184,17 @@ def page(label, type_=None):
     if isinstance(r,tuple): # 404
         return r
 
-    outprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in lod.config["graph"].predicate_objects(r) 
-               if x[0]!=rdflib.RDF.type])
-    types=sorted([ resolve(x) for x in lod.config["graph"].objects(r,rdflib.RDF.type)])
+    outprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in g.graph.predicate_objects(r) if x[0]!=rdflib.RDF.type])
+    types=sorted([ resolve(x) for x in g.graph.objects(r,rdflib.RDF.type)])
     
-    inprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in lod.config["graph"].subject_predicates(r)])
+    inprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in g.graph.subject_predicates(r)])
     
     return render_template("lodpage.html", 
                            outprops=outprops, 
                            inprops=inprops, 
                            label=get_label(r),
                            urilabel=label,
-                           graph=lod.config["graph"],
+                           graph=g.graph,
                            type_=type_, 
                            types=types,
                            resource=r)
@@ -242,27 +243,29 @@ def index():
             key=lambda x: x.get('label'))
         if len(lod.config["resources"][turl])>10:
             resources[turl].append({ 'url': t["url"], 'label': "..." })
+        t["count"]=len(lod.config["resources"][turl])
     
     return render_template("lodindex.html", 
                            types=types, 
                            resources=resources,
-                           graph=lod.config["graph"])
+                           graph=g.graph)
 
 ##################
 
 def serve(graph_,debug=False):
     get(graph_).run(debug=debug)
 
-def get(graph_, types='auto',image_patterns=["\.[png|jpg|gif]$"], 
+
+def get(graph, types='auto',image_patterns=["\.[png|jpg|gif]$"], 
         label_properties=LABEL_PROPERTIES, 
         hierarchy_properties=[ rdflib.RDFS.subClassOf, rdflib.RDFS.subPropertyOf ] ):
 
-    lod.config["graph"]=graph_
+    lod.config["graph"]=graph
     lod.config["label_properties"]=label_properties
     lod.config["hierarchy_properties"]=hierarchy_properties
     
     if types=='auto':
-        lod.config["types"]=detect_types(graph_)
+        lod.config["types"]=detect_types(graph)
     elif types==None: 
         lod.config["types"]=[None]
     else: 
@@ -270,7 +273,7 @@ def get(graph_, types='auto',image_patterns=["\.[png|jpg|gif]$"],
 
     lod.config["rtypes"]=reverse_types(lod.config["types"])
 
-    lod.config["resources"]=find_resources()
+    lod.config["resources"]=find_resources(graph)
     lod.config["rresources"]=reverse_resources(lod.config["resources"])
     
     return lod
@@ -308,12 +311,12 @@ if __name__=='__main__':
     
     import sys, codecs
     if len(sys.argv)>1:
-        g=rdflib.Graph()
+        gr=rdflib.Graph()
         for f in sys.argv[1:]:
             sys.stderr.write("Loading %s\n"%f)
-            g.load(f, format=format_from_filename(f))
+            gr.load(f, format=format_from_filename(f))
     else:
         import bookdb
-        g=bookdb.bookdb
+        gr=bookdb.bookdb
     
-    serve(g, True)
+    serve(gr, True)
