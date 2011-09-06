@@ -42,18 +42,27 @@ See <http://nedbatchelder.com/code/modules/coverage.html> for details.
 
 NOSE_ARGS = [
         '--where=./',
+        '--with-nosexunit',
+        #'--enable-cover',
+        #'--enable-audit',
+        #'--extra-include=rdfextras',
+        #'--source-folder=rdfextras',
         '--with-doctest',
         '--doctest-extension=.doctest',
         '--doctest-tests',
-#        '--with-EARL',
+        # '--trim-errors',
+        # '--with-EARL',
+        #'--with-coverage',
     ]
 
 COVERAGE_EXTRA_ARGS = [
         '--cover-package=rdfextras',
         '--cover-inclusive',
+        '--cover-html',
+        #'--cover-html-dir=coverdata',
     ]
 
-DEFAULT_ATTRS = ['!known_issue'] # ['!known_issue', '!sparql']
+DEFAULT_ATTRS = [] # ['!known_issue', '!sparql']
 
 DEFAULT_DIRS = ['test', 'rdfextras']
 

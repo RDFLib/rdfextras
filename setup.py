@@ -20,10 +20,12 @@ config = dict(
                 'rdfextras.parsers',
                 'rdfextras.serializers',
                 'rdfextras.tools',
+                'rdfextras.tools.Client',
                 'rdfextras.sparql',
                 'rdfextras.sparql.results',
                 'rdfextras.store',
-		'rdfextras.web',],
+                'rdfextras.store.FOPLRelationalModel',
+                'rdfextras.web',],
     package_dir = { 'rdfextras.web': 'rdfextras/web' },
     package_data={ 'rdfextras.web': [
             'templates/*.html',
@@ -54,6 +56,17 @@ else:
                 'json-ld = rdfextras.serializers.jsonld:JsonLDSerializer', 
             ],
         },
+)
+
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+else:
+    config.update(
+        extras_require = {
+            "sparql" : ['rdflib >= 3.0', 'pyparsing']
+            },
         #test_suite = 'nose.collector',
         #namespace_packages = ['rdfextras'], # TODO: really needed?
         install_requires = [

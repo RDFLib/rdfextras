@@ -148,7 +148,7 @@ class SPARQLStore(SPARQLWrapper,Store):
     def __init__(self,identifier=None,bNodeAsURI = False):
         super(SPARQLStore, self).__init__(identifier,returnFormat=XML)
         self.bNodeAsURI = bNodeAsURI
-        self.nsBindings={}
+        self.nsBindings = sparqlNsBindings
 
     #Database Management Methods
     def create(self, configuration):
