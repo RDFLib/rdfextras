@@ -26,8 +26,8 @@ from testSPARQL import ns_foaf
 from testSPARQL import ns_ns
 from testSPARQL import ns_book
 
-from rdflib.Literal     import Literal
-from rdfextras.sparql.graphPattern import GraphPattern
+from rdflib import Literal
+from rdfextras.sparql.graph import GraphPattern
 rdfData ="""<?xml version="1.0" encoding="UTF-8"?>
 <rdf:RDF
    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"

@@ -11,7 +11,7 @@ from testSPARQL import ns_dc
 from testSPARQL import ns_dc0
 from testSPARQL import ns_foaf
 
-from rdfextras.sparql.graphPattern import GraphPattern
+from rdfextras.sparql.graph import GraphPattern
 
 
 # Careful to keep the <?xml declaration at the very beginning, otherwise the parser will fail...

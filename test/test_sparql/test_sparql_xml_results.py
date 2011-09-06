@@ -34,7 +34,7 @@ SELECT ?s ?o WHERE { ?s ?p ?o . }
 expected_fragments = [
     #u"""<sparql:sparql xmlns="http://www.w3.org/2005/sparql-results#"><sparql:head>""",
 
-    u"""</sparql:head><sparql:results>""",
+    u"""</sparql:head><sparql:results distinct="false" ordered="false">""",
 
     u"""<sparql:binding name="s"><sparql:uri>http://example.org/word</sparql:uri></sparql:binding>""",
 
@@ -66,9 +66,9 @@ class TestSparqlXmlResults(unittest.TestCase):
         results = self.graph.query(query)
         result_xml = results.serialize(format='xml')
         result_xml = normalize(result_xml) # TODO: poor mans c14n..
-        print result_xml
+        # print result_xml
         for frag in fragments:
-            print frag
+            # print frag
             self.failUnless(frag in result_xml)
 
 

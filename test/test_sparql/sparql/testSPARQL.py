@@ -9,18 +9,19 @@
 """
 import sys, os, time, datetime
 
-from rdflib.constants   import RDFNS  as ns_rdf
-from rdflib.constants   import RDFSNS as ns_rdfs
-#from rdfextras.sparql import ns_dc   as ns_dc
-#from rdfextras.sparql import ns_owl  as ns_owl
+ns_rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ns_rdfs = "http://www.w3.org/2000/01/rdf-schema#"
 
-from rdfextras.sparql.sparql import type_integer
-from rdfextras.sparql.sparql import type_double
-from rdfextras.sparql.sparql import type_float
-from rdfextras.sparql.sparql import type_decimal
-from rdfextras.sparql.sparql import type_dateTime
+##########################################################################
+# XML Schema datatypes
+type_integer  = "http://www.w3.org/2001/XMLSchema#integer"
+type_double   = "http://www.w3.org/2001/XMLSchema#double"
+type_float    = "http://www.w3.org/2001/XMLSchema#float"
+type_decimal  = "http://www.w3.org/2001/XMLSchema#decimal"
+type_dateTime = "http://www.w3.org/2001/XMLSchema#dateTime"
 
-from rdflib.Namespace import Namespace
+
+from rdflib import Namespace
 
 ns_foaf   = Namespace("http://xmlns.com/foaf/0.1/")
 ns_ns     = Namespace("http://example.org/ns#")

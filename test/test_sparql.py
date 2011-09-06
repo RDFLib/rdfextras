@@ -3,7 +3,6 @@ import unittest
 import rdflib
 
 from rdflib import term
-import rdflib.compare
 from rdflib.graph import Graph
 
 rdflib.plugin.register('sparql', rdflib.query.Processor,
@@ -22,8 +21,8 @@ blank_node = FakeBlankNode()
 
 def create_graph(n3data):
     '''
-    @param n3data: data to create the graph from.
-    @return: rdflib.graph.Graph instance containing parsed graph.
+    :param n3data: data to create the graph from.
+    :return: :class:`~rdflib.graph.Graph` instance containing parsed graph.
     '''
     g = Graph()
     g.parse(data=n3data, format='n3')
@@ -61,7 +60,7 @@ class TestSimpleQueries(unittest.TestCase):
         http://www.w3.org/TR/rdf-sparql-query/#MultipleMatches
         '''
         g = create_graph("""
-        @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+        :prefix foaf:  <http://xmlns.com/foaf/0.1/> .
 
         _:a  foaf:name   "Johnny Lee Outlaw" .
         _:a  foaf:mbox   <mailto:jlow@example.com> .
@@ -89,7 +88,7 @@ class TestSimpleQueries(unittest.TestCase):
         http://www.w3.org/TR/rdf-sparql-query/#BlankNodesInResults
         """
         g = create_graph("""
-        @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+        :prefix foaf:  <http://xmlns.com/foaf/0.1/> .
 
         _:a  foaf:name   "Alice" .
         _:b  foaf:name   "Bob" .
@@ -117,7 +116,7 @@ class TestSimpleQueries(unittest.TestCase):
         """
 
         g = create_graph("""
-        @prefix org:    <http://example.com/ns#> .
+        :prefix org:    <http://example.com/ns#> .
 
         _:a  org:employeeName   "Alice" .
         _:a  org:employeeId     12345 .
@@ -135,15 +134,15 @@ class TestSimpleQueries(unittest.TestCase):
         """)
 
         expected_results = create_graph("""
-        @prefix foaf: <http://xmlns.com/foaf/0.1/> .
-        @prefix org: <http://example.com/ns#> .
+        :prefix foaf: <http://xmlns.com/foaf/0.1/> .
+        :prefix org: <http://example.com/ns#> .
               
         _:x foaf:name "Alice" .
         _:y foaf:name "Bob" .
         """)
         
+        self.assertEqual(results, expected_results)
         
-        self.assertEqual(rdflib.compare.to_isomorphic(results.graph), rdflib.compare.to_isomorphic(expected_results))
 
 class TestRDFLiterals(unittest.TestCase):
     """
@@ -153,10 +152,10 @@ class TestRDFLiterals(unittest.TestCase):
     sparql = True
 
     data = """
-        @prefix dt:   <http://example.org/datatype#> .
-        @prefix ns:   <http://example.org/ns#> .
-        @prefix :     <http://example.org/ns#> .
-        @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+        :prefix dt:   <http://example.org/datatype#> .
+        :prefix ns:   <http://example.org/ns#> .
+        :prefix :     <http://example.org/ns#> .
+        :prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 
         :x   ns:p     "cat"@en .
         :y   ns:p     "42"^^xsd:integer .
@@ -195,9 +194,9 @@ class TestTermConstraints(unittest.TestCase):
     sparql = True
 
     data = """
-    @prefix dc:   <http://purl.org/dc/elements/1.1/> .
-    @prefix :     <http://example.org/book/> .
-    @prefix ns:   <http://example.org/ns#> .
+    :prefix dc:   <http://purl.org/dc/elements/1.1/> .
+    :prefix :     <http://example.org/book/> .
+    :prefix ns:   <http://example.org/ns#> .
 
     :book1  dc:title  "SPARQL Tutorial" .
     :book1  ns:price  42 .

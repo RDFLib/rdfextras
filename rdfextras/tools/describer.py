@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: UTF-8 -*-
 """
 A Describer is a stateful utility for creating RDF statements in a
 semi-declarative manner. It has methods for creating literal values, rel and
@@ -100,8 +100,12 @@ Full example in the ``to_rdf`` method below::
 from __future__ import with_statement # if Python < 2.6
 from contextlib import contextmanager
 from rdflib.graph import Graph
-from rdflib.namespace import RDF, RDFS
-from rdflib.term import URIRef, BNode, Literal, Identifier
+from rdflib.namespace import RDF
+from rdflib.namespace import RDFS
+from rdflib.term import BNode
+from rdflib.term import Identifier
+from rdflib.term import Literal
+from rdflib.term import URIRef
 
 
 class Describer(object):
@@ -142,6 +146,8 @@ class Describer(object):
 
         Usage::
 
+            >>> from rdflib import URIRef
+            >>> from rdflib.namespace import RDF, RDFS
             >>> d = Describer(about="http://example.org/")
             >>> d.value(RDFS.label, "Example")
             >>> d.graph.value(URIRef('http://example.org/'), RDFS.label)
@@ -162,6 +168,8 @@ class Describer(object):
 
         Usage::
 
+            >>> from rdflib import URIRef
+            >>> from rdflib.namespace import RDF, RDFS
             >>> d = Describer(about="/", base="http://example.org/")
             >>> _ctxt = d.rel(RDFS.seeAlso, "/about")
             >>> d.graph.value(URIRef('http://example.org/'), RDFS.seeAlso)
@@ -190,6 +198,8 @@ class Describer(object):
 
         Usage::
 
+            >>> from rdflib import URIRef
+            >>> from rdflib.namespace import RDF, RDFS
             >>> d = Describer(about="http://example.org/")
             >>> with d.rev(RDFS.seeAlso, "http://example.net/"):
             ...     d.value(RDFS.label, "Net")
@@ -212,6 +222,8 @@ class Describer(object):
 
         Usage::
 
+            >>> from rdflib import URIRef
+            >>> from rdflib.namespace import RDF, RDFS
             >>> d = Describer(about="http://example.org/")
             >>> d.rdftype(RDFS.Resource)
             >>> (URIRef('http://example.org/'), RDF.type, RDFS.Resource) in d.graph

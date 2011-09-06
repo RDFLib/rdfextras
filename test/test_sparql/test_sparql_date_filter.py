@@ -66,15 +66,15 @@ class DateFilterTest(unittest.TestCase):
         self.graph.load(StringIO(testContent), format='n3')
     def test_DATE_FILTER1(self):
         for query in [QUERY1,QUERY2,QUERY3]:
-            print query
+            # print query
             #pQuery = Parse(query)
             #print RenderSPARQLAlgebra(pQuery)
             results = self.graph.query(query,
-                                       DEBUG=False)
+                                       DEBUG=False).serialize(format='python')
             results = list(results)
             self.failUnless(
-                len(results) and results == [(ANSWER1,)],
-                "expecting : %s .  Got: %s"%([(ANSWER1,)],repr(results)))
+                len(results) and results == [ANSWER1],
+                "expecting : %s .  Got: %s"%([ANSWER1],repr(results)))
 
 if __name__ == "__main__":
     unittest.main()

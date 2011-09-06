@@ -57,8 +57,11 @@ def describe(terms,bindings,graph):
     ...   "DESCRIBE  ?x WHERE  { ?x foaf:name ?name }",
     ...   initNs=namespaces
     ...   ).result
-    >>> len(rt)
-    2
+    >>> g = Graph()
+    >>> g.parse(data=rt) # doctest: +ELLIPSIS
+    <Graph identifier=... (<class 'rdflib.graph.Graph'>)>
+    >>> len(g)
+    1
         
 A user-defined method is specified by passing it in as an extension function bound to
 <http://www.w3.org/TR/rdf-sparql-query/#describe>
@@ -68,11 +71,11 @@ A user-defined method is specified by passing it in as an extension function bou
     ...   initNs=namespaces,
     ...   extensionFunctions={DESCRIBE:describeOverride}
     ...   ).result
-    >>> list(rt)
-    [(rdflib.BNode('.........'), rdflib.URIRef('http://xmlns.com/foaf/0.1/mbox'), rdflib.URIRef('mailto:alice@example.org'))]
+    >>> list(rt) # doctest: +ELLIPSIS
+    [(rdflib.term.BNode('...'), rdflib.term.URIRef('http://xmlns.com/foaf/0.1/mbox'), rdflib.term.URIRef('mailto:alice@example.org'))]
     >>> [ (s.n3(),
     ...    p.n3(),
-    ...    o.n3()) for s,p,o in rt]
-    [(u'_:.........', u'<http://xmlns.com/foaf/0.1/mbox>', u'<mailto:alice@example.org>')]
+    ...    o.n3()) for s,p,o in rt] # doctest: +ELLIPSIS
+    [(u'_:...', u'<http://xmlns.com/foaf/0.1/mbox>', u'<mailto:alice@example.org>')]
     
     

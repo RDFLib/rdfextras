@@ -27,12 +27,13 @@ where {
 }
 """
 
-#g = CG()
-#g.parse(StringIO(data), format='n3')
-#print g.query(q).serialize('json')
+from StringIO import StringIO
 
 def test_leaves():
-    return doctest.DocFileSuite("leaves.txt")
+    return doctest.DocFileSuite("../test/test_sparql/leaves.txt",
+                                package="rdfextras",
+                                optionflags = doctest.ELLIPSIS,
+                                globs=locals())
 
 
 if __name__ == "__main__":

@@ -8,7 +8,6 @@ rdflib.plugin.register('sparql', rdflib.query.Processor,
 rdflib.plugin.register('sparql', rdflib.query.Result,
                        'rdfextras.sparql.query', 'SPARQLQueryResult')
 
-
 DC = Namespace(u"http://purl.org/dc/elements/1.1/")
 FUNC = Namespace(u"http://example.org/functions#")
 

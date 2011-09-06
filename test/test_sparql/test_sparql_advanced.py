@@ -1,7 +1,7 @@
 import doctest
 from rdflib.namespace import RDF, RDFS, Namespace
 from rdflib.term import Variable
-from rdflib.graph import Graph
+from rdflib.graph import ConjunctiveGraph as Graph
 from cStringIO import StringIO
 
 import rdflib

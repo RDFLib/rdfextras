@@ -12,10 +12,10 @@ from testSPARQL import ns_foaf
 from testSPARQL import ns_ns
 from testSPARQL import ns_book
 
-from rdflib.Literal     import Literal
-from rdfextras.sparql.sparqlOperators import lt, ge
+from rdflib import Literal
+from rdfextras.sparql.operators import lt, ge
 import datetime
-from rdfextras.sparql.graphPattern import GraphPattern
+from rdfextras.sparql.graph import GraphPattern
 
 thresholdDate = datetime.date(2005,01,01)
 rdfData ="""<?xml version="1.0" encoding="UTF-8"?>
