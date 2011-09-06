@@ -40,3 +40,4 @@ rdfextras/docs/rawdocs*
 rdfextras.egg-info/*
 ez_setup/*
 Icon*
+configstrings.py

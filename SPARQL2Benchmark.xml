@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xml-stylesheet href="file://localhost/usr/share/sgml/css/articleedit.css" type="text/css"?>
+<article>
+  <title>rdflib 3.0.0 SPARQL engine :: performance tests using the <ulink url="http://dbis.informatik.uni-freiburg.de/index.php?project=SP2B">SP2B</ulink> SPARQL benchmark</title>
+  <articleinfo>
+    <title>rdflib 3.0.0 SPARQL engine :: performance tests using the <ulink url="http://dbis.informatik.uni-freiburg.de/index.php?project=SP2B">SP2B</ulink> SPARQL benchmark</title>
+    <date>2010-09-22T18:17:42Z</date>
+    <isbn> <ulink url="http://bel-epa.com/notes/">Original source</ulink> </isbn>
+    <author>
+      <firstname>Graham</firstname>
+      <surname>Higgins</surname>
+      <affiliation>
+        <orgname>BEL-EPA</orgname>
+      </affiliation>
+    </author>
+    <abstract>
+      <para></para>
+    </abstract>
+  </articleinfo>
+  <section>
+    <title>rdflib 3.0.0 SPARQL engine :: performance tests using the <ulink url="http://dbis.informatik.uni-freiburg.de/index.php?project=SP2B">SP2B</ulink> SPARQL benchmark</title>
+    <para>17 SPARQL queries...</para>
+<section id="Q01">
+    <title>Q1: Return the year of publication of <emphasis>Journal 1 (1940)</emphasis>.</title>
+        <para>1 result in 1.259s</para>
+        <programlisting role="sparql"><![CDATA[
+PREFIX rdf:     &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX dc:      &lt;http://purl.org/dc/elements/1.1/&gt;
+PREFIX dcterms: &lt;http://purl.org/dc/terms/&gt;
+PREFIX bench:   &lt;http://localhost/vocabulary/bench/&gt;
+PREFIX xsd:     &lt;http://www.w3.org/2001/XMLSchema#&gt; 
+
+SELECT ?yr
+WHERE {
+  ?journal rdf:type bench:Journal .
+  ?journal dc:title "Journal 1 (1940)"^^xsd:string .
+  ?journal dcterms:issued ?yr 
+}
+]]>
+</programlisting>
+</section>
+<section id="Q02">
+    <title>Q2: Extract all inproceedings with properties <emphasis>dc:creator</emphasis>, <emphasis>bench:booktitle</emphasis>, <emphasis>dc:title</emphasis>, <emphasis>swrc:pages</emphasis>, <emphasis>dcterms:partOf</emphasis>, <emphasis>rdfs:seeAlso</emphasis>, <emphasis>foaf:homepage</emphasis> <emphasis>dcterms:issued</emphasis>, and optionally <emphasis>bench:abstract</emphasis>, including these properties, ordered by year.</title>
+        <para>147 results in 0.332s</para>
+        <programlisting role="sparql"><![CDATA[
+PREFIX rdf:     &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX rdfs:    &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+PREFIX swrc:    &lt;http://swrc.ontoware.org/ontology#&gt;
+PREFIX foaf:    &lt;http://xmlns.com/foaf/0.1/&gt;
+PREFIX bench:   &lt;http://localhost/vocabulary/bench/&gt;
+PREFIX dc:      &lt;http://purl.org/dc/elements/1.1/&gt;
+PREFIX dcterms: &lt;http://purl.org/dc/terms/&gt;
+
+SELECT ?inproc ?author ?booktitle ?title 
+       ?proc ?ee ?page ?url ?yr ?abstract
+WHERE {
+  ?inproc rdf:type bench:Inproceedings .
+  ?inproc dc:creator ?author .
+  ?inproc bench:booktitle ?booktitle .
+  ?inproc dc:title ?title .
+  ?inproc dcterms:partOf ?proc .
+  ?inproc rdfs:seeAlso ?ee .
+  ?inproc swrc:pages ?page .
+  ?inproc foaf:homepage ?url .
+  ?inproc dcterms:issued ?yr 
+  OPTIONAL {
+    ?inproc bench:abstract ?abstract
+  }
+}
+ORDER BY ?yr
+]]>
+</programlisting>
+</section>
+<section id="Q03a">
+    <title>Q3(a): Select all articles with property <emphasis>swrc:pages</emphasis>.</title>
+    <para>"No results" in 0.824s</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX rdf:   &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX bench: &lt;http://localhost/vocabulary/bench/&gt;
+PREFIX swrc:  &lt;http://swrc.ontoware.org/ontology#&gt;
+
+SELECT ?article
+WHERE {
+  ?article rdf:type bench:Article .
+  ?article ?property ?value 
+  FILTER (?property=swrc:pages) 
+}
+]]>
+</programlisting>
+</section>
+<section id="Q03b">
+    <title>Q3(b): Select all articles with property <emphasis>swrc:month</emphasis>.</title>
+    <para>"No results" in 0.924s</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX rdf:   &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX bench: &lt;http://localhost/vocabulary/bench/&gt;
+PREFIX swrc:  &lt;http://swrc.ontoware.org/ontology#&gt;
+
+SELECT ?article
+WHERE {
+  ?article rdf:type bench:Article .
+  ?article ?property ?value
+  FILTER (?property=swrc:month)
+}
+]]>
+</programlisting>
+</section>
+<section id="Q03c">
+    <title>Q3(c): Select all articles with property <emphasis>swrc:isbn</emphasis>.</title>
+    <para>"No results" in 0.764s</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX rdf:   &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX swrc:  &lt;http://swrc.ontoware.org/ontology#&gt;
+PREFIX bench: &lt;http://localhost/vocabulary/bench/&gt;
+
+SELECT ?article
+WHERE {
+  ?article rdf:type bench:Article .
+  ?article ?property ?value
+  FILTER (?property=swrc:isbn)
+}
+]]>
+</programlisting>
+</section>
+<section id="Q04">
+    <title>Q4: Select all distinct pairs of article author names for authors that have published in the same journal.</title>
+    <para>Failed to complete</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX rdf:     &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX bench:   &lt;http://localhost/vocabulary/bench/&gt;
+PREFIX dc:      &lt;http://purl.org/dc/elements/1.1/&gt;
+PREFIX dcterms: &lt;http://purl.org/dc/terms/&gt;
+PREFIX foaf:    &lt;http://xmlns.com/foaf/0.1/&gt;
+PREFIX swrc:    &lt;http://swrc.ontoware.org/ontology#&gt;
+
+SELECT DISTINCT ?name1 ?name2 
+WHERE {
+  ?article1 rdf:type bench:Article .
+  ?article2 rdf:type bench:Article .
+  ?article1 dc:creator ?author1 .
+  ?author1 foaf:name ?name1 .
+  ?article2 dc:creator ?author2 .
+  ?author2 foaf:name ?name2 .
+  ?article1 swrc:journal ?journal .
+  ?article2 swrc:journal ?journal
+  FILTER (?name1&lt;?name2)
+}
+]]>
+</programlisting>
+</section>
+<section id="Q05a">
+    <title>Q5(a): Return the names of all persons that occur as author of at least one inproceeding and at least one article.</emphasis></title>
+    <para>Failed to complete</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX rdf:   &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX foaf:  &lt;http://xmlns.com/foaf/0.1/&gt;
+PREFIX bench: &lt;http://localhost/vocabulary/bench/&gt;
+PREFIX dc:    &lt;http://purl.org/dc/elements/1.1/&gt;
+
+SELECT DISTINCT ?person ?name
+WHERE {
+  ?article rdf:type bench:Article .
+  ?article dc:creator ?person .
+  ?inproc rdf:type bench:Inproceedings .
+  ?inproc dc:creator ?person2 .
+  ?person foaf:name ?name .
+  ?person2 foaf:name ?name2
+  FILTER (?name=?name2)
+}
+]]>
+</programlisting>
+</section>
+<section id="Q05b">
+    <title>Q5(b): Return the names of all persons that occur as author of at least one inproceeding and at least one article (same as <emphasis>Q5a</emphasis>).</title>
+    <para>155 results in 26.371s</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX rdf:   &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX foaf:  &lt;http://xmlns.com/foaf/0.1/&gt;
+PREFIX bench: &lt;http://localhost/vocabulary/bench/&gt;
+PREFIX dc:    &lt;http://purl.org/dc/elements/1.1/&gt;
+
+SELECT DISTINCT ?person ?name
+WHERE {
+  ?article rdf:type bench:Article .
+  ?article dc:creator ?person .
+  ?inproc rdf:type bench:Inproceedings .
+  ?inproc dc:creator ?person .
+  ?person foaf:name ?name
+}
+]]>
+</programlisting>
+</section>
+<section id="Q06">
+    <title>Q6: Return, for each year, the set of all publications authored by persons that have not published in years before.</title>
+    <para>280 results in 49.853s</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX rdf:     &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX rdfs:    &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+PREFIX foaf:    &lt;http://xmlns.com/foaf/0.1/&gt;
+PREFIX dc:      &lt;http://purl.org/dc/elements/1.1/&gt;
+PREFIX dcterms: &lt;http://purl.org/dc/terms/&gt;
+
+SELECT ?yr ?name ?document
+WHERE {
+  ?class rdfs:subClassOf foaf:Document .
+  ?document rdf:type ?class .
+  ?document dcterms:issued ?yr .
+  ?document dc:creator ?author .
+  ?author foaf:name ?name
+  OPTIONAL {
+    ?class2 rdfs:subClassOf foaf:Document .
+    ?document2 rdf:type ?class2 .
+    ?document2 dcterms:issued ?yr2 .
+    ?document2 dc:creator ?author2 
+    FILTER (?author=?author2 && ?yr2&lt;?yr)
+  } FILTER (!bound(?author2))
+}
+]]>
+</programlisting>
+</section>
+<section id="Q07">
+    <title>Q7: Return the titles of all papers that have been cited at least once, but not by any paper that has not been cited itself.</title>
+    <para>42 results in 15.205s</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX rdf:     &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX rdfs:    &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+PREFIX foaf:    &lt;http://xmlns.com/foaf/0.1/&gt;
+PREFIX dc:      &lt;http://purl.org/dc/elements/1.1/&gt;
+PREFIX dcterms: &lt;http://purl.org/dc/terms/&gt;
+
+SELECT DISTINCT ?title
+WHERE {
+  ?class rdfs:subClassOf foaf:Document .
+  ?doc rdf:type ?class .
+  ?doc dc:title ?title .
+  ?bag2 ?member2 ?doc .
+  ?doc2 dcterms:references ?bag2
+  OPTIONAL {
+    ?class3 rdfs:subClassOf foaf:Document .
+    ?doc3 rdf:type ?class3 .
+    ?doc3 dcterms:references ?bag3 .
+    ?bag3 ?member3 ?doc
+    OPTIONAL {
+      ?class4 rdfs:subClassOf foaf:Document .
+      ?doc4 rdf:type ?class4 .
+      ?doc4 dcterms:references ?bag4 .
+      ?bag4 ?member4 ?doc3
+    } FILTER (!bound(?doc4))
+  } FILTER (!bound(?doc3))
+}
+]]>
+</programlisting>
+</section>
+<section id="Q08">
+    <title>Q8: Compute authors that have published with <emphasis>Paul Erdős</emphasis>, or with an author that has published with <emphasis>Paul Erdős</emphasis>.</title>
+    <para>184 results in 9.908s</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX xsd:  &lt;http://www.w3.org/2001/XMLSchema#&gt; 
+PREFIX rdf:  &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt;
+PREFIX dc:   &lt;http://purl.org/dc/elements/1.1/&gt;
+
+SELECT DISTINCT ?name
+WHERE {
+  ?erdoes rdf:type foaf:Person .
+  ?erdoes foaf:name "Paul Erdoes"^^xsd:string .
+  {
+    ?document dc:creator ?erdoes .
+    ?document dc:creator ?author .
+    ?document2 dc:creator ?author .
+    ?document2 dc:creator ?author2 .
+    ?author2 foaf:name ?name
+    FILTER (?author!=?erdoes &&
+            ?document2!=?document &&
+            ?author2!=?erdoes &&
+            ?author2!=?author)
+  } UNION {
+    ?document dc:creator ?erdoes.
+    ?document dc:creator ?author.
+    ?author foaf:name ?name
+    FILTER (?author!=?erdoes)
+  }
+}
+]]>
+</programlisting>
+</section>
+<section id="Q09">
+    <title>Q9: Return incoming and outcoming properties of persons.</title>
+    <para>4 results in 0.610s</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX rdf:  &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt;
+
+SELECT DISTINCT ?predicate
+WHERE {
+  {
+    ?person rdf:type foaf:Person .
+    ?subject ?predicate ?person
+  } UNION {
+    ?person rdf:type foaf:Person .
+    ?person ?predicate ?object
+  }
+}
+]]>
+</programlisting>
+</section>
+<section id="Q10">
+    <title>Q10: Return all subjects that stand in any relation to <emphasis>Paul Erdős</emphasis>. In our scenario, the query might also be formulated as "Return publications and venues in which <emphasis>Paul Erdős</emphasis> is involved either as author or as editor".</title>
+    <para>166 results in 0.015s</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX person: &lt;http://localhost/persons/&gt;
+
+SELECT ?subject ?predicate
+WHERE {
+  ?subject ?predicate person:Paul_Erdoes
+}
+]]>
+</programlisting>
+</section>
+<section id="Q11">
+    <title>Q11: Return (up to) 10 electronic edition URLs starting from the 51st publication, in lexicographical order.</title>
+    <para>10 results in 0.085s</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+
+SELECT ?ee
+WHERE {
+  ?publication rdfs:seeAlso ?ee
+}
+ORDER BY ?ee
+LIMIT 10
+OFFSET 50
+]]>
+</programlisting>
+</section>
+<section id="Q12a">
+    <title>Q12(a): Return <emphasis>yes</emphasis> if a person occurs as author of at least one inproceeding and article, <emphasis>no</emphasis> otherwise. This query is the boolean counterpart of <emphasis>Q5(a)</emphasis></title>
+    <para>"No results" in 112.632s"</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX rdf:   &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX foaf:  &lt;http://xmlns.com/foaf/0.1/&gt;
+PREFIX bench: &lt;http://localhost/vocabulary/bench/&gt;
+PREFIX dc:    &lt;http://purl.org/dc/elements/1.1/&gt;
+
+ASK {
+  ?article rdf:type bench:Article .
+  ?article dc:creator ?person1 .
+  ?inproc  rdf:type bench:Inproceedings .
+  ?inproc  dc:creator ?person2 .
+  ?person1 foaf:name ?name1 .
+  ?person2 foaf:name ?name2
+  FILTER (?name1=?name2)
+}
+]]>
+</programlisting>
+</section>
+<section id="Q12b">
+    <title>Q12(b): Return <emphasis>yes</emphasis> if an author has published with <emphasis>Paul Erdős</emphasis> or with an author that has published with <emphasis>Paul Erdős</emphasis>, and <emphasis>no</emphasis> otherwise. This query is the boolean counterpart of <emphasis>Q8</emphasis></emphasis>.</title>
+    <para>"No results" on 12.297s</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX xsd:  &lt;http://www.w3.org/2001/XMLSchema#&gt; 
+PREFIX rdf:  &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt;
+PREFIX dc:   &lt;http://purl.org/dc/elements/1.1/&gt;
+
+ASK {
+  ?erdoes rdf:type foaf:Person .
+  ?erdoes foaf:name "Paul Erdoes"^^xsd:string .
+  {
+    ?document dc:creator ?erdoes .
+    ?document dc:creator ?author .
+    ?document2 dc:creator ?author .
+    ?document2 dc:creator ?author2 .
+    ?author2 foaf:name ?name
+    FILTER (?author!=?erdoes &&
+            ?document2!=?document &&
+            ?author2!=?erdoes &&
+            ?author2!=?author)
+  } UNION {
+    ?document dc:creator ?erdoes .
+    ?document dc:creator ?author .
+    ?author foaf:name ?name 
+    FILTER (?author!=?erdoes)
+  }
+}
+]]>
+</programlisting>
+</section>
+<section id="Q12c">
+    <title>Q12(c): Check if the person <emphasis>John Q Public</emphasis> exists in the database.)</title>
+    <para>"No results" in 0.007s</para>
+    <programlisting role="sparql"><![CDATA[
+PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX person: &lt;http://localhost/persons/&gt;
+PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt;
+
+ASK {
+  person:John_Q_Public rdf:type foaf:Person.
+}
+]]>
+</programlisting>
+</section>
+  </section>
+</article>
