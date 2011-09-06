@@ -19,7 +19,7 @@ Contents:
     FixTypeViews
     MySQLStoreInfo
     rdfpipe
-    term_utils
+    termutils
 
 
 
