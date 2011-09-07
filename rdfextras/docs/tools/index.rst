@@ -13,6 +13,7 @@ Contents:
 .. toctree::
     :maxdepth: 2
     
+    csv2rdf
     DatabaseStats
     describer
     EARLPlugin

@@ -38,16 +38,14 @@ class TestSparqlASK(unittest.TestCase):
         Ask for a triple that exists, assert that the response is True.
         """
         res = self.graph.query('ASK { <http://goonmill.org/2007/skill.n3#bar> a <http://goonmill.org/2007/skill.n3#Foo> } ')
-        self.assertEquals(res.askAnswer, [True], "The answer should have been that the triple was found")
-
-    test_ask_true.known_issue = True
+        self.assertEquals(res.askAnswer, True, "The answer should have been that the triple was found")
 
     def test_ask_false(self):
         """
         Ask for a triple that does not exist, assert that the response is False.
         """
         res = self.graph.query('ASK { <http://goonmill.org/2007/skill.n3#baz> a <http://goonmill.org/2007/skill.n3#Foo> } ')
-        self.assertEquals(res.askAnswer, [False], "The answer should have been that the triple was not found")
+        self.assertEquals(res.askAnswer, False, "The answer should have been that the triple was not found")
 
 # class TestSparqlASKWithCompliance(TestSparqlASK):
 #     def setUp(self):

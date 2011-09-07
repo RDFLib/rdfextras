@@ -1,4 +1,4 @@
-from rdflib.namespace import RDF, RDFS, Namespace
+from rdflib.namespace import RDF, RDFS
 from rdflib.store import Store
 from rdflib import plugin
 from rdflib.parser import StringInputSource
@@ -36,47 +36,45 @@ WHERE {
 class TestSPARQLAbbreviations(unittest.TestCase):
 
     sparql = True
-    debug=False
 
     def setUp(self):
         NS = u"http://example.org/"
-        self.graph = Graph("IOMemory")
-        self.graph.parse(StringInputSource('''
+        self.graph = Graph(store)
+        self.graph.parse(StringInputSource("""
            @prefix    : <http://example.org/> .
            @prefix rdf: <%s> .
            @prefix rdfs: <%s> .
            [ :prop :val ].
-           [ a rdfs:Class ].'''%(Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#"),
-                                 Namespace("http://www.w3.org/2000/01/rdf-schema#"))), format="n3")
+           [ a rdfs:Class ]."""%(RDF,RDFS)), format="n3")
 
     def testTypeAbbreviation(self):
         query = """SELECT ?subj WHERE { ?subj a rdfs:Class }"""
-        # print query
-        rt = self.graph.query(query,DEBUG=self.debug)
+        print query
+        rt = self.graph.query(query,DEBUG=debug)
         self.failUnless(len(rt) == 1,"Should be a single match: %s"%len(rt))
-        query = '''SELECT ?subj WHERE { ?subj a <http://www.w3.org/2000/01/rdf-schema#Class> }'''
-        # print query
-        rt = self.graph.query(query,DEBUG=self.debug)
+        query = """SELECT ?subj WHERE { ?subj a <http://www.w3.org/2000/01/rdf-schema#Class> }"""
+        print query
+        rt = self.graph.query(query,DEBUG=debug)
         self.failUnless(len(rt) == 1,"Should be a single match: %s"%len(rt))
         
     def testTypeAbbreviation(self):
         query = """SELECT ?subj WHERE { ?subj a rdfs:Class }"""
-        # print query
-        rt = self.graph.query(query,DEBUG=self.debug)
+        print query
+        rt = self.graph.query(query,DEBUG=debug)
         self.failUnless(len(rt) == 1,"Should be a single match: %s"%len(rt))
         query = """SELECT ?subj WHERE { ?subj a <http://www.w3.org/2000/01/rdf-schema#Class> }"""
-        # print query
-        rt = self.graph.query(query,DEBUG=self.debug)
+        print query
+        rt = self.graph.query(query,DEBUG=debug)
         self.failUnless(len(rt) == 1,"Should be a single match: %s"%len(rt))
 
     def testQNameVSFull(self):
         query = """SELECT ?subj WHERE { ?subj <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> rdfs:Class }"""
-        # print query
-        rt = self.graph.query(query,DEBUG=self.debug)
+        print query
+        rt = self.graph.query(query,DEBUG=debug)
         self.failUnless(len(rt) == 1,"Should be a single matchL: %s"%len(rt))
         query = """SELECT ?subj WHERE { ?subj <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> }"""
-        # print query
-        rt = self.graph.query(query,DEBUG=self.debug)
+        print query
+        rt = self.graph.query(query,DEBUG=debug)
         self.failUnless(len(rt) == 1,"Should be a single match: %s"%len(rt))
         
     def tearDown(self):
