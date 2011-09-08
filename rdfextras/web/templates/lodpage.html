@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}{{label}} @ RDFLib LOD Server{% endblock %}
+
+ {% block body %}
+<h1>
+  {{label}}
+  <span class='url'>{{resource}}</span>
+</h1>
+is-a 
+<span id="typelist">	
+	{% for t in types %}
+	<a href='{{t.url}}'>{{t.label}}</a>
+	{% if not loop.last %}, {% endif %}
+	{% endfor %}
+</span>
+
+<h2>Properties:</h2>
+<table>
+<thead>
+  <tr><td>property</td><td>value</td></tr>
+</thead>
+{% for p,v in outprops %}
+<tr class="{{ loop.cycle('odd', 'even') }}">
+  <td><a href='{{p.url}}'>{{p.label}}</a></td>
+	{% if v.url %}
+  <td><a href='{{v.url}}'>{{v.label}}</a></td>
+	{% else %}
+	<td>"{{v.label}}"
+	{% if v.lang %} <i>({{v.lang}})</i> {% endif %}
+	{% endif %}
+</tr>
+{% endfor %}
+</table>
+{% if inprops %}
+<h2>Incoming Properties:</h2>
+<table>
+<thead>
+  <tr><td>node</td><td>property</td></tr>
+</thead>
+{% for v,p in inprops %}
+<tr class="{{ loop.cycle('odd', 'even') }}">
+	{% if p.url %}
+  <td><a href='{{p.url}}'>{{p.label}}</a></td>
+	{% else %}
+	<td>{{p.label}}
+	{% endif %}
+	<td><a href='{{v.url}}'>{{v.label}}</a></td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+<hr/>
+<div id="footer">
+	<a href='/'>back to index</a> - 	
+Download as: 
+{% if type_ %}
+<a href="{{url_for('data', type_=type_, label=urilabel, format_='nt') }}">ntriples</a> |
+<a href="{{url_for('data', type_=type_, label=urilabel, format_='n3') }}">n3</a> |
+<a href="{{url_for('data', type_=type_, label=urilabel, format_='xml') }}">rdf/xml</a>
+{% else %}         
+
+<a href="{{url_for('data', label=urilabel, format_='nt') }}">ntriples</a> |
+<a href="{{url_for('data', label=urilabel, format_='n3') }}">n3</a> |
+<a href="{{url_for('data', label=urilabel, format_='xml') }}">rdf/xml</a>
+</div>
+{% endif %}
+{% endblock %}
