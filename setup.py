@@ -37,7 +37,7 @@ install_requires = [
     'pyparsing'
 ]
 tests_require = install_requires + \
-                ['flask', 'mimeparser', 'jinja2']
+                ['flask', 'mimeparse', 'jinja2']
 
 try:
     from setuptools import setup
