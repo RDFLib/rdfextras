@@ -1,7 +1,10 @@
 import rdflib
-from rdflib.Graph import ConjunctiveGraph
+from rdflib.graph import ConjunctiveGraph
 from rdflib import plugin
-from rdflib.store import Store, NO_STORE, VALID_STORE
+from rdflib import URIRef
+from rdflib.store import NO_STORE
+from rdflib.store import Store
+from rdflib.store import VALID_STORE
 
 try:
     import MySQLdb
@@ -21,14 +24,15 @@ def FixViewsString(configStr, storeName='rdfstore'):
         #store.open(configStr,create=True)
         
         #TODO: could create store & load appropriate data here
-        assert False, "'%s' store '%s' not found using config string '%s!'" % (storeType, storeName, configStr) 
+        assert False, "MySQL store '%s' not found using config string '%s!'" % \
+                                (storeName, configStr)
     else:
         assert rt == VALID_STORE,"There underlying store is corrupted"
-        
+    
     #There is a store, use it; use ConjunctiveGraph to see everything!
     graph = ConjunctiveGraph(store, identifier = URIRef(graphUri))
     
-    FixViewsGraph(graph)    
+    FixViewsGraph(graph)
 
 def FixViewsGraph(graph):
     FixViews(graph.store._db.cursor(), graph.store._internedId)
@@ -54,7 +58,7 @@ object, class_term as object_term, context as context, context_term as
 context_term, NULL as data_type, NULL as language from
 %(store)s_associativeBox"""%dict(store=storeInteredId))
     
-    print "Fixing view %s_relation_or_associativeBox."%(storeInteredId)
+    print("Fixing view %s_relation_or_associativeBox." % (storeInteredId))
     
     cursor.execute("""ALTER view %(store)s_relation_or_associativeBox as select * from
 %(store)s_relations
@@ -63,12 +67,12 @@ select member as subject, member_term as subject_term,
 CONVERT('3732454415692939113', UNSIGNED INTEGER) as predicate, 'U' as predicate_term, class as
 object, class_term as object_term, context as context, context_term as
 context_term from %(store)s_associativeBox"""%dict(store=storeInteredId))
-        
+    
     cursor.close()
     
-    print "Done."
-    
-    
+    print("Done.")
+
+
 if __name__ == '__main__':
    from optparse import OptionParser
    usage = '''usage: %prog [options] configStr storeName'''

@@ -4,17 +4,20 @@ Utility functions associated with RDF terms:
 - normalizing (to 64 bit integers via half-md5-hashes)
 - escaping literal's for SQL persistence
 """
-from rdflib import Literal, Graph
-
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import md5
-
+from rdflib.term import BNode
+from rdflib.namespace import RDF
+from rdflib.term import Literal
+from rdflib.term import URIRef
+from rdflib.graph import Graph
 from rdflib.graph import QuotedGraph
-
+from hashlib import md5
+from rdfextras.tools.termutils import SUBJECT
+from rdfextras.tools.termutils import PREDICATE
+from rdfextras.tools.termutils import OBJECT
+from rdfextras.tools.termutils import CONTEXT
+from rdfextras.tools.termutils import term2Letter
+from rdfextras.tools.termutils import escape_quotes
 from rdfextras.store.REGEXMatching import REGEXTerm
-from rdfextras.store.term_utils import term2Letter
 
 Any = None
 
@@ -45,6 +48,7 @@ def EscapeQuotes(qstr):
         return ''
     tmp = qstr.replace("\\","\\\\")
     tmp = tmp.replace("'", "\\'")
+    tmp = tmp.replace('"', '\\"')
     return tmp
 
 def dereferenceQuad(index,quad):
@@ -56,30 +60,47 @@ def dereferenceQuad(index,quad):
     else:
         return quad[index]
 
-def genQuadSlots(quads):
-    return [QuadSlot(index,quads[index])for index in POSITION_LIST]
+def genQuadSlots(quads, useSignedInts=False):
+    return [QuadSlot(index, quads[index], useSignedInts)
+            for index in POSITION_LIST]
 
-def normalizeValue(value,termType):
+def normalizeValue(value, termType, useSignedInts=False):
     if value is None:
         value = u'http://www.w3.org/2002/07/owl#NothingU'
     else:
         value = (isinstance(value,Graph) and value.identifier or str(value)) + termType
-    return int(md5(isinstance(value,unicode) and value.encode('utf-8') or value).hexdigest()[:16],16)
+    unsigned_hash = int(md5(
+                      isinstance(value, unicode) and value.encode('utf-8')
+                                                 or value)
+                    .hexdigest()[:16], 16)
 
-def normalizeNode(node):
-    return normalizeValue(node, term2Letter(node))
+    if useSignedInts:
+        return makeSigned(unsigned_hash)
+    else:
+        return unsigned_hash
 
-class QuadSlot:
+bigint_signed_max = 2**63
+def makeSigned(bigint):
+  if bigint > bigint_signed_max:
+    return bigint_signed_max - bigint
+  else:
+    return bigint
+
+def normalizeNode(node, useSignedInts=False):
+    return normalizeValue(node, term2Letter(node), useSignedInts)
+
+class QuadSlot(object):
     def __repr__(self):
         #NOTE: http://docs.python.org/ref/customization.html
         return "QuadSlot(%s,%s,%s)"%(SlotPrefixes[self.position],self.term,self.md5Int)
 
-    def __init__(self,position,term):
+    def __init__(self, position, term, useSignedInts=False):
         assert position in POSITION_LIST, "Unknown quad position: %s"%position
         self.position = position
         self.term = term
-        self.md5Int = normalizeValue(term,term2Letter(term))
         self.termType = term2Letter(term)
+        self.useSignedInts = useSignedInts
+        self.md5Int = normalizeValue(term, term2Letter(term), useSignedInts)
 
     def EscapeQuotes(self,qstr):
         """
@@ -89,6 +110,7 @@ class QuadSlot:
             return ''
         tmp = qstr.replace("\\","\\\\")
         tmp = tmp.replace("'", "\\'")
+        tmp = tmp.replace('"', '\\"')
         return tmp
 
     def normalizeTerm(self):
@@ -100,3 +122,10 @@ class QuadSlot:
             return self.term
         else:
             return self.term.encode('utf-8')
+        
+    def getDatatypeQuadSlot(self):
+        if self.termType == 'L' and self.term.datatype:
+            return self.__class__(SUBJECT, self.term.datatype,
+                                  self.useSignedInts)
+        return None
+

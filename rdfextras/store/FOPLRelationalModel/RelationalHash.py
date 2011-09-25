@@ -1,27 +1,32 @@
 """
 This module implements two hash tables for identifiers and values that
-facilitate maximal index lookups and minimal redundancy (since identifiers and values are stored once
-only and referred to by integer half-md5-hashes).  The identifier hash uses
-the half-md5-hash (converted by base conversion to an integer) to key on the identifier's full
-lexical form (for partial matching by REGEX) and their term types.
-The use of a half-hash introduces a collision risk that is currently not accounted for.  The volume at which
-the risk becomes significant is calculable, though through the 'birthday paradox'.
+facilitate maximal index lookups and minimal redundancy (since identifiers and
+values are stored once only and referred to by integer half-md5-hashes). The
+identifier hash uses the half-md5-hash (converted by base conversion to an
+integer) to key on the identifier's full lexical form (for partial matching by
+REGEX) and their term types.
 
-The value hash is keyed off the half-md5-hash (as an integer also) and stores the identifier's full lexical
-representation (for partial matching by REGEX)
+The use of a half-hash introduces a collision risk that is currently not
+accounted for. The volume at which the risk becomes significant is calculable,
+though through the 'birthday paradox'.
 
-These classes are meant to automate the creation, management, linking, insertion of these hashes (by SQL)
-automatically
+The value hash is keyed off the half-md5-hash (as an integer also) and stores
+the identifier's full lexical representation (for partial matching by REGEX)
+
+These classes are meant to automate the creation, management, linking, insertion
+of these hashes (by SQL) automatically
 
 see: http://en.wikipedia.org/wiki/Birthday_Paradox
+
 """
 
-
-from rdflib import RDF, Literal, Graph
+from rdflib.term import Literal
+from rdflib.namespace import RDF
 from rdflib.graph import QuotedGraph
-
+from rdflib.graph import Graph
+from rdfextras.tools.termutils import OBJECT
 from rdfextras.store.REGEXMatching import REGEXTerm
-from QuadSlot import normalizeValue, OBJECT
+from rdfextras.store.FOPLRelationalModel.QuadSlot import normalizeValue
 Any = None
 
 COLLISION_DETECTION = False
@@ -29,17 +34,22 @@ REGEX_IDX = False
 CREATE_HASH_TABLE = """
 CREATE TABLE %s (
     %s
-) ENGINE=InnoDB;"""
+) %s"""
 
 IDENTIFIER_GARBAGE_COLLECTION_SQL="CREATE TEMPORARY TABLE danglingIds SELECT %s.%s FROM %s %s where %s and %s.%s <> %s;"
 VALUE_GARBAGE_COLLECTION_SQL="CREATE TEMPORARY TABLE danglingIds SELECT %s.%s FROM %s %s where %s"
 PURGE_KEY_SQL="DELETE %s FROM %s INNER JOIN danglingIds on danglingIds.%s = %s.%s;"
 
+# IDEA: Could we store a refcount in the DB instead of doing this GC?  That
+# might also allow for some interesting statistical queries.  -
+# clarkj@ccf.org, 2008-02-18
+
 def GarbageCollectionQUERY(idHash,valueHash,aBoxPart,binRelPart,litPart):
     """
-    Performs garbage collection on interned identifiers and their references.  Joins
-    the given KB parititions against the identifiers and values and removes the 'danglers'.  This
-    must be performed after every removal of an assertion and so becomes a primary bottleneck
+    Performs garbage collection on interned identifiers and their references.
+    Joins the given KB partitions against the identifiers and values and removes
+    the 'danglers'.  This must be performed after every removal of an assertion
+    and so becomes a primary bottleneck
     """
     purgeQueries = ["drop temporary table if exists danglingIds"]
     rdfTypeInt = normalizeValue(RDF.type,'U')
@@ -100,13 +110,65 @@ def GarbageCollectionQUERY(idHash,valueHash,aBoxPart,binRelPart,litPart):
     purgeQueries.append(valuePurgeQuery)
     return purgeQueries
 
-class RelationalHash:
-    def __init__(self,identifier):
+class Table(object):
+  def get_name(self):
+    '''
+    Returns the name of this table in the backing SQL database.
+    '''
+    raise NotImplementedError('`Table` is an abstract base class.')
+    
+  def createStatements(self):
+    '''
+    Returns a list of SQL statements that, when executed, will create this
+    table (and any other critical data structures).
+    '''
+    raise NotImplementedError('`Table` is an abstract base class.')
+
+  def defaultStatements(self):
+    '''
+    Returns a list of SQL statements that, when executed, will provide an
+    initial set of rows for this table.
+    '''
+    return []
+
+  def indexingStatements(self):
+    '''
+    Returns a list of SQL statements that, when executed, will create
+    appropriate indices for this table.
+    '''
+    return []
+
+  def removeIndexingStatements(self):
+    '''
+    Returns a list of SQL statements that, when executed, will remove all of
+    the indices corresponding to `indexingStatements`.
+    '''
+    return []
+
+  def foreignKeyStatements(self):
+    '''
+    Returns a list of SQL statements that, when executed, will initialize
+    appropriate foreign key references for this table.
+    '''
+    return []
+
+  def removeForeignKeyStatements(self):
+    '''
+    Returns a list of SQL statements that, when executed, will remove all
+    the foreign key references corresponding to `foreignKeyStatements`.
+    '''
+    return []
+
+class RelationalHash(Table):
+    def __init__(self, identifier,
+                 useSignedInts=False, hashFieldType='BIGINT unsigned',
+                 engine='ENGINE=InnoDB', declareEnums=False):
+        self.useSignedInts = useSignedInts
+        self.hashFieldType = hashFieldType
+        self.engine = engine
+        self.declareEnums = declareEnums
         self.identifier = identifier
         self.hashUpdateQueue = {}
-
-    def defaultSQL(self):
-        return ''
 
     def EscapeQuotes(self,qstr):
         if qstr is None:
@@ -128,55 +190,108 @@ class RelationalHash:
     def __repr__(self):
         return "%s_%s"%(self.identifier,self.tableNameSuffix)
 
-    def IndexManagementSQL(self,create=False):
-        idxSQLStmts = []#'ALTER TABLE %s DROP PRIMARY KEY'%self]
-        for colName,colType,indexMD in self.columns:
+    def get_name(self):
+        return "%s_%s"%(self.identifier,self.tableNameSuffix)
+
+    def indexingStatements(self):
+        idxSQLStmts = []
+        for colName, colType, indexMD in self.columns:
             if indexMD:
-                indexName,indexCol = indexMD
+                indexName, indexCol = indexMD
                 if indexName:
-                    if create:
-                        idxSQLStmts.append("create INDEX %s on %s (%s)"%(indexName,self,indexCol))
-                    else:
-                        idxSQLStmts.append("drop INDEX %s on %s"%(indexName,self))
+                    idxSQLStmts.append("CREATE INDEX %s_%s ON %s (%s)" %
+                                       (self, indexName, self, indexCol))
+                else:
+                    idxSQLStmts.append(
+                      "ALTER TABLE %s ADD PRIMARY KEY (%s)" %
+                      (self, indexCol))
         return idxSQLStmts
 
-    def createSQL(self):
-        columnSQLStmts = []
-        for colName,colType,indexMD in self.columns:
+    def removeIndexingStatements(self):
+        idxSQLStmts = []
+        for colName, colType, indexMD in self.columns:
             if indexMD:
-                indexName,indexCol = indexMD
+                indexName, indexCol = indexMD
                 if indexName:
-                    columnSQLStmts.append("\t%s\t%s not NULL"%(colName,colType))
-                    columnSQLStmts.append("\tINDEX %s (%s)"%(indexName,indexCol))
+                    idxSQLStmts.append("DROP INDEX %s_%s ON %s" %
+                                       (self, indexName, self))
                 else:
-                    columnSQLStmts.append("\t%s\t%s not NULL PRIMARY KEY"%(colName,colType))
-            else:
-                columnSQLStmts.append("\t%s\t%s not NULL"%(colName,colType))
+                    idxSQLStmts.append("ALTER TABLE %s DROP PRIMARY KEY" %
+                                       (self,))
+        return idxSQLStmts
 
-        return CREATE_HASH_TABLE%(
+    def createStatements(self):
+        statements = []
+        columnSQLStmts = []
+        for colName, colType, indexMD in self.columns:
+            if isinstance(colType, list):
+                if self.declareEnums:
+                    # This is disabled until PostgreSQL grows enums (8.3)
+                    if False:
+                      enumName = '%s_enum' % (colName,)
+                      statements.append(
+                        'CREATE TYPE %s AS ENUM (%s)' %
+                        (enumName, ', '.join(
+                          ["'%s'" % item for item in colType])))
+                    enumName = 'char'
+                    columnSQLStmts.append("\t%s %s not NULL" %
+                                            (colName, enumName))
+                else:
+                    columnSQLStmts.append("\t%s\t%s not NULL" %
+                      (colName, 'enum(%s)' % ', '.join(
+                        ["'%s'" % item for item in colType])))
+            else:
+                columnSQLStmts.append("\t%s\t%s not NULL" %
+                                        (colName, colType))
+
+        statements.append(CREATE_HASH_TABLE % (
             self,
-            ',\n'.join(columnSQLStmts)
-        )
+            ',\n'.join(columnSQLStmts),
+            self.engine))
+        return statements
+
+    def getRowsByHash(self, db, hash):
+        c = db.cursor()
+        keyCol = self.columns[0][0]
+        c.execute('SELECT * FROM %s WHERE %s = %s' % (self, keyCol, hash))
+        return c.fetchall()
+
     def dropSQL(self):
         pass
 
 class IdentifierHash(RelationalHash):
-    columns = [
-                ('id','BIGINT unsigned',[None,'id']),
-                ('term_type',"enum('U','B','F','V','L')",['termTypeIndex','term_type']),
-              ]
 
     tableNameSuffix = 'identifiers'
+
+    def __init__(self, identifier,
+                 useSignedInts=False, hashFieldType='BIGINT unsigned',
+                 engine='ENGINE=InnoDB', declareEnums=False):
+        super(IdentifierHash, self).__init__(
+          identifier, useSignedInts, hashFieldType, engine, declareEnums)
+        self.columns = [
+          ('id', self.hashFieldType, [None, 'id']),
+          ('term_type',
+           ['U', 'B', 'F', 'V', 'L'],
+           ['termTypeIndex', 'term_type']),
+        ]
+
+        if REGEX_IDX:
+            self.columns.append(
+              ('lexical', 'text', ['lexicalIndex', 'lexical(100)']),)
+        else:    
+            self.columns.append(('lexical', 'text', None))
 
     def viewUnionSelectExpression(self,relations_only=False):
         return "select * from %s"%(repr(self))
 
-    def defaultSQL(self):
+    def defaultStatements(self):
         """
-        Since rdf:type is modeled explicitely (in the ABOX partition) it must be inserted as a 'default'
-        identifier
+        Since rdf:type is modeled explicitely (in the ABOX partition) it
+        must be inserted as a 'default' identifier.
         """
-        return 'INSERT into %s values (%s,"U","%s");'%(self,normalizeValue(RDF.type,'U'),RDF.type)
+        return ["INSERT INTO %s VALUES (%s, 'U', '%s');" %
+                  (self, normalizeValue(RDF.type, 'U', self.useSignedInts),
+                   RDF.type)]
 
     def generateDict(self,db):
         c=db.cursor()
@@ -189,15 +304,22 @@ class IdentifierHash(RelationalHash):
 
     def updateIdentifierQueue(self,termList):
         for term,termType in termList:
-            md5Int = normalizeValue(term,termType)
-            self.hashUpdateQueue[md5Int]=(termType,self.normalizeTerm(term))
+            md5Int = normalizeValue(term, termType, self.useSignedInts)
+            self.hashUpdateQueue[md5Int] = (termType,
+                                            self.normalizeTerm(term))
 
     def insertIdentifiers(self,db):
         c=db.cursor()
         keyCol = self.columns[0][0]
         if self.hashUpdateQueue:
-            params = [(md5Int,termType,lexical) for md5Int,(termType,lexical) in self.hashUpdateQueue.items()]
-            c.executemany("INSERT IGNORE INTO %s"%(self)+" VALUES (%s,%s,%s)",params)
+            params = [(md5Int, termType, lexical)
+                      for md5Int, (termType, lexical)
+                        in self.hashUpdateQueue.items()
+                        if len(self.getRowsByHash(db, md5Int)) == 0]
+            if len(params) > 0:
+                c.executemany(
+                  "INSERT INTO %s" % (self,) + " VALUES (%s,%s,%s)", params)
+
             if COLLISION_DETECTION:
                 insertedIds = self.hashUpdateQueue.keys()
                 if len(insertedIds) > 1:
@@ -213,8 +335,20 @@ class IdentifierHash(RelationalHash):
         c.close()
 
 class LiteralHash(RelationalHash):
-    columns = [('id','BIGINT unsigned',[None,'id']),]
     tableNameSuffix = 'literals'
+
+    def __init__(self, identifier,
+                 useSignedInts=False, hashFieldType='BIGINT unsigned',
+                 engine='ENGINE=InnoDB', declareEnums=False):
+        super(LiteralHash, self).__init__(
+          identifier, useSignedInts, hashFieldType, engine, declareEnums)
+        self.columns = [('id', self.hashFieldType, [None, 'id']),]
+
+        if REGEX_IDX:
+            self.columns.append(
+              ('lexical', 'text', ['lexicalIndex', 'lexical(100)']),)
+        else:    
+            self.columns.append(('lexical', 'text', None))
 
     def viewUnionSelectExpression(self,relations_only=False):
         return "select %s, 'L' as term_type, lexical from %s"%(self.columns[0][0],repr(self))
@@ -230,15 +364,20 @@ class LiteralHash(RelationalHash):
 
     def updateIdentifierQueue(self,termList):
         for term,termType in termList:
-            md5Int = normalizeValue(term,termType)
+            md5Int = normalizeValue(term, termType, self.useSignedInts)
             self.hashUpdateQueue[md5Int]=self.normalizeTerm(term)
 
     def insertIdentifiers(self,db):
         c=db.cursor()
         keyCol = self.columns[0][0]
         if self.hashUpdateQueue:
-            params = [(md5Int,lexical) for md5Int,lexical in self.hashUpdateQueue.items()]
-            c.executemany("INSERT IGNORE INTO %s"%(self)+" VALUES (%s,%s)",params)
+            params = [(md5Int, lexical) for md5Int, lexical
+                        in self.hashUpdateQueue.items()
+                        if len(self.getRowsByHash(db, md5Int)) == 0]
+            if len(params) > 0:
+                c.executemany(
+                  "INSERT INTO %s" % (self,) + " VALUES (%s,%s)", params)
+
             if COLLISION_DETECTION:
                 insertedIds = self.hashUpdateQueue.keys()
                 if len(insertedIds) > 1:
@@ -251,10 +390,3 @@ class LiteralHash(RelationalHash):
                         raise Exception("Hash Collision (in %s) on %s vs %s!"%(self,lexical,self.hashUpdateQueue[key][0]))
             self.hashUpdateQueue = {}
         c.close()
-
-if REGEX_IDX:
-    LiteralHash.columns.append(('lexical','text',['lexicalIndex','lexical(100)']),)
-    IdentifierHash.columns.append(('lexical','text',['lexical_index','lexical(100)']))
-else:    
-    LiteralHash.columns.append(('lexical','text',None))
-    IdentifierHash.columns.append(('lexical','text',None))

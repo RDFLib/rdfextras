@@ -31,6 +31,8 @@ SUFFIX_FORMAT_MAP = {
     'xhtml': 'rdfa',
     'html': 'rdfa',
     'svg': 'rdfa',
+    'nq': 'nquads',
+    'trig': 'trig'
 }
 
 def guess_format(fpath, fmap=None):
@@ -62,7 +64,7 @@ def guess_format(fpath, fmap=None):
         'xml'
     """
     fmap = fmap or SUFFIX_FORMAT_MAP
-    return fmap.get(_get_ext(fpath)) or fmap.get(fpath.lower())
+    return fmap.get(_get_ext(fpath)) or fmap.get(fpath.lower()) 
 
 
 def _get_ext(fpath, lower=True):
@@ -76,8 +78,12 @@ def _get_ext(fpath, lower=True):
         'pdf'
         >>> _get_ext("noext")
         ''
+        >>> _get_ext(".rdf")
+        'rdf'
     """
     ext = splitext(fpath)[-1]
+    if ext=='' and fpath.startswith("."): 
+        ext=fpath
     if lower:
         ext = ext.lower()
     if ext.startswith('.'):

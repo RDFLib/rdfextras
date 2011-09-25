@@ -12,12 +12,27 @@ the efficient removal of all statements about a particular resource using cascad
 
 see: http://dev.mysql.com/doc/refman/5.0/en/ansi-diff-foreign-keys.html
 """
-from rdflib import URIRef, BNode, RDF, Literal, Graph, Variable
-
-#from rdflib.term_utils import *
-from QuadSlot import POSITION_LIST, DATATYPE_INDEX, LANGUAGE_INDEX, SUBJECT, PREDICATE, OBJECT, SlotPrefixes, normalizeValue, CONTEXT, dereferenceQuad
-from rdfextras.store.term_utils import term2Letter
+from pprint import pprint
+from rdflib.graph import Graph
+from rdflib.term import BNode
+from rdflib.term import Literal
+from rdflib.term import URIRef
+from rdflib.term import Variable
+from rdflib.namespace import RDF
+from rdfextras.tools.termutils import SUBJECT
+from rdfextras.tools.termutils import PREDICATE
+from rdfextras.tools.termutils import OBJECT
+from rdfextras.tools.termutils import CONTEXT
+from rdfextras.tools.termutils import term2Letter
 from rdfextras.store.REGEXMatching import REGEXTerm
+from rdfextras.store.FOPLRelationalModel.QuadSlot import Any
+from rdfextras.store.FOPLRelationalModel.QuadSlot import DATATYPE_INDEX
+from rdfextras.store.FOPLRelationalModel.QuadSlot import LANGUAGE_INDEX
+from rdfextras.store.FOPLRelationalModel.QuadSlot import SlotPrefixes
+from rdfextras.store.FOPLRelationalModel.QuadSlot import POSITION_LIST
+from rdfextras.store.FOPLRelationalModel.QuadSlot import dereferenceQuad
+from rdfextras.store.FOPLRelationalModel.QuadSlot import normalizeValue
+from rdfextras.store.FOPLRelationalModel.RelationalHash import Table
 Any = None
 
 EXPLAIN_INFO = False
@@ -42,12 +57,12 @@ ASSOCIATIVE_BOX_CLASSES    = GROUND_IDENTIFIERS
 CREATE_BRP_TABLE = """
 CREATE TABLE %s (
     %s
-) ENGINE=InnoDB"""
+) %s"""
 
 LOOKUP_INTERSECTION_SQL = "INNER JOIN %s %s ON (%s)"
 LOOKUP_UNION_SQL        = "LEFT JOIN %s %s ON (%s)"
 
-class BinaryRelationPartition(object):
+class BinaryRelationPartition(Table):
     """
     The common ancestor of the three partitions for assertions.
     Implements behavior common to all 3.  Each subclass is expected to define the following:
@@ -66,10 +81,17 @@ class BinaryRelationPartition(object):
     indexSuffix = 'Index'
     literalTable = False
     objectPropertyTable = False
-    def __init__(self,identifier,idHash,valueHash):
+    def __init__(self, identifier, idHash, valueHash, store,
+                 useSignedInts=False, hashFieldType='BIGINT unsigned',
+                 engine='ENGINE=InnoDB', declareEnums=False):
+        self.store = store
         self.identifier = identifier
         self.idHash    = idHash
         self.valueHash = valueHash
+        self.useSignedInts = useSignedInts
+        self._hashFieldType = hashFieldType
+        self.declareEnums = declareEnums
+        self._engine = engine
         self._repr = self.identifier+'_'+self.nameSuffix
         self.singularInsertionSQLCmd = self.insertRelationsSQLCMD()
         self._resetPendingInsertions()
@@ -77,91 +99,163 @@ class BinaryRelationPartition(object):
         self._selectFieldsLeading    = self._selectFields(True)  + ['NULL as '+SlotPrefixes[DATATYPE_INDEX],'NULL as '+SlotPrefixes[LANGUAGE_INDEX]]
         self._selectFieldsNonLeading = self._selectFields(False) + ['NULL','NULL']
 
+        self._cacheStatements()
+
+        self.delimited_file = None
+
     def __repr__(self):
         return self._repr
 
-    def foreignKeySQL(self,slot):
-        """
-        Generates foreign key expression relating a particular quad term with
-        the identifier hash
-        """
-        rt = ["\tCONSTRAINT %s_%s_lookup FOREIGN KEY (%s) REFERENCES %s (%s)"%(
-                    self,
-                    self.columnNames[slot],
-                    self.columnNames[slot],
-                    self.idHash,
-                    self.idHash.columns[0][0])]
-        return rt
+    def get_name(self):
+        return self._repr
 
-    def IndexManagementSQL(self,ignoreFK=False,create=False):
-        idxSQLStmts = []
+    def foreignKeySQL(self, slot):
+        """
+        Generates foreign key expressions for relating a particular quad
+        term with the identifier hash.
+        """
+        self._foreign.append(
+            ("""ALTER TABLE %s ADD CONSTRAINT %s_%s_lookup
+                FOREIGN KEY (%s) REFERENCES %s (%s)""" %
+                  (self, self,
+                   self.columnNames[slot],
+                   self.columnNames[slot],
+                   self.idHash,
+                   self.idHash.columns[0][0]),
+             "ALTER TABLE %s DROP FOREIGN KEY %s_%s_lookup" %
+                  (self, self,
+                   self.columnNames[slot])))
+
+    def indexingStatements(self):
+        return [pair[0] for pair in self._indexing]
+
+    def removeIndexingStatements(self):
+        return [pair[1] for pair in self._indexing]
+
+    def foreignKeyStatements(self):
+        return [pair[0] for pair in self._foreign]
+
+    def removeForeignKeyStatements(self):
+        return [pair[1] for pair in self._foreign]
+
+    def order_column_names(self, positions):
+        ordering = []
+        for index in positions:
+            if index < len(self.columnNames):
+                namespec = self.columnNames[index]
+                if isinstance(namespec, tuple):
+                    namespec = namespec[0]
+
+                if namespec is not None:
+                    ordering.append(namespec)
+
+        return ordering
+
+        #return [self.columnNames[position] for
+        #  position in positions if self.columnNames[position] is not None]
+
+    def _cacheStatements(self):
+        self._indexing = []
+        self._foreign = []
         for slot in POSITION_LIST:
             if self.columnNames[slot]:
-                if create:
-                    idxSQLStmts.append("create INDEX %s%s on %s (%s)"%(self.columnNames[slot],self.indexSuffix,self,self.columnNames[slot]))
-                    if not ignoreFK:
-                        idxSQLStmts.append("ALTER TABLE %s ADD %s"%(self,self.foreignKeySQL(slot)[0]))
-                else:
-                    if not ignoreFK:
-                        idxSQLStmts.append("ALTER TABLE %s DROP FOREIGN KEY %s_%s_lookup"%(self,self,self.columnNames[slot]))
-                    idxSQLStmts.append("ALTER TABLE %s DROP INDEX %s%s"%(self,self.columnNames[slot],self.indexSuffix))
+                self._indexing.append(
+                    ("CREATE INDEX %s_%s%s ON %s (%s)" %
+                       (self.get_name(), self.columnNames[slot],
+                        self.indexSuffix, self.get_name(),
+                        self.columnNames[slot]),
+                     "DROP INDEX %s_%s%s ON %s" %
+                       (self.get_name(), self.columnNames[slot],
+                        self.indexSuffix, self.get_name())))
+
                 if self.termEnumerations[slot]:
-                    if create:
-                        idxSQLStmts.append("create INDEX %s_term%s on %s (%s_term)"%(self.columnNames[slot],self.indexSuffix,self,self.columnNames[slot]))
-                    else:
-                        idxSQLStmts.append("drop index %s_term%s on %s"%(self.columnNames[slot],self.indexSuffix,self))
+                    self._indexing.append(
+                        ("CREATE INDEX %s_%s_term%s ON %s (%s_term)" %
+                           (self.get_name(), self.columnNames[slot],
+                            self.indexSuffix, self.get_name(),
+                            self.columnNames[slot]),
+                         "DROP INDEX %s_%s_term%s ON %s" %
+                           (self.get_name(), self.columnNames[slot],
+                            self.indexSuffix, self.get_name())))
+
+                self.foreignKeySQL(slot)
+
         if len(self.columnNames) > 4:
-            for otherSlot in range(4,len(self.columnNames)):
+            for otherSlot in range(4, len(self.columnNames)):
                 colMD = self.columnNames[otherSlot]
-                if isinstance(colMD,tuple):
-                    colName,colType,indexStr = colMD
-                    if create:
-                        idxSQLStmts.append("create INDEX %s%s on %s (%s)"%(colName,self.indexSuffix,self,indexStr%colName))
-                    else:
-                        idxSQLStmts.append("drop index %s%s on %s"%(colName,self.indexSuffix,self))
+                if isinstance(colMD, tuple):
+                    colName, colType, indexStr = colMD
+                    self._indexing.append(
+                        ("CREATE INDEX %s_%s%s ON %s (%s)" %
+                           (self.get_name(), colName, self.indexSuffix,
+                            self.get_name(), indexStr % colName),
+                         "DROP INDEX %s_%s%s ON %s" %
+                           (self.get_name(), colName, self.indexSuffix,
+                            self.get_name())))
                 else:
-                    if create:
-                        idxSQLStmts.append("create INDEX %s%s on (%s)"%(colMD,self.indexSuffix,self,colMD))
-                        if not ignoreFK:
-                            idxSQLStmts.append("ALTER TABLE %s ADD %s"%(self,self.foreignKeySQL(otherSlot)[0]))
-                    else:
-                        if not ignoreFK:
-                            idxSQLStmts.append("ALTER TABLE %s DROP FOREIGN KEY %s_%s_lookup"%(self,self,colMD))
-                        idxSQLStmts.append("drop index %s%s on %s"%(colMD,self.indexSuffix,self))
+                    self._indexing.append(
+                        ("CREATE INDEX %s_%s%s ON %s (%s)" %
+                           (self.get_name(), colMD, self.indexSuffix,
+                            self.get_name(), colMD),
+                         "DROP INDEX %s_%s%s ON %s" %
+                           (self.get_name(), colMD, self.indexSuffix,
+                            self.get_name())))
+                    self.foreignKeySQL(otherSlot)
 
-        return idxSQLStmts
+        self._indexing.append(
+          ('CREATE UNIQUE INDEX %s_posc%s ON %s (%s)' %
+             (self.get_name(), self.indexSuffix, self.get_name(),
+              ', '.join(self.order_column_names(
+                (PREDICATE, OBJECT, SUBJECT, CONTEXT, DATATYPE_INDEX,
+                 LANGUAGE_INDEX)))),
+           'DROP INDEX %s_posc%s ON %s' %
+             (self.get_name(), self.indexSuffix, self.get_name())))
 
-    def createSQL(self):
+    def createStatements(self):
         """
         Generates a CREATE TABLE statement which creates a SQL table used for
-        persisting assertions associated with this partition
+        persisting assertions associated with this partition.
         """
+        statements = []
         columnSQLStmts = []
         for slot in POSITION_LIST:
             if self.columnNames[slot]:
-                columnSQLStmts.append("\t%s\tBIGINT unsigned not NULL"%(self.columnNames[slot]))
-                columnSQLStmts.append("\tINDEX %s%s (%s)"%(self.columnNames[slot],self.indexSuffix,self.columnNames[slot]))
+                columnSQLStmts.append("\t%s\t%s not NULL" %
+                  (self.columnNames[slot], self._hashFieldType))
                 if self.termEnumerations[slot]:
-                    columnSQLStmts.append("\t%s_term enum(%s) not NULL"%(self.columnNames[slot],','.join(["'%s'"%tType for tType in self.termEnumerations[slot]])))
-                    columnSQLStmts.append("\tINDEX %s_term%s (%s_term)"%(self.columnNames[slot],self.indexSuffix,self.columnNames[slot]))
-                columnSQLStmts.extend(self.foreignKeySQL(slot))
+                    if self.declareEnums:
+                        # This is disabled until PostgreSQL grows enums (8.3)
+                        if False:
+                          enumName = '%s_enum' % (self.columnNames[slot],)
+                          statements.append(
+                            'CREATE TYPE %s AS ENUM (%s)' %
+                            (enumName,
+                             ','.join(["'%s'" % tType for tType in
+                                        self.termEnumerations[slot]])))
+                        enumName = 'char'
+                        columnSQLStmts.append("\t%s_term %s not NULL" %
+                          (self.columnNames[slot], enumName))
+                    else:
+                        columnSQLStmts.append("\t%s_term enum(%s) not NULL" %
+                          (self.columnNames[slot],
+                           ','.join(["'%s'" % tType for tType in
+                                              self.termEnumerations[slot]])))
 
         if len(self.columnNames) > 4:
-            for otherSlot in range(4,len(self.columnNames)):
+            for otherSlot in range(4, len(self.columnNames)):
                 colMD = self.columnNames[otherSlot]
-                if isinstance(colMD,tuple):
-                    colName,colType,indexStr = colMD
-                    columnSQLStmts.append("\t%s %s"%(colName,colType))
-                    columnSQLStmts.append("\tINDEX %s%s (%s)"%(colName,self.indexSuffix,indexStr%colName))
+                if isinstance(colMD, tuple):
+                    colName, colType, indexStr = colMD
+                    columnSQLStmts.append("\t%s %s" % (colName, colType))
                 else:
-                    columnSQLStmts.append("\t%s BIGINT unsigned not NULL"%colMD)
-                    columnSQLStmts.append("\tINDEX %s%s (%s)"%(colMD,self.indexSuffix,colMD))
-                    columnSQLStmts.extend(self.foreignKeySQL(otherSlot))
+                    columnSQLStmts.append("\t%s %s unsigned not NULL" %
+                                          (self._hashFieldType, colMD))
 
-        return CREATE_BRP_TABLE%(
+        statements.append(CREATE_BRP_TABLE % (
             self,
-            ',\n'.join(columnSQLStmts)
-        )
+            ',\n'.join(columnSQLStmts),
+            self._engine))
+        return statements
 
     def _resetPendingInsertions(self):
         """
@@ -216,6 +310,12 @@ class BinaryRelationPartition(object):
         rt=[]
         if relations_only and self.objectPropertyTable:
             return "select * from %s"%repr(self)
+
+        if self.useSignedInts:
+            int_cast = 'BIGINT'
+        else:
+            int_cast = 'UNSIGNED BIGINT'
+
         for idx in range(len(POSITION_LIST)):
             rdfTermLabel=SlotPrefixes[idx]
             if idx < len(self.columnNames) and self.columnNames[idx]:
@@ -223,25 +323,37 @@ class BinaryRelationPartition(object):
                 rt.append(self.columnNames[idx]+' as %s'%rdfTermLabel)
                 if self.termEnumerations[idx]:
                     #there is a corresponding term enumeration
-                    rt.append(self.columnNames[idx]+'_term as %s_term'%rdfTermLabel)
+                    rt.append(self.columnNames[idx] +
+                              '_term as %s_term' % (rdfTermLabel,))
                 else:
                     #no corresponding term enumeration (hardcoded)
-                    rt.append("'%s' as %s_term"%(self.hardCodedResultTermsTypes[idx],
-                                                 rdfTermLabel))
+                    rt.append("CAST('%s' as CHAR) as %s_term" %
+                                (self.hardCodedResultTermsTypes[idx],
+                                 rdfTermLabel))
             else:
                 assert self.hardCodedResultFields[idx] == RDF.type
-                rt.append("'%s' as %s"%(normalizeValue(self.hardCodedResultFields[idx],'U'),
-                                        rdfTermLabel))
+                if not self.store.can_cast_bigint:
+                    rt.append("%s as %s" % (normalizeValue(
+                      self.hardCodedResultFields[idx], 'U',
+                      self.useSignedInts), rdfTermLabel))
+                else:
+                    rt.append("CAST('%s' as %s) as %s" % (normalizeValue(
+                      self.hardCodedResultFields[idx], 'U',
+                      self.useSignedInts), int_cast, rdfTermLabel))
                 if self.hardCodedResultTermsTypes[idx]:
-                    rt.append("'%s' as %s_term"%(self.hardCodedResultTermsTypes[idx],
-                                                 rdfTermLabel))
+                    rt.append("CAST('%s' as CHAR) as %s_term" %
+                                (self.hardCodedResultTermsTypes[idx],
+                                 rdfTermLabel))
         if not relations_only:
             if self.literalTable:
                 for i in self.columnNames[-2:]:
                     rt.append(i[0])
             else:
-                rt.append('NULL as data_type')
-                rt.append('NULL as language')
+                if not self.store.can_cast_bigint:
+                    rt.append('NULL as data_type')
+                else:
+                    rt.append('CAST(NULL as %s) as data_type' % (int_cast,))
+                rt.append('CAST(NULL as char(3)) as language')
         return "select %s from %s"%(', '.join(rt),repr(self))        
 
     def selectContextFields(self,first):
@@ -342,21 +454,33 @@ class BinaryRelationPartition(object):
 
                     if isinstance(queryTerm,list):
                         whereClauses.append("%s.%s"%(self,self.columnNames[idx])+" in (%s)"%','.join(['%s' for item in range(len(queryTerm))]))
-                        whereParameters.extend([normalizeValue(item,term2Letter(item)) for item in queryTerm])
+                        whereParameters.extend(
+                          [normalizeValue(item, term2Letter(item),
+                                          self.useSignedInts)
+                           for item in queryTerm])
                     else:
                         whereClauses.append("%s.%s"%(self,self.columnNames[idx])+" = %s")
-                        whereParameters.append(normalizeValue(queryTerm,term2Letter(queryTerm)))
+                        whereParameters.append(normalizeValue(
+                          queryTerm, term2Letter(queryTerm),
+                          self.useSignedInts))
 
                 if not idx in self.hardCodedResultTermsTypes and self.termEnumerations[idx] and not isinstance(queryTerm,list):
                     whereClauses.append("%s.%s_term"%(self,self.columnNames[idx])+" = %s")
                     whereParameters.append(term2Letter(queryTerm))
             elif idx >= len(POSITION_LIST) and len(self.columnNames) > len(POSITION_LIST) and queryTerm is not None:
-                compVal = idx == DATATYPE_INDEX and normalizeValue(queryTerm,term2Letter(queryTerm)) or queryTerm
+                compVal = idx == DATATYPE_INDEX and normalizeValue(
+                  queryTerm, term2Letter(queryTerm),
+                  self.useSignedInts) or queryTerm
                 whereClauses.append("%s.%s"%(self,self.columnNames[idx][0])+" = %s")
                 whereParameters.append(compVal)
 
         return ' AND '.join(whereClauses),whereParameters# + "#{%s}\n"%(str(queryPattern)),whereParameters
 
+    def listIdentifiers(self, quadSlots):
+        return []
+
+    def listLiterals(self, quadSlots):
+        return []
 
 class AssociativeBox(BinaryRelationPartition):
     """
@@ -388,6 +512,20 @@ class AssociativeBox(BinaryRelationPartition):
                 conSlot.md5Int,
                 term2Letter(conSlot.term))
 
+    def makeRowComponents(self, quadSlots):
+        subjSlot, predSlot, objSlot, conSlot = quadSlots
+        return (subjSlot.md5Int, subjSlot.termType,
+                objSlot.md5Int, objSlot.termType,
+                conSlot.md5Int, conSlot.termType)
+
+    def listIdentifiers(self, quadSlots):
+        subjSlot, predSlot, objSlot, conSlot = quadSlots
+
+        return [(subjSlot.md5Int, subjSlot.termType,
+                 subjSlot.normalizeTerm()),
+                (objSlot.md5Int, objSlot.termType, objSlot.normalizeTerm()),
+                (conSlot.md5Int, conSlot.termType, conSlot.normalizeTerm())]
+
     def extractIdentifiers(self,quadSlots):
         subjSlot,predSlot,objSlot,conSlot = quadSlots
         self.idHash.updateIdentifierQueue([
@@ -402,7 +540,6 @@ class NamedLiteralProperties(BinaryRelationPartition):
     """
     nameSuffix = 'literalProperties'
     termEnumerations=[NON_LITERALS,PREDICATE_NAMES,None,CONTEXT_TERMS]
-    columnNames = ['subject','predicate','object',CONTEXT_COLUMN,('data_type','BIGINT unsigned','%s'),('language','varchar(3)','%s(3)')]
     columnIntersectionList = [
                                (DATATYPE_INDEX,True),
                                (PREDICATE,True),
@@ -425,8 +562,15 @@ class NamedLiteralProperties(BinaryRelationPartition):
                     hash.columns[0][0])]
         return rt
 
-    def __init__(self,identifier,idHash,valueHash):
-        super(NamedLiteralProperties,self).__init__(identifier,idHash,valueHash)
+    def __init__(self, identifier, idHash, valueHash, store,
+                 useSignedInts=False, hashFieldType='BIGINT unsigned',
+                 engine='ENGINE=InnoDB', declareEnums=False):
+        self.columnNames = ['subject', 'predicate', 'object', CONTEXT_COLUMN,
+                            ('data_type', hashFieldType, '%s'),
+                            ('language', 'varchar(3)', '%s')]
+        super(NamedLiteralProperties, self).__init__(
+          identifier, idHash, valueHash, store, useSignedInts,
+          hashFieldType, engine, declareEnums)
         self.insertSQLCmds = {
            (False,False): self.insertRelationsSQLCMD(),
            (False,True) : self.insertRelationsSQLCMD(language=True),
@@ -494,7 +638,8 @@ class NamedLiteralProperties(BinaryRelationPartition):
 
     def compileQuadToParams(self,quadSlots):
         subjSlot,predSlot,objSlot,conSlot = quadSlots
-        dTypeParam = objSlot.term.datatype and normalizeValue(objSlot.term.datatype,'U') or None
+        dTypeParam = objSlot.term.datatype and normalizeValue(
+          objSlot.term.datatype, 'U', self.useSignedInts) or None
         langParam  = objSlot.term.language and objSlot.term.language or None
         rtList = [
                     subjSlot.md5Int,
@@ -509,10 +654,23 @@ class NamedLiteralProperties(BinaryRelationPartition):
                 rtList.append(item)
         return tuple(rtList)
 
+    def makeRowComponents(self, quadSlots):
+        subjSlot, predSlot, objSlot, conSlot = quadSlots
+        dTypeParam = objSlot.term.datatype and normalizeValue(
+          objSlot.term.datatype, 'U', self.useSignedInts) or None
+        langParam  = objSlot.term.language and objSlot.term.language or None
+        return (subjSlot.md5Int, subjSlot.termType,
+                predSlot.md5Int, predSlot.termType,
+                objSlot.md5Int,
+                conSlot.md5Int, conSlot.termType,
+                dTypeParam, langParam)
+
     def extractIdentifiers(self,quadSlots):
         """
         Test literal data type extraction
-        >>> from rdflib import RDF
+        >>> from rdflib.namespace import RDF
+        >>> from rdflib import Literal, BNode
+        >>> from rdfextras.store.FOPLRelationalModel.QuadSlot import genQuadSlots
         >>> class DummyClass:
         ...   def __init__(self,test=False):
         ...     self.test = test
@@ -537,6 +695,25 @@ class NamedLiteralProperties(BinaryRelationPartition):
             idTerms.append((objSlot.term.datatype,term2Letter(objSlot.term.datatype)))
         self.idHash.updateIdentifierQueue(idTerms)
         self.valueHash.updateIdentifierQueue([(objSlot.term,objSlot.termType)])
+
+    def listIdentifiers(self, quadSlots):
+        subjSlot, predSlot, objSlot, conSlot = quadSlots
+
+        idTerms = [(subjSlot.md5Int, subjSlot.termType,
+                    subjSlot.normalizeTerm()),
+                   (predSlot.md5Int, predSlot.termType,
+                    predSlot.normalizeTerm()),
+                   (conSlot.md5Int, conSlot.termType,
+                    conSlot.normalizeTerm())]
+        if objSlot.term.datatype:
+            dt = objSlot.getDatatypeQuadSlot()
+            idTerms.append((dt.md5Int, dt.termType, dt.normalizeTerm()))
+        return idTerms
+
+    def listLiterals(self, quadSlots):
+        subjSlot, predSlot, objSlot, conSlot = quadSlots
+
+        return [(objSlot.md5Int, objSlot.normalizeTerm())]
 
     def selectFields(self,first=False):
         return first and self._selectFieldsLeading or self._selectFieldsNonLeading
@@ -567,6 +744,23 @@ class NamedBinaryRelations(BinaryRelationPartition):
                 term2Letter(objSlot.term),
                 conSlot.md5Int,
                 term2Letter(conSlot.term))
+
+    def makeRowComponents(self, quadSlots):
+        subjSlot, predSlot, objSlot, conSlot = quadSlots
+        return (subjSlot.md5Int, subjSlot.termType,
+                predSlot.md5Int, predSlot.termType,
+                objSlot.md5Int, objSlot.termType,
+                conSlot.md5Int, conSlot.termType)
+
+    def listIdentifiers(self, quadSlots):
+        subjSlot, predSlot, objSlot, conSlot = quadSlots
+
+        return [(subjSlot.md5Int, subjSlot.termType,
+                 subjSlot.normalizeTerm()),
+                (predSlot.md5Int, predSlot.termType,
+                 predSlot.normalizeTerm()),
+                (objSlot.md5Int, objSlot.termType, objSlot.normalizeTerm()),
+                (conSlot.md5Int, conSlot.termType, conSlot.normalizeTerm())]
 
     def extractIdentifiers(self,quadSlots):
         subjSlot,predSlot,objSlot,conSlot = quadSlots

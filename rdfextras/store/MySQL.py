@@ -1,52 +1,69 @@
 from __future__ import generators
-from rdflib import BNode, Literal, URIRef, RDF, Variable
-from rdflib.store import Store,VALID_STORE, CORRUPTED_STORE, NO_STORE
-
+from rdflib.term import BNode
+from rdflib.term import Literal
+from rdflib.term import URIRef
+from rdflib.term import Variable
+from rdflib.term import XSDToPython
+from rdflib.store import Store
+from rdflib.store import CORRUPTED_STORE
+from rdflib.store import NO_STORE
+from rdflib.store import VALID_STORE
+from pprint import pprint
 import sys
 try:
     import MySQLdb
 except ImportError:
     import warnings
     warnings.warn("MySQLdb is not installed")
-    __test__=False
+    #__test__=False
 
 try: 
-    from hashlib import sha1 as sha
-except:
-    from sha import sha 
+    from hashlib import sha1 
+except ImportError:
+    from sha import new as sha1
 
+
+from rdfextras.tools.termutils import PREDICATE
+from rdfextras.tools.termutils import CONTEXT
+from rdfextras.tools.termutils import constructGraph
+from rdfextras.tools.termutils import escape_quotes as EscapeQuotes
+from rdfextras.tools.termutils import TERM_INSTANTIATION_DICT
 from rdflib.graph import QuotedGraph
-from REGEXMatching import REGEXTerm, NATIVE_REGEX
-
-from FOPLRelationalModel.RelationalHash import IdentifierHash, LiteralHash, RelationalHash, GarbageCollectionQUERY
-from term_utils import TERM_INSTANCIATION_DICT, constructGraph
-from AbstractSQLStore import INTERNED_PREFIX
-
-from rdfextras.store.FOPLRelationalModel.QuadSlot import normalizeNode, genQuadSlots, CONTEXT
-
-from rdfextras.store.FOPLRelationalModel.BinaryRelationPartition import NamedBinaryRelations, NamedLiteralProperties, AssociativeBox, BinaryRelationPartitionCoverage, PatternResolution
+from rdfextras.store.REGEXMatching import NATIVE_REGEX
+from rdfextras.store.REGEXMatching import REGEXTerm
+from rdfextras.store.AbstractSQLStore import INTERNED_PREFIX
+from FOPLRelationalModel.BinaryRelationPartition import AssociativeBox
+from FOPLRelationalModel.BinaryRelationPartition import NamedLiteralProperties
+from FOPLRelationalModel.BinaryRelationPartition import NamedBinaryRelations
+from FOPLRelationalModel.BinaryRelationPartition import BinaryRelationPartitionCoverage
+from FOPLRelationalModel.BinaryRelationPartition import PatternResolution
+from FOPLRelationalModel.QuadSlot import genQuadSlots
+from FOPLRelationalModel.QuadSlot import normalizeNode
+from FOPLRelationalModel.RelationalHash import IdentifierHash
+from FOPLRelationalModel.RelationalHash import LiteralHash
+from FOPLRelationalModel.RelationalHash import GarbageCollectionQUERY
+# from rdflib.sparql.sql.RdfSqlBuilder import DEFAULT_OPT_FLAGS
+# from rdflib.sparql.sql.DatabaseStats import LoadCachedStats, GetDatabaseStats
+from rdflib.namespace import OWL
+from rdflib.namespace import RDF
+from rdflib.namespace import RDFS
+import cPickle, time, datetime #BE: for performance logging
 
 Any = None
 
-def ParseConfigurationString(config_string):
-    """
-    Parses a configuration string in the form:
-    key1=val1,key2=val2,key3=val3,...
-    The following configuration keys are expected (not all are required):
-    user
-    password
-    db
-    host
-    port (optional - defaults to 3306)
-    """
-    kvDict = dict([(part.split('=')[0],part.split('=')[-1]) for part in config_string.split(',')])
-    for requiredKey in ['user','db','host']:
-        assert requiredKey in kvDict
-    if 'port' not in kvDict:
-        kvDict['port']=3306
-    if 'password' not in kvDict:
-        kvDict['password']=''
-    return kvDict
+class TimeStamp(object):
+  def __init__(self):
+    self.start = datetime.datetime.now()
+    self.checkpoint = self.start
+
+  def delta(self):
+    print >> sys.stderr, 'LAST DELTA:', datetime.datetime.now() - self.checkpoint
+    self.checkpoint = datetime.datetime.now()
+
+  def elapsed(self):
+    print >> sys.stderr, 'ELAPSED:', datetime.datetime.now() - self.start
+    self.start = datetime.datetime.now()
+    self.checkpoint = self.start
 
 def createTerm(termString,termType,store,objLanguage=None,objDatatype=None):
     if termType == 'L':
@@ -76,7 +93,7 @@ def createTerm(termString,termType,store,objLanguage=None,objDatatype=None):
             return cache
         else:
             #store.cacheMisses += 1
-            rt = TERM_INSTANCIATION_DICT[termType](termString)
+            rt = TERM_INSTANTIATION_DICT[termType](termString)
             store.bnodeCache[(termString)] = rt
             return rt
     elif termType =='U':
@@ -96,7 +113,7 @@ def createTerm(termString,termType,store,objLanguage=None,objDatatype=None):
             return cache
         else:
             #store.cacheMisses += 1
-            rt = TERM_INSTANCIATION_DICT[termType](termString)
+            rt = TERM_INSTANTIATION_DICT[termType](termString)
             store.otherCache[(termType,termString)] = rt
             return rt
 
@@ -137,17 +154,17 @@ class _variable_cluster(object):
     Parameters:
 
     - `component_name`: A name prefix used to construct the SQL phrases
-    	produced by this instance.  This prefix must be unique to the set of
-    	`_variable_cluster` instances corresponding to a complete SPARQL
-    	query.  These prefixes might be of the form "component_N" for some N,
-    	and are used to identify which SQL columns correspond to which
-    	SPARQL variable.
+       produced by this instance.  This prefix must be unique to the set of
+       `_variable_cluster` instances corresponding to a complete SPARQL
+       query.  These prefixes might be of the form "component_N" for some N,
+       and are used to identify which SQL columns correspond to which
+       SPARQL variable.
     - `db_prefix`: A name prefix used to fully qualify SQL table references
-    	in the current DB.
+       in the current DB.
     - `subject`, `predicate`, `object_`, `context`: The subject, predicate,
-    	object, and the name of the graph for the current triple pattern,
-    	respectively.  Each of these will be RDFLib `node` objects, and at
-    	least one should be an RDFLib `variable`.
+       object, and the name of the graph for the current triple pattern,
+       respectively.  Each of these will be RDFLib `node` objects, and at
+       least one should be an RDFLib `variable`.
     '''
 
     self.component_name = component_name
@@ -158,6 +175,7 @@ class _variable_cluster(object):
     self.object_ = object_
     self.object_name = 'object'
     self.context = context
+    self._node_pickler = None
 
     # If the predicate of this triple pattern is `rdf:type`, then the SQL
     # table uses 'member' for the subject and 'class' for the object.
@@ -165,6 +183,11 @@ class _variable_cluster(object):
       self.subject_name = 'member'
       self.object_name = 'class'
 
+    self.table_subset = set(['associativeBox', 'literalProperties',
+                             'relations'])
+    '''Set of triple tables to query to satisfy this pattern.  This starts
+    with all of them; options can be eliminated as more information is
+    learned.'''
     self.subset_name = None
     '''String indicating the base name of the table or view containing RDF
     statements that this triple pattern will reference.'''
@@ -186,6 +209,11 @@ class _variable_cluster(object):
     self.object_columns = []
     '''SQL column phrases that are relevant to the object of the triple
     pattern that this object represents.'''
+    self.join_fragment_template = (
+      '%s_%%s as %s_statements' % (self.db_prefix, self.component_name,))
+    '''Template for the SQL phrase that defines a table to use for the
+    triple pattern that this object represents in the "from" clause of the
+    full SQL query.'''
     self.join_fragment = None
     '''SQL phrase that defines the table to use for the triple pattern that
     this object represents in the "from" clause of the full SQL query.'''
@@ -211,14 +239,14 @@ class _variable_cluster(object):
     '''
     Determine the most specific RDF statement subset that this triple
     pattern can use, based on the types of the parts of the statement and
-    the information provided about properties provided by the MySQL store
-    (in the `store` parameter).  This is crucial to optimization, because
+    the information provided about properties provided by the SQL store (in
+    the `store` parameter).  This is crucial to optimization, because
     specific subsets (SQL tables such as the 'relations' table) are very
     efficient but general subsets (SQL views such as the
     'URI_or_literal_objects' view) are very inefficient.
 
     :Parameters:
-    - `store`: RDFLib MySQL store containing the target data.
+    - `store`: RDFLib SQL store containing the target data.
     '''
 
     if isinstance(self.subject, Literal):
@@ -232,23 +260,31 @@ class _variable_cluster(object):
       if RDF.type == self.predicate:
         # TODO: find a constant for these somewhere
         self.subset_name = "associativeBox"
+        self.table_subset = set([self.subset_name])
       elif isinstance(self.object_, Literal):
         self.subset_name = "literalProperties"
+        self.table_subset = set([self.subset_name])
       elif isinstance(self.object_, Variable):
         if self.predicate in store.literal_properties:
           self.subset_name = "literalProperties"
+          self.table_subset = set([self.subset_name])
         elif self.predicate in store.resource_properties:
           self.subset_name = "relations"
+          self.table_subset = set([self.subset_name])
         else:
           self.subset_name = "URI_or_literal_object"
+          self.table_subset.remove('associativeBox')
       else:
         self.subset_name = "relations"
+        self.table_subset = set([self.subset_name])
 
     elif isinstance(self.predicate, Variable):
       if isinstance(self.object_, Literal):
         self.subset_name = "literalProperties"
+        self.table_subset = set([self.subset_name])
       elif not isinstance(self.object_, Variable):
         self.subset_name = "relation_or_associativeBox"
+        self.table_subset.remove('literalProperties')
       else:
         self.subset_name = "all"
       
@@ -278,6 +314,7 @@ class _variable_cluster(object):
 
       if 'URI_or_literal_object' == self.subset_name:
         self.subset_name = 'relations'
+        self.table_subset = set([self.subset_name])
         self.join_fragment = (self.db_prefix + '_' + self.subset_name +
           ' as %s_statements' % (self.component_name,))
 
@@ -299,8 +336,8 @@ class _variable_cluster(object):
     - `variable`: The variable to manage.
     - `variable_bindings`: A map of previously existing variables.
     - `role`: String indicating the role that this variable plays in the
-    	managed triple pattern.  This should be one of 'subject', 'predicate',
-    	or 'context'.
+       managed triple pattern.  This should be one of 'subject', 'predicate',
+       or 'context'.
 
     Returns a list containing the new variable name and manager tuple, or an
     empty list if this is a previously seen variable.
@@ -358,17 +395,18 @@ class _variable_cluster(object):
       self.variable_columns.append((variable_name, column_name, False, self))
       return [(variable_name, self)]
 
-  def make_SQL_components(self, variable_bindings, variable_clusters):
+  def make_SQL_components(self, variable_bindings, variable_clusters,
+                          useSignedInts):
     '''
     Process all the terms from the managed RDF triple pattern in the
     appropriate context.
 
     :Parameters:
     - `variable_bindings`: Map of existing variable bindings.  It is crucial
-    	that the caller updates this map after each triple pattern is
-    	processed.
+       that the caller updates this map after each triple pattern is
+       processed.
     - `variable_clusters`: List of existing `_variable_cluster` objects that
-    	manage variables.
+       manage variables.
 
     Returns a list of 2-tuples consisting of newly managed variables and a
     reference to this object (which may be empty if there are no new
@@ -392,7 +430,7 @@ class _variable_cluster(object):
     elif not isinstance(self.subject, Literal):
       self.where_fragments.append('%s_statements.%s = %%s' %
         (self.component_name, self.subject_name,))
-      self.substitutions.append(normalizeNode(self.subject))
+      self.substitutions.append(normalizeNode(self.subject, useSignedInts))
     else:
       raise ValueError('The subject of a triple pattern cannot be a literal.')
 
@@ -402,7 +440,7 @@ class _variable_cluster(object):
     elif RDF.type != self.predicate:
       self.where_fragments.append('%s_statements.predicate = %%s' %
         (self.component_name,))
-      self.substitutions.append(normalizeNode(self.predicate))
+      self.substitutions.append(normalizeNode(self.predicate, useSignedInts))
 
     if isinstance(self.context, Variable):
       local_binding_list.extend(
@@ -410,7 +448,7 @@ class _variable_cluster(object):
     elif isinstance(self.context, URIRef) or isinstance(self.context, BNode):
       self.where_fragments.append('%s_statements.context = %%s' %
         (self.component_name,))
-      self.substitutions.append(normalizeNode(self.context))
+      self.substitutions.append(normalizeNode(self.context, useSignedInts))
 
     # Process the object of the triple pattern manually, as it could be a
     # literal and so requires special handling to query properly.
@@ -460,31 +498,75 @@ class _variable_cluster(object):
     else:
       self.where_fragments.append('%s_statements.%s = %%s' %
         (self.component_name, self.object_name,))
-      self.substitutions.append(normalizeNode(self.object_))
+      self.substitutions.append(normalizeNode(self.object_, useSignedInts))
 
     return local_binding_list
 
-class MySQL(Store):
+class SQL(Store):
     """
-    MySQL implementation of FOPL Relational Model as an rdflib Store
+    Abstract SQL implementation of the FOPL Relational Model as an rdflib
+    Store.
     """
     context_aware = True
     formula_aware = True
     transaction_aware = True
     regex_matching = NATIVE_REGEX
     batch_unification = True
-    def __init__(self, identifier=None, configuration=None,debug=False):
+    _Store__node_pickler = None
+    def __init__(self, identifier=None, configuration=None,
+                 debug=False, engine="ENGINE=InnoDB",
+                 useSignedInts=False, hashFieldType='BIGINT unsigned',
+                 declareEnums=False, perfLog=False,
+                 optimizations=None,
+                 scanForDatatypes=False):
+        self.dataTypes={}
+        self.scanForDatatypes=scanForDatatypes
+        self.optimizations=optimizations
         self.debug = debug
+        if debug:
+          self.timestamp = TimeStamp()
+                                
+        #BE: performance logging
+        self.perfLog = perfLog
+        if self.perfLog:
+            self.resetPerfLog()    
+
         self.identifier = identifier and identifier or 'hardcoded'
-        #Use only the first 10 bytes of the digest
-        self._internedId = INTERNED_PREFIX + sha(self.identifier).hexdigest()[:10]
         
+        #Use only the first 10 bytes of the digest
+        self._internedId = INTERNED_PREFIX + sha1(self.identifier).hexdigest()[:10]
+
+        self.engine = engine
+        self.showDBsCommand = 'SHOW DATABASES'
+        self.findTablesCommand = "SHOW TABLES LIKE '%s'"
+        self.findViewsCommand = "SHOW TABLES LIKE '%s'"
+        # TODO: Note, the following three members are MySQL-specific, and
+        # must be overridden for other databases.
+        self.defaultDB = 'mysql'
+        self.default_port = 3306
+        self.select_modifier = 'straight_join'
+        self.can_cast_bigint = False
+
+        self.INDEX_NS_BINDS_TABLE = \
+          'CREATE INDEX uri_index on %s_namespace_binds (uri(100))'
+
         #Setup FOPL RelationalModel objects
-        self.idHash = IdentifierHash(self._internedId)
-        self.valueHash = LiteralHash(self._internedId)
-        self.binaryRelations = NamedBinaryRelations(self._internedId,self.idHash,self.valueHash)
-        self.literalProperties = NamedLiteralProperties(self._internedId,self.idHash,self.valueHash)
-        self.aboxAssertions = AssociativeBox(self._internedId,self.idHash,self.valueHash)
+        self.useSignedInts = useSignedInts
+        # TODO: derive this from `self.useSignedInts`?
+        self.hashFieldType = hashFieldType
+        self.idHash = IdentifierHash(self._internedId,
+          self.useSignedInts, self.hashFieldType, self.engine, declareEnums)
+        self.valueHash = LiteralHash(self._internedId,
+          self.useSignedInts, self.hashFieldType, self.engine, declareEnums)
+        self.binaryRelations = NamedBinaryRelations(
+          self._internedId, self.idHash, self.valueHash, self,
+          self.useSignedInts, self.hashFieldType, self.engine, declareEnums)
+        self.literalProperties = NamedLiteralProperties(
+          self._internedId, self.idHash, self.valueHash, self,
+          self.useSignedInts, self.hashFieldType, self.engine, declareEnums)
+        self.aboxAssertions = AssociativeBox(
+          self._internedId, self.idHash, self.valueHash, self,
+          self.useSignedInts, self.hashFieldType, self.engine, declareEnums)
                 
         self.tables = [
                        self.binaryRelations,
@@ -525,9 +607,9 @@ class MySQL(Store):
         #of the triple pattern is
         self.STRONGLY_TYPED_TERMS = False
         self._db = None
-        self.configuration = None
         if configuration is not None:
-            self.open(configuration)
+            #self.open(configuration)
+            self._set_connection_parameters(configuration=configuration)
 
 
         self.cacheHits = 0
@@ -544,29 +626,114 @@ class MySQL(Store):
         self.resource_properties = set()
         '''set of URIRefs of those RDF properties which are known to range
         over resources.'''
+        
+        #update the two sets above with defaults
+        if False: # TODO: Update this to reflect the new namespace layout
+          self.literal_properties.update( OWL.literalProperties)
+          self.literal_properties.update( RDF.literalProperties)
+          self.literal_properties.update( RDFS.literalProperties)
+          self.resource_properties.update(OWL.resourceProperties)
+          self.resource_properties.update(RDF.resourceProperties)
+          self.resource_properties.update(RDFS.resourceProperties)
+
+        self.length = None
+
+    def scanProperties(self):
+        """
+        Via introspection, update the set of literal and resource properties
+        using the assertions in the store
+        """
+        litTable   = self.literalProperties
+        relTable   = self.binaryRelations
+        idObjTable = self.idHash
+        
+        #@todo: perhaps these column names should not be hard-coded?
+        idField = "id"
+        lexField = "lexical"
+        
+        cursor = self._db.cursor()
+        
+        litProps = set()
+        cursor.execute(""" 
+            SELECT DISTINCT i.%s AS pred
+            FROM %s t INNER JOIN %s i ON t.%s = i.%s;""" % 
+            (lexField, litTable, idObjTable, litTable.columnNames[PREDICATE], idField))
+        for (pred,) in cursor.fetchall():
+            self.literal_properties.add(pred)
+        
+        resProps = set()
+        cursor.execute(""" 
+            SELECT DISTINCT i.%s AS pred
+            FROM %s t INNER JOIN %s i ON t.%s = i.%s;""" % 
+            (lexField, relTable, idObjTable, relTable.columnNames[PREDICATE], idField))
+        for (pred,) in cursor.fetchall():
+            self.resource_properties.add(pred)
+            
+    def resetPerfLog(self, clearCache=False): #BE: for performance logging
+        self.mainQueryCount = 0
+        self.mainQueryTime = 0
+        self.rowPrepQueryCount = 0
+        self.rowPrepQueryTime = 0
+        self.mainQueries = []
+        #TODO: clear the MySQL query cache to get more consistent results
+        # RESET QUERY CACHE -- see http://dev.mysql.com/doc/refman/5.0/en/reset.html
+        if clearCache:
+            c=self._db.cursor()
+            self.executeSQL(c, "RESET QUERY CACHE")
+       
+    def getPerfLog(self): #BE: for performance logging
+        if self.perfLog:
+            return dict(mainQueryCount=self.mainQueryCount,
+                        mainQueryTime=self.mainQueryTime,
+                        rowPrepQueryCount=self.rowPrepQueryCount,
+                        rowPrepQueryTime=self.rowPrepQueryTime,
+                        sqlQueries=self.mainQueries)
+        return dict();
+
+    def log_statement(self, statement):
+        if self.debug:
+            self.timestamp.delta()
+            print >> sys.stderr, statement
+
+            try:
+                self.statement_log.write(statement + "\n")
+            except Exception:
+                pass
 
     def executeSQL(self,cursor,qStr,params=None,paramList=False):
         """
-        Overridded in order to pass params seperate from query for MySQLdb
-        to optimize
+        Overridden in order to pass params seperate from query for the
+        database to optimize.
         """
         #self._db.autocommit(False)
+        self.log_statement(qStr)
+        #return # XXX: Temporary!
         if params is None:
             cursor.execute(qStr)
         elif paramList:
             cursor.executemany(qStr,[tuple(item) for item in params])
         else:
             cursor.execute(qStr,tuple(params))
-            
-    def _dbState(self,db,configDict):
+
+    def note_modified(self):
+        """Indicate that the triples in this store have been modified.  This
+        should be called after any operation that could add or remove
+        triples in the store."""
+
+        self.length = None
+
+    def _dbState(self, db):
         c=db.cursor()
-        c.execute("""SHOW DATABASES""")
+        self.log_statement(self.showDBsCommand)
+        self.executeSQL(c, self.showDBsCommand)
         #FIXME This is a character set hack.  See: http://sourceforge.net/forum/forum.php?thread_id=1448424&forum_id=70461
         #self._db.charset = 'utf8'
-        rt = c.fetchall()
-        if (configDict['db'].encode('utf-8'),) in rt:
+        if (self.config['db'].encode('utf-8'),) in [
+              tuple(item) for item in c.fetchall()]:
             for tn in self.tables:
-                c.execute("""show tables like '%s'"""%(tn,))
+                statement = self.findTablesCommand % (tn,) 
+                self.log_statement(statement)
+                self.executeSQL(c, statement)
                 rt=c.fetchall()
                 if not rt:
                     sys.stderr.write("table %s Doesn't exist\n" % (tn));
@@ -588,10 +755,105 @@ class MySQL(Store):
                                 for t in tables]))
             if self.debug:
                 print >> sys.stderr, "## Creating View ##\n",query
-            cursor.execute(query)
+            self.executeSQL(cursor, query)
+
+    def _parse_configuration_string(self, config_string):
+        """
+        Parses a configuration string in the form:
+        key1=val1,key2=val2,key3=val3,...
+        The following configuration keys are expected (not all are required):
+        user
+        password
+        db
+        host
+        port (optional - defaults to 3306)
+        """
+        kvDict = {}
+        for part in config_string.split(','):
+            assignment = part.split('=')
+            kvDict[assignment[0]] = assignment[-1]
+
+        for requiredKey in ['user', 'db', 'host']:
+            assert requiredKey in kvDict
+        if 'port' not in kvDict:
+            kvDict['port'] = self.default_port
+        if 'password' not in kvDict:
+            kvDict['password'] = ''
+        return kvDict
+
+    def _set_connection_parameters(self, db=None, user=None, passwd=None,
+                                   port=None, host=None, configuration=None):
+        if configuration is not None:
+            self.config = self._parse_configuration_string(configuration)
+        else:
+            self.config = dict(user=user, db=db, host=host, port=port,
+                               password=passwd)
+
+    def _connect(self, db=None):
+        raise NotImplementedError('SQL is an abstract base class.')
+
+    def _set_db(self, db):
+        self._db = db
 
     #Database Management Methods
-    def open(self, configuration, create=False):
+    def create(self, configuration=None, populate=True):
+        if configuration is not None:
+            self._set_connection_parameters(configuration=configuration)
+        test_db = self._connect(self.defaultDB)
+        c=test_db.cursor()
+        self.executeSQL(c, 'COMMIT')
+        self.executeSQL(c, self.showDBsCommand)
+        if not (self.config['db'].encode('utf-8'),) in [
+                tuple(item) for item in c.fetchall()]:
+            print >> sys.stderr, "creating %s (doesn't exist)"%(self.config['db'])
+            self.executeSQL(c, "CREATE DATABASE %s" % (self.config['db'],))
+        c.close()
+        test_db.close()
+
+        db = self._connect()
+        c=db.cursor()
+        self.executeSQL(c, 'COMMIT')
+        self.executeSQL(c, 'START TRANSACTION')
+        self.executeSQL(c, CREATE_NS_BINDS_TABLE %
+                             (self._internedId, self.engine))
+        self.executeSQL(c, self.INDEX_NS_BINDS_TABLE % (self._internedId,))
+        for kb in self.createTables:
+            for statement in kb.createStatements():
+                self.executeSQL(c, statement)
+
+            if populate:
+                for statement in kb.defaultStatements():
+                    self.executeSQL(c, statement)
+        self._createViews(c)
+        self.executeSQL(c, 'COMMIT')
+        c.close()
+        self._set_db(db)
+
+    def applyIndices(self):
+        c = self._db.cursor()
+        for kb in self.createTables:
+            for statement in kb.indexingStatements():
+                self.executeSQL(c, statement)
+
+    def removeIndices(self):
+        c = self._db.cursor()
+        for kb in self.createTables:
+            for statement in kb.removeIndexingStatements():
+                self.executeSQL(c, statement)
+
+    def applyForeignKeys(self):
+        c = self._db.cursor()
+        for kb in self.createTables:
+            for statement in kb.foreignKeyStatements():
+                self.executeSQL(c, statement)
+
+    def removeForeignKeys(self):
+        c = self._db.cursor()
+        for kb in self.createTables:
+            for statement in kb.removeForeignKeyStatements():
+                self.executeSQL(c, statement)
+
+    def open(self, configuration=None, create=False):
         """
         Opens the store specified by the configuration string. If
         create is True a store will be created if it does not already
@@ -600,147 +862,131 @@ class MySQL(Store):
         exists, but there is insufficient permissions to open the
         store.
         """
-        self.configuration = configuration
-        configDict = ParseConfigurationString(configuration)
+        if self._db is not None:
+            self._db.close()
+        if configuration is not None:
+            self._set_connection_parameters(configuration=configuration)
         if create:
-            test_db = MySQLdb.connect(user=configDict['user'],
-                                      passwd=configDict['password'],
-                                      db='test',
-                                      port=configDict['port'],
-                                      host=configDict['host'],
-                                      #use_unicode=True,
-                                      #read_default_file='/etc/my-client.cnf'
-                                      )
-            c=test_db.cursor()
-            c.execute("""SET AUTOCOMMIT=0""")
-            c.execute("""SHOW DATABASES""")
-            if not (configDict['db'].encode('utf-8'),) in c.fetchall():
-                print >> sys.stderr, "creating %s (doesn't exist)"%(configDict['db'])
-                c.execute("""CREATE DATABASE %s"""%(configDict['db'],))
-                test_db.commit()
-                c.close()
-                test_db.close()
-
-            db = MySQLdb.connect(user = configDict['user'],
-                                 passwd = configDict['password'],
-                                 db=configDict['db'],
-                                 port=configDict['port'],
-                                 host=configDict['host'],
-                                 #use_unicode=True,
-                                 #read_default_file='/etc/my-client.cnf'
-                                 )
-            c=db.cursor()
-            c.execute("""SET AUTOCOMMIT=0""")
-            c.execute(CREATE_NS_BINDS_TABLE%(self._internedId))
-            for kb in self.createTables:
-                c.execute(kb.createSQL())
-                if isinstance(kb,RelationalHash) and kb.defaultSQL():
-                    c.execute(kb.defaultSQL())
-            self._createViews(c)
-            db.commit()
-            c.close()
-            db.close()
+            self.create()
+            self.applyIndices()
+            self.applyForeignKeys()
         else:
             #This branch is needed for backward compatibility
             #which didn't use SQL views
-            _db=MySQLdb.connect(user = configDict['user'],
-                                passwd = configDict['password'],
-                                db=configDict['db'],
-                                port=configDict['port'],
-                                host=configDict['host'])
-            if self._dbState(_db,configDict) == VALID_STORE:
+            _db=self._connect()
+            if self._dbState(_db) == VALID_STORE:
                 c=_db.cursor()
-                c.execute("""SET AUTOCOMMIT=0""")
+                self.executeSQL(c, 'COMMIT')
+                self.executeSQL(c, 'START TRANSACTION')
                 existingViews=[]
                 #check which views already exist
                 views=[]
                 for suffix in self.viewCreationDict:
                     view = self._internedId+suffix
                     views.append(view)
-                    c.execute("""show tables like '%s'"""%(view,))
+                    self.executeSQL(c, self.findViewsCommand % (view,))
                     rt=c.fetchall()
                     if rt:
                         existingViews.append(view)
                 c.close()
+                
+                if self.scanForDatatypes:
+                    cursor=_db.cursor()
+                    cursor.execute(""" 
+                        SELECT DISTINCT i.id, i.lexical
+                        FROM %s lp INNER JOIN 
+                            %s i ON lp.data_type = i.id;""" %(self.literalProperties, 
+                                                              self.idHash))
+                    for (id,text) in cursor.fetchall():
+                        self.dataTypes[id] = text
+                    cursor.close()
+                else:
+                    self.dataTypes=dict([(normalizeNode(dType, 
+                                                        self.useSignedInts),dType) 
+                                                for dType in XSDToPython.keys()])
+                    self.scanForDatatypes={}
                 _db.close()
                 if not existingViews:
                     #None of the views have been defined - so this is
                     #an old (but valid) store
                     #we need to create the missing views 
-                    db = MySQLdb.connect(user = configDict['user'],
-                                         passwd = configDict['password'],
-                                         db=configDict['db'],
-                                         port=configDict['port'],
-                                         host=configDict['host'])
+                    db = self._connect()
                     c=db.cursor()
-                    c.execute("""SET AUTOCOMMIT=0""")
+                    self.executeSQL(c, 'COMMIT')
+                    self.executeSQL(c, 'START TRANSACTION')
                     self._createViews(c)
                     db.commit()
                     c.close()
                 elif len(existingViews)!=len(views):
-                    #Not all the view have been setup
+                    #Not all the views have been setup
                     return CORRUPTED_STORE                        
-        try:
-            port = int(configDict['port'])
-        except:
-            raise ArithmeticError('MySQL port must be a valid integer')
-        self._db = MySQLdb.connect(user = configDict['user'],
-                                   passwd = configDict['password'],
-                                   db=configDict['db'],
-                                   port=port,
-                                   host=configDict['host'],
-                                   #use_unicode=True,
-                                   #read_default_file='/etc/my.cnf'
-                                  )
-        self._db.autocommit(False)
-        return self._dbState(self._db,configDict)
+        self._set_db(self._connect())
+        c = self._db.cursor()
+        self.executeSQL(c, 'COMMIT')
+        #self._db.autocommit(False)
+        
+        #Manage triple pattern statistics
+        # FIXME: depends on tools packages
+        # self.stats = None
+        # statsFName = self.config.get('sparqlStatsFile')
+        # if statsFName:
+        #     self.stats = LoadCachedStats(statsFName)
+        #     if not self.stats:
+        #         #Need to generate DB statistics for SPARQL
+        #         self.stats = GetDatabaseStats(self)
+        #         f = open(statsFName, 'w')
+        #         cPickle.dump(version, f)
+        #         cPickle.dump(self.stats, f)
+        #         f.close()
+        
+        return self._dbState(self._db)
 
-    def destroy(self, configuration):
+    def destroy(self, configuration=None):
         """
         FIXME: Add documentation
         """
-        configDict = ParseConfigurationString(configuration)
-        msql_db = MySQLdb.connect(user=configDict['user'],
-                                passwd=configDict['password'],
-                                db=configDict['db'],
-                                port=configDict['port'],
-                                host=configDict['host']
-                                )
-        msql_db.autocommit(False)
-        c=msql_db.cursor()
+        if configuration is not None:
+            self._set_connection_parameters(configuration=configuration)
+        db = self._connect()
+        #db.autocommit(False)
+        c=db.cursor()
+        self.executeSQL(c, 'COMMIT')
+        self.executeSQL(c, 'START TRANSACTION')
+
+        for suffix in self.viewCreationDict:
+            view = self._internedId+suffix
+            try:
+                self.executeSQL(c, 'DROP view %s' % (view,))
+            except Exception, e:
+                print >> sys.stderr, "unable to drop view: %s"%(view)
+                print >> sys.stderr, e
+
         for tbl in self.tables + ["%s_namespace_binds"%self._internedId]:
             try:
-                c.execute('DROP table %s'%tbl)
+                self.executeSQL(c, 'DROP table %s' % (tbl,))
                 #print "dropped table: %s"%(tblsuffix%(self._internedId))
             except Exception, e:
                 print >> sys.stderr, "unable to drop table: %s"%(tbl)
                 print >> sys.stderr, e
 
-        for suffix in self.viewCreationDict:
-            view = self._internedId+suffix
-            try:
-                c.execute('DROP view %s'%view)
-            except Exception, e:
-                print >> sys.stderr, "unable to drop table: %s"%(view)
-                print >> sys.stderr, e
-
         #Note, this only removes the associated tables for the closed world universe given by the identifier
-        print >> sys.stderr, "Destroyed Close World Universe %s ( in MySQL database %s)"%(self.identifier,configDict['db'])
-        msql_db.commit()
-        msql_db.close()
+        # print >> sys.stderr, "Destroyed Close World Universe %s ( in SQL database %s)"%(self.identifier,self.config['db'])
+        self.executeSQL(c, 'COMMIT')
+        db.close()
+        self.note_modified()
 
     def batch_unify(self, patterns):
         """
         Perform RDF triple store-level unification of a list of triple
         patterns (4-item tuples which correspond to a SPARQL triple pattern
-        with an additional constraint for the graph name).  For the MySQL
+        with an additional constraint for the graph name).  For the SQL
         backend, this method compiles the list of triple patterns into SQL
         statements that obtain bindings for all the variables in the list of
         triples patterns.
 
         :Parameters:
         - `patterns`: a list of 4-item tuples where any of the items can be
-        	one of: Variable, URIRef, BNode, or Literal.
+           one of: Variable, URIRef, BNode, or Literal.
         
         Returns a generator over dictionaries of solutions to the list of
         triple patterns.  Each dictionary binds the variables in the triple
@@ -753,11 +999,20 @@ class MySQL(Store):
         variable_bindings = {}
         variable_clusters = []
 
+        #BE: this appears to be project-specific and shouldn't be hardcoded here
+        filterNS = 'tag:info@semanticdb.ccf.org,2008:FilterTerms#'
+        filter_patterns = []
+
         # Unpack each triple pattern, and for each pattern, create a
         # variable cluster for managing the variables in that triple
         # pattern.
         index = 0
         for subject, predicate, object_, context in patterns:
+          if (URIRef(filterNS + 'dateAfter') == predicate or
+              URIRef(filterNS + 'dateBefore') == predicate):
+            filter_patterns.append((subject, predicate, object_, context))
+            continue
+
           component_name = "component_" + str(index)
           index = index + 1
 
@@ -766,9 +1021,12 @@ class MySQL(Store):
             subject, predicate, object_, context)
           cluster.determine_initial_subset(self)
           bindings = cluster.make_SQL_components(
-            variable_bindings, variable_clusters)
+            variable_bindings, variable_clusters, self.useSignedInts)
           variable_bindings.update(bindings)
           variable_clusters.append(cluster)
+
+        #BE: disabled this debug printing
+        #print >> sys.stderr, filter_patterns
 
         from_fragments = []
         where_fragments = []
@@ -788,23 +1046,51 @@ class MySQL(Store):
         if len(variable_columns) < 1:
           return
 
+        index = 0
+        for subject, predicate, object_, context in filter_patterns:
+          table_alias = 'filter_literals_' + str(index)
+          index = index + 1
+          from_fragments.append(
+            self._internedId + '_literals as ' + table_alias)
+          cluster = variable_bindings[str(subject)]
+          column_name = cluster.definitions[str(subject)]
+
+          where_fragments.append(table_alias + '.id = ' + column_name)
+          if URIRef(filterNS + 'dateAfter') == predicate:
+            where_fragments.append(
+              table_alias + '.lexical > "' + EscapeQuotes(str(object_)) + '"')
+          elif URIRef(filterNS + 'dateBefore') == predicate:
+            where_fragments.append(
+              table_alias + '.lexical < "' + EscapeQuotes(str(object_)) + '"')
+
         # Construct and execute the SQL query.
         columns_fragment = ', '.join(columns)
-        from_fragment = ',\n '.join(from_fragments)
+        from_fragment = '\ncross join\n '.join(from_fragments)
         where_fragment = ' and '.join(where_fragments)
         if len(where_fragment) > 0:
           where_fragment = '\nwhere\n' + where_fragment
 
-        query = "select straight_join\n%s\nfrom\n%s%s\n" % (
-          columns_fragment, from_fragment, where_fragment)
+        query = "select %s\n%s\nfrom\n%s%s\n" % (
+          self.select_modifier, columns_fragment, from_fragment,
+          where_fragment)
 
         if self.debug:
             print >> sys.stderr, query, substitutions
+            
+        if self.perfLog: #BE: performance logging
+            self.mainQueryCount += 1
+            self.mainQueries.append(query % tuple(substitutions))
+            startTime = time.time()
 
         cursor = self._db.cursor()
         cursor.execute(query, substitutions)
 
+        if self.perfLog: #BE: performance logging
+            self.mainQueryTime += time.time()-startTime
+
         preparation_cursor = self._db.cursor()
+
+        #print "JLC; Description:", cursor.description
 
         def prepare_row(row):
           '''
@@ -812,8 +1098,8 @@ class MySQL(Store):
           query to a map from query variables to lexical values.
 
           :Parameters:
-          - `row`: The return value of `fetchone()` on an MySQLdb cursor
-          	object after executing the SPARQL solving SQL query.
+          - `row`: The return value of `fetchone()` on an DBAPI cursor
+             object after executing the SPARQL solving SQL query.
 
           Returns a dictionary from SPARQL variable names to one set of
           correct values for the original list of SPARQL triple patterns.
@@ -860,7 +1146,16 @@ class MySQL(Store):
              ' and '.join(where_fragments)))
           if self.debug:
             print >> sys.stderr, query, substitutions
+            
+          if self.perfLog: #BE: performance logging
+            self.rowPrepQueryCount += 1
+            startTime = time.time()
+
           preparation_cursor.execute(query, substitutions)
+          
+          if self.perfLog: #BE: performance logging
+            self.rowPrepQueryTime += time.time()-startTime
+
           prepared_map = dict(zip(
             [description[0] for description in preparation_cursor.description],
             preparation_cursor.fetchone()))
@@ -898,11 +1193,10 @@ class MySQL(Store):
         row = cursor.fetchone()
         while row:
           new_row = prepare_row(row)
+          #print row, new_row
           yield new_row
 
           row = cursor.fetchone()
-
-        return
 
     #Transactional interfaces
     def commit(self):
@@ -928,17 +1222,24 @@ class MySQL(Store):
         for q in purgeQueries:
             self.executeSQL(c,q)
 
-    def add(self, (subject, predicate, obj), context=None, quoted=False):
-        """ Add a triple to the store of triples. """
-        qSlots = genQuadSlots([subject,predicate,obj,context])
+    def get_table(self, triple):
+        subject, predicate, obj = triple
         if predicate == RDF.type:
             kb = self.aboxAssertions
-        elif isinstance(obj,Literal):
+        elif isinstance(obj, Literal):
             kb = self.literalProperties
         else:
             kb = self.binaryRelations
+        return kb
+
+    def add(self, (subject, predicate, obj), context=None, quoted=False):
+        """ Add a triple to the store of triples. """
+        qSlots = genQuadSlots([subject, predicate, obj, context],
+                              self.useSignedInts)
+        kb = self.get_table((subject, predicate, obj))
         kb.insertRelations([qSlots])
         kb.flushInsertions(self._db)
+        self.note_modified()
 
     def addN(self, quads):
         """
@@ -948,34 +1249,31 @@ class MySQL(Store):
         """
         for s,p,o,c in quads:
             assert c is not None, "Context associated with %s %s %s is None!"%(s,p,o)
-            qSlots = genQuadSlots([s,p,o,c])
-            if p == RDF.type:
-                kb = self.aboxAssertions
-            elif isinstance(o,Literal):
-                kb = self.literalProperties
-            else:
-                kb = self.binaryRelations
+            qSlots = genQuadSlots([s, p, o, c],
+                                  self.useSignedInts)
 
+            kb = self.get_table((s, p, o))
             kb.insertRelations([qSlots])
 
         for kb in self.partitions:
             if kb.pendingInsertions:
                 kb.flushInsertions(self._db)
+        self.note_modified()
 
     def remove(self, (subject, predicate, obj), context):
         """ Remove a triple from the store """
         targetBRPs = BinaryRelationPartitionCoverage((subject,predicate,obj,context),self.partitions)
         c=self._db.cursor()
         for brp in targetBRPs:
-            query = "DELETE %s from %s %s WHERE "%(
+            query = "DELETE from %s WHERE "%(
                                           brp,
-                                          brp,
-                                          brp.generateHashIntersections()
+                                          #brp.generateHashIntersections()
                                         )
             whereClause,whereParameters = brp.generateWhereClause((subject,predicate,obj,context))
             self.executeSQL(c,query+whereClause,params=whereParameters)
 
         c.close()
+        self.note_modified()
 
     def triples(self, (subject, predicate, obj), context=None):
         c=self._db.cursor()
@@ -1033,7 +1331,7 @@ class MySQL(Store):
             for (s1, p1, o1), cg in self.triples((subject,predicate,object_),context):
                 yield (s1, p1, o1), cg
 
-    def __repr__(self):
+    def get_summary(self):
         c=self._db.cursor()
 
         rtDict = {}
@@ -1046,7 +1344,7 @@ class MySQL(Store):
             self.executeSQL(c,countRows%part)
             rowCount = c.fetchone()[0]
             rtDict[str(part)]=rowCount
-        return "<Parititioned MySQL N3 Store: %s context(s), %s classification(s), %s property/value assertion(s), and %s other relation(s)>"%(
+        return "<Parititioned SQL N3 Store: %s context(s), %s classification(s), %s property/value assertion(s), and %s other relation(s)>"%(
             ctxCount,
             rtDict[str(self.aboxAssertions)],
             rtDict[str(self.literalProperties)],
@@ -1054,6 +1352,9 @@ class MySQL(Store):
         )
 
     def __len__(self, context=None):
+        if self.length is not None:
+          return self.length
+
         rows = []
         countRows = "select count(*) from %s"
         c=self._db.cursor()
@@ -1065,7 +1366,8 @@ class MySQL(Store):
                 self.executeSQL(c,countRows%part)
             rowCount = c.fetchone()[0]
             rows.append(rowCount)
-        return reduce(lambda x,y: x+y,rows)
+        self.length = reduce(lambda x,y: x+y,rows)
+        return self.length
 
     def contexts(self, triple=None):
         c=self._db.cursor()
@@ -1078,10 +1380,13 @@ class MySQL(Store):
                               self.partitions,
                               fetchall=False,
                               fetchContexts=True)
+        fetchedGraphNames=[]
         while rt:
             contextId,cTerm = rt
-            graphKlass, idKlass = constructGraph(cTerm)
-            yield graphKlass(self,idKlass(contextId))
+            if contextId not in fetchedGraphNames:
+                graphKlass, idKlass = constructGraph(cTerm)
+                yield graphKlass(self,idKlass(contextId))
+                fetchedGraphNames.append(contextId)
             rt = c.fetchone()
 
     #Namespace persistence interface implementation
@@ -1138,9 +1443,102 @@ class MySQL(Store):
             yield prefix,uri
 
 
+class MySQL(SQL):
+    """
+    MySQL implementation of FOPL Relational Model as an rdflib Store
+    """
+    try:
+        import MySQLdb
+        def _connect(self, db=None):
+            if db is None:
+                db = self.config['db']
+            return MySQL.MySQLdb.connect(
+                     user=self.config['user'],
+                     passwd=self.config['password'], db=db,
+                     port=self.config['port'], host=self.config['host'])
+    except ImportError:
+        def _connect(self, db=None):
+            raise NotImplementedError(
+              'We need the MySQLdb module to connect to MySQL databases.')
+    
+    def _createViews(self,cursor):
+      for suffix, (relations_only, tables) in self.viewCreationDict.items():
+        query = ('CREATE SQL SECURITY INVOKER VIEW %s%s AS %s' %
+                  (self._internedId, suffix, ' UNION ALL '.join(
+                     [t.viewUnionSelectExpression(relations_only)
+                      for t in tables])))
+        if self.debug:
+          print >> sys.stderr, "## Creating View ##\n",query
+        self.executeSQL(cursor, query)
+
+# TODO: break this out into a separate module, which will allow us to do
+# away with the import chicanery.
+class PostgreSQL(SQL):
+    def __init__(self, identifier=None, configuration=None,
+                 debug=False):
+        super(PostgreSQL, self).__init__(identifier=identifier,
+          configuration=None, debug=debug, engine="",
+          useSignedInts=True, hashFieldType='BIGINT', declareEnums=True)
+
+        self.showDBsCommand = 'SELECT datname FROM pg_database'
+        self.findTablesCommand = """SELECT tablename FROM pg_tables WHERE
+                                    tablename = lower('%s')"""
+        self.findViewsCommand = """SELECT viewname FROM pg_views WHERE
+                                    viewname = lower('%s')"""
+        self.defaultDB = 'template1'
+        self.default_port = 5432
+        self.can_cast_bigint = True
+        if configuration is not None:
+            self._set_connection_parameters(configuration=configuration)
+        self.select_modifier = ''
+
+        self.INDEX_NS_BINDS_TABLE = \
+          'CREATE INDEX uri_index on %s_namespace_binds (uri)'
+
+    def _set_db(self, db):
+        self._db = db
+        #cursor = db.cursor()
+        #self.executeSQL(cursor, 'SET join_collapse_limit = 1')
+
+    try:
+        import pgdb
+        def _connect(self, db=None):
+            if db is None:
+                db = self.config['db']
+            return PostgreSQL.pgdb.connect(
+                     user=self.config['user'],
+                     password=self.config['password'], database=db,
+                     host=self.config['host'] + ':' +
+                          str(self.config['port']))
+    except ImportError:
+        try:
+            from postgresql.interface.proboscis import dbapi2
+            def _connect(self, db=None):
+                if db is None:
+                    db = self.config['db']
+                return PostgreSQL.dbapi2.connect(
+                         user=self.config['user'],
+                         password=self.config['password'], database=db,
+                         host=self.config['host'], port=self.config['port'])
+        except ImportError:
+            def _connect(self, db=None):
+                raise NotImplementedError(
+                  'We need the PyGreSQL module to connect to PostgreSQL databases.')
+
+if False:
+  class InnoDB(MySQL):
+    pass
+
+  class MyISAM(MySQL):
+    pass
+
+
 CREATE_NS_BINDS_TABLE = """
 CREATE TABLE %s_namespace_binds (
     prefix        varchar(20) UNIQUE not NULL,
     uri           text,
-    PRIMARY KEY (prefix),
-    INDEX uri_index (uri(100))) ENGINE=InnoDB"""        
+    PRIMARY KEY (prefix)) %s"""        
+
+from rdflib import plugin, store
+plugin.register("MySQL", store.Store, 'rdfextras.store.MySQL', 'MySQL')
+plugin.register("PostgreSQL", store.Store, 'rdfextras.store.MySQL', 'PostgreSQL')
