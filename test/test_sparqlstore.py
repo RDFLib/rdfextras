@@ -32,3 +32,11 @@ class SPARQLStoreTestCase(unittest.TestCase):
         res = self.graph.query(query, initNs={})
         for i in res.serialize(format="python"):
             assert type(i) == URIRef, i.n3()
+
+from nose import SkipTest
+import urllib2
+try:
+    assert len(urllib2.urlopen("http://dbpedia.org/sparql").read()) > 0
+except:
+    raise SkipTest("No HTTP connection.")
+
