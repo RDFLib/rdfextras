@@ -32,6 +32,13 @@ config = dict(
 
 )
 
+install_requires = [
+    'rdflib >= 3.2.0-dev',
+    'pyparsing'
+]
+tests_require = install_requires + \
+                ['flask', 'mimeparse', 'jinja2']
+
 try:
     from setuptools import setup
 except ImportError:
@@ -47,19 +54,15 @@ else:
             ],
             'rdf.plugins.parser': [
                 'rdf-json = rdfextras.parsers.rdfjson:RdfJsonParser',
-                'json-ld = rdfextras.parsers.jsonld:JsonLDParser',
             ],
             'rdf.plugins.serializer': [
                 'rdf-json = rdfextras.serializers.rdfjson:RdfJsonSerializer',
-                'json-ld = rdfextras.serializers.jsonld:JsonLDSerializer', 
             ],
         },
         #test_suite = 'nose.collector',
         #namespace_packages = ['rdfextras'], # TODO: really needed?
-        install_requires = [
-            'rdflib >= 3.2.0-dev',
-            'pyparsing'
-        ],
+        install_requires = install_requires,
+        tests_require = tests_require
     )
 
 setup(**config)

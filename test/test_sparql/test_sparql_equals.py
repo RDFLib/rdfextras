@@ -1,4 +1,5 @@
 
+# -*- coding: UTF-8 -*-
 from rdflib.graph import ConjunctiveGraph
 from rdflib.term import URIRef
 from StringIO import StringIO

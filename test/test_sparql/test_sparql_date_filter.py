@@ -66,7 +66,7 @@ class DateFilterTest(unittest.TestCase):
         self.graph.load(StringIO(testContent), format='n3')
     def test_DATE_FILTER1(self):
         for query in [QUERY1,QUERY2,QUERY3]:
-            print query
+            # print query
             #pQuery = Parse(query)
             #print RenderSPARQLAlgebra(pQuery)
             results = self.graph.query(query,

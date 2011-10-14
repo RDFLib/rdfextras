@@ -22,8 +22,8 @@ blank_node = FakeBlankNode()
 
 def create_graph(n3data):
     '''
-    @param n3data: data to create the graph from.
-    @return: rdflib.graph.Graph instance containing parsed graph.
+    :param n3data: data to create the graph from.
+    :return: :class:`~rdflib.graph.Graph` instance containing parsed graph.
     '''
     g = Graph()
     g.parse(data=n3data, format='n3')

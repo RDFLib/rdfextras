@@ -47,10 +47,10 @@ from testSPARQL import ns_foaf
 from testSPARQL import ns_ns
 from testSPARQL import ns_book
 
-from rdflib.Literal     import Literal
-from rdfextras.sparql.graphPattern import GraphPattern
+from rdflib import Literal
+from rdfextras.sparql.graph import GraphPattern
 
-from rdfextras.sparql.sparqlOperators import isURI
+from rdfextras.sparql.operators import isURI
 
 
 select      = ["?name", "?mbox"]

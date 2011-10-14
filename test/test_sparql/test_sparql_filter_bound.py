@@ -1,4 +1,4 @@
-from rdflib.term import Literal,BNode
+from rdflib.term import Literal, BNode, URIRef
 from rdflib.graph import ConjunctiveGraph
 from rdflib.namespace import Namespace
 

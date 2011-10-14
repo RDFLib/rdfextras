@@ -20,7 +20,8 @@ from rdfextras.sparql.sparql import type_float
 from rdfextras.sparql.sparql import type_decimal
 from rdfextras.sparql.sparql import type_dateTime
 
-from rdflib.Namespace import Namespace
+
+from rdflib import Namespace
 
 ns_foaf   = Namespace("http://xmlns.com/foaf/0.1/")
 ns_ns     = Namespace("http://example.org/ns#")

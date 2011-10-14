@@ -11,7 +11,7 @@ import sys, os, time, datetime, imp, sys, StringIO
 
 sys.path.insert(0,"../")
 
-from rdflib import sparql
+from rdfextras import sparql
 from rdfextras.sparql import sparqlGraph
 from testSPARQL import ns_rdf
 from testSPARQL import ns_rdfs

@@ -8,7 +8,21 @@ from optparse import OptionParser
 from rdflib.store import Store, NO_STORE
 
 import unittest, getpass
+global singleGraph
 
+global singleGraph
+
+class Option(object):
+    def __init__(self):
+        self.identifier = "http://example.com"
+        self.user = "test"
+        self.password = "test"
+        self.host = "localhost"
+        self.database = "test"
+        self.liveDB = False
+        self.facts = False
+        self.format = "xml"
+    
 class AbstractSPARQLUnitTestCase(unittest.TestCase):
     """
     This is the base class for all unit tests in this module
@@ -22,6 +36,7 @@ class AbstractSPARQLUnitTestCase(unittest.TestCase):
     """
 
     sparql = True
+    debug = False
 
     TEST_FACT = None
     TEST_FACT_FORMAT = 'xml'
@@ -66,17 +81,14 @@ ex:interval3 ptrec:hasDateTimeMax "2008-01-01"^^xsd:date .
 #involves a comparison that requires the lexical value of a term
 #(not just its hash as is the case with a simple equality comparison)
 class TestOPTVariableCorrelationTest(AbstractSPARQLUnitTestCase):
-
-    known_issue=True
-
     TEST_FACT=StringIO(BROKEN_OPTIONAL_DATA)
     TEST_FACT_FORMAT = 'n3'
     def test_OPT_FILTER(self):
         rt=list(self.graph.query(BROKEN_OPTIONAL,
-                                 DEBUG=True))
+                                 DEBUG=self.debug))
         self.assertEqual(len(rt),1)
         self.failUnless(rt[0][0]==URIRef('http://example.org/interval3'),
-                        "ex:interval3 is the only other interval that preceeded interval1")
+                        "ex:interval3 is the only other interval that preceded interval1")
 
 #This master list of unit tests needs to be updated as more are added
 #to this module
@@ -84,28 +96,33 @@ UNIT_TESTS = [
     TestOPTVariableCorrelationTest,
 ]
 
-if __name__ == "__main__":
+class testSPARQLUnitTests(unittest.TestCase):
     global singleGraph, options, store
         
-    op = OptionParser('usage: %prog [options]')
-    op.add_option('-u','--user', default=None,
-      help = 'The user name to use to connect to the MySQL database')
-    op.add_option('-d','--database', default=None,
-      help = 'The MySQL database to connect to')    
-    op.add_option('-s','--host', default='localhost',
-      help = 'The hostname of the MySQL server (localhost by default)')    
-    op.add_option('-i', '--identifier', default=None,
-      help = 'The identifier associated with the RDF dataset')
-    op.add_option('-f', '--facts', default=None,
-      help = 'The path to an RDF document to use as the set of facts for the included unit tests')    
-    op.add_option('-l', '--liveDB', action='store_true',default=False,
-      help = 'Whether or not to use the connected RDF dataset for all unit tests')        
-    op.add_option('--format', default='xml',
-      help = 'The serialization format of the RDF document specified via -f/--facts (RDF/XML is the default)')        
-    op.add_option('-p','--password', default=None,
-      help = 'The password to use in authenticating with the given user (you will be prompted for one otherwise)')    
-    (options, args) = op.parse_args()
-    pw = options.password and options.password or getpass.getpass('Enter password for %s:'%(options.user))
+    store = "IOMemory"
+    options = Option()
+    # op = OptionParser('usage: %prog [options]')
+    # op.add_option('-u','--user', default=None,
+    #   help = 'The user name to use to connect to the MySQL database')
+    # op.add_option('-d','--database', default=None,
+    #   help = 'The MySQL database to connect to')    
+    # op.add_option('-s','--host', default='localhost',
+    #   help = 'The hostname of the MySQL server (localhost by default)')    
+    # op.add_option('-i', '--identifier', default=None,
+    #   help = 'The identifier associated with the RDF dataset')
+    # op.add_option('-f', '--facts', default=None,
+    #   help = 'The path to an RDF document to use as the set of facts for the included unit tests')    
+    # op.add_option('-l', '--liveDB', action='store_true',default=False,
+    #   help = 'Whether or not to use the connected RDF dataset for all unit tests')        
+    # op.add_option('--format', default='xml',
+    #   help = 'The serialization format of the RDF document specified via -f/--facts (RDF/XML is the default)')        
+    # op.add_option('-p','--password', default=None,
+    #   help = 'The password to use in authenticating with the given user (you will be prompted for one otherwise)')    
+    # (options, args) = op.parse_args()
+    # pw = options.password and options.password or getpass.getpass('Enter password for %s:'%(options.user))
+    # 
+    # if options.facts and options.liveDB:
+    #     op.error("options -l/--liveDB and -f/--facts are mutually exclusive!")    
     
     if options.facts and options.liveDB:
         op.error("options -l/--liveDB and -f/--facts are mutually exclusive!")    
@@ -116,12 +133,16 @@ if __name__ == "__main__":
     
     #We setup a global store.  A store is what a Graph instance uses to manage the persistence of RDF statements
     #We want to create a connection to the specified MySQL dataset as a store
-    store = plugin.get('MySQL',Store)(options.identifier)
-    configurationString = 'user=%s,host=%s,db=%s,password=%s'%(
-                             options.user,
-                             options.host,
-                             options.database,
-                             pw)
+    
+    # store = plugin.get('MySQL',Store)(options.identifier)
+    # configurationString = 'user=%s,host=%s,db=%s,password=%s'%(
+    #                          options.user,
+    #                          options.host,
+    #                          options.database,
+    #                          options.password)
+    # rt = store.open(configurationString,create=False)
+    store = plugin.get('IOMemory',Store)(options.identifier)
+    configurationString = ''
     rt = store.open(configurationString,create=False)
     if not options.liveDB:
         #if we aren't working with a live database, then create a fresh
@@ -139,6 +160,11 @@ if __name__ == "__main__":
     else:
         singleGraph = options.liveDB and ConjunctiveGraph(store) or None
         
-    for suite in UNIT_TESTS: 
-        unittest.TextTestRunner(verbosity=5).run(unittest.makeSuite(suite))
-        store.rollback()        
+#This master list of unit tests needs to be updated as more are added
+#to this module
+UNIT_TESTS = [
+    TestOPTVariableCorrelationTest,
+]
+
+if __name__ == '__main__':
+    unittest.main()
