@@ -61,6 +61,7 @@ WHERE {
 ANSWER1 = URIRef('http://del.icio.us/rss/chimezie/paper')
 
 class DateFilterTest(unittest.TestCase):
+    # debug = True
     def setUp(self):
         self.graph = ConjunctiveGraph()
         self.graph.load(StringIO(testContent), format='n3')
@@ -70,6 +71,7 @@ class DateFilterTest(unittest.TestCase):
             #pQuery = Parse(query)
             #print RenderSPARQLAlgebra(pQuery)
             results = self.graph.query(query,
+                                       processor="sparql",
                                        DEBUG=False)
             results = list(results)
             self.failUnless(

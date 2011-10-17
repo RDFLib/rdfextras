@@ -1,12 +1,3 @@
-try:
-    import MySQLdb
-except ImportError:
-    import warnings
-    warnings.warn("MySQLdb is not installed")
-    __test__=False
-    from nose.exc import SkipTest
-    raise SkipTest("MySQLdb not installed")
-
 from rdflib import plugin
 from rdflib import URIRef, BNode, Literal, Graph
 from rdflib.store import Store

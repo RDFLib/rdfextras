@@ -1,22 +1,18 @@
-from n3_2 import testN3Store,testN3,implies
+from n3_2 import implies
+from n3_2 import testN3
+from n3_2 import testN3Store
 from rdflib.graph import QuotedGraph
-
+from rdflib.parser import StringInputSource
 try:
     from rdflib.store.MySQL import REGEXTerm
 except ImportError, e:
     print "Can not test REGEX bits:", e
-
-from rdflib import Graph, URIRef, BNode, ConjunctiveGraph, RDF, RDFS
-configString="user=gjh,password=50uthf0rk,host=localhost,db=test"
-
-
-import rdflib
-
-rdflib.plugin.register('MySQL', rdflib.store.Store,
-                       'rdfextras.store.MySQL', 'MySQL')
+from rdflib import *
+configString="user=,password=,host=localhost,db=test"
 
 def testRegex():
-    g = Graph(backend='MySQL')
+    g = Graph(store='MySQL')
+    g.destroy(configString)
     g.open(configString)
     g.parse(StringInputSource(testN3), format="n3")
     try:

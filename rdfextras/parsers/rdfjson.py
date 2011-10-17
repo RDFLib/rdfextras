@@ -2,33 +2,30 @@
 # Author: Rob Sanderson
 # RDFLib 3.1 compatibility updates: Richard Jones
 #
-# This serialiser will read in an RDFJSON formatted document and create
-# an RDF Graph
-# See:
-#   http://docs.api.talis.com/platform-api/output-types/rdf-json
-#
-# It was originally written by Rob Sanderson as a plugin for RDFLib 2.x.
-# This version modifies the import paths for compatibility with RDFLib 3.x
-# and changes its name to RdfJsonParser due to the large number of
-# other JSON serialisations of RDF.
-#
-# See:
-#   http://code.google.com/p/rdflib/issues/detail?id=76
 #
 # TODO:
 #   This code reads the entire JSON object into memory before parsing,
 #   but we should consider streaming the input to deal with arbitrarily
 #   large graphs
 """
-Example usage:
+This serialiser will read in an RDF/JSON formatted document and create
+an RDF graph
 
-from rdflib import Graph, plugin
-from rdflib.parser import Parser
-plugin.register("rdf-json", Parser, "rdfjson.RdfJsonParser", "RdfJsonParser")
-g = Graph()
-g.parse("test.json", format="rdf-json")
+See:
+  http://docs.api.talis.com/platform-api/output-types/rdf-json
+
+It was originally written by Rob Sanderson as a plugin for RDFLib 2.x.
+This version modifies the import paths for compatibility with RDFLib 3.x
+and changes its name to RdfJsonParser due to the large number of
+other JSON serialisations of RDF.
+
+See:
+  http://code.google.com/p/rdflib/issues/detail?id=76
+
+
 """
 
+import logging
 try:
     import json
 except ImportError:
@@ -36,6 +33,7 @@ except ImportError:
 
 from rdflib.parser import Parser
 from rdflib.term import URIRef, BNode, Literal
+log = logging.getLogger(__name__)
 
 class RdfJsonParser(Parser):
     
@@ -43,6 +41,36 @@ class RdfJsonParser(Parser):
         pass
 
     def parse(self, source, sink, **args):
+        """
+        Parse an RDF/JSON-formatted document and create an RDF graph.
+        
+        Params:
+        :source: a stream (a URL, a file or a StringIO object) or 
+                 a string (of data), as per the standard API for 
+                 rdflib parsers.
+
+        Example usage:
+
+        >>> from rdflib import Graph, plugin
+        >>> from rdflib.parser import Parser
+        >>> plugin.register("rdf-json", Parser, 
+        ...    "rdfextras.parsers.rdfjson", "RdfJsonParser")
+        ...
+        >>> g = Graph()
+        >>> testrdfjson = '''{
+        ...   "http://example.org/about" : 
+        ...     {
+        ...        "http://purl.org/dc/elements/1.1/title": [ 
+        ...             { "type" : "literal" , "value" : "Anna's Homepage." } 
+        ...         ]
+        ...     }
+        ... }'''
+        ... 
+        >>> g.parse(data=testrdfjson, format="rdf-json") # doctest: +ELLIPSIS
+        <Graph identifier=... (<class 'rdflib.graph.Graph'>)>
+        >>> rdfxml = g.serialize(format="xml")
+        >>> assert '''Anna's Homepage''' in rdfxml
+        """
 
         data = source.getByteStream().read()
         objs = json.loads(data)

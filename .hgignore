@@ -22,7 +22,6 @@ MANIFEST
 .tox
 .coverage
 coverdata
-coverage
 .hgignore
 .orig
 .bz2
