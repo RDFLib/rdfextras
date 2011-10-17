@@ -68,9 +68,9 @@ class MySQLStoreTests(unittest.TestCase):
         self.graph = Graph(store=self.store_name)
         if isinstance(self.path, type(None)):
             if self.store_name in ["SQLite"]: 
-                self.path = mkstemp(prefix='test',dir='/var/tmp')
+                self.path = mkstemp(prefix='test',dir='/tmp')
             else:
-                self.path = mkdtemp(prefix='test',dir='/var/tmp')
+                self.path = mkdtemp(prefix='test',dir='/tmp')
 	        self.graph.store.identifier = self.identifier
 	    # Remove the db detritus that remains after a test run
 	    # has been interrupted with ^C.

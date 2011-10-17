@@ -67,9 +67,9 @@ class PostgreSQLStoreTests(unittest.TestCase):
         self.graph = Graph(store=self.store_name)
         if isinstance(self.path, type(None)):
             if self.store_name == "SQLite":
-                self.path = mkstemp(prefix='test',dir='/var/tmp')
+                self.path = mkstemp(prefix='test',dir='/tmp')
             else:
-                self.path = mkdtemp(prefix='test',dir='/var/tmp')
+                self.path = mkdtemp(prefix='test',dir='/tmp')
             self.graph.store.identifier = self.identifier
         self.graph.open(self.path, create=self.create)
 

@@ -12,7 +12,7 @@ from test_n3_2 import testN3Store
 
 storename = "KyotoCabinet"
 storetest = True
-configString = "/var/tmp/test"
+configString = "/tmp/test"
 
 plugin.register(storename, store.Store,
                 'rdfextras.store.KyotoCabinet', 

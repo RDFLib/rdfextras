@@ -59,9 +59,9 @@ class StoreTestCase(unittest.TestCase):
             path=configString
             PostgreSQL().destroy(path)
         elif not self.path and self.store == "SQLite":
-            path = mkstemp(dir="/var/tmp", prefix="test", suffix='.sqlite')[1]
+            path = mkstemp(dir="/tmp", prefix="test", suffix='.sqlite')[1]
         elif not self.path and self.store in ["sqlobject", "SQLAlchemy", "Elixir"]:
-            path = mkstemp(dir="/var/tmp", prefix="test", suffix='.db')[1]
+            path = mkstemp(dir="/tmp", prefix="test", suffix='.db')[1]
             path = 'sqlite://'+path
         elif not self.path:
             path = mkdtemp()

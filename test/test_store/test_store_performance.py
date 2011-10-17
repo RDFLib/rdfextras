@@ -42,9 +42,9 @@ class StoreTestCase(unittest.TestCase):
             path=configString
             PostgreSQL().destroy(path)
         elif not self.path and self.store == "SQLite":
-            path = mkstemp(dir="/var/tmp", prefix="test", suffix='.sqlite')[1]
+            path = mkstemp(dir="/tmp", prefix="test", suffix='.sqlite')[1]
         elif not self.path and self.store in ["sqlobject", "SQLAlchemy", "Elixir"]:
-            path = mkstemp(dir="/var/tmp", prefix="test", suffix='.db')[1]
+            path = mkstemp(dir="/tmp", prefix="test", suffix='.db')[1]
             path = 'sqlite://'+path
         elif not self.path:
             path = mkdtemp()
@@ -99,14 +99,14 @@ class KyotoCabinetStoreTestCase(StoreTestCase):
     store = "KyotoCabinet"
     def setUp(self):
         self.store = "KyotoCabinet"
-        self.path = '/var/tmp/test'
+        self.path = '/tmp/test'
         StoreTestCase.setUp(self)
 
 class SleepycatStoreTestCase(StoreTestCase):
     store = "Sleepycat"
     def setUp(self):
         self.store = "Sleepycat"
-        self.path = '/var/tmp/test'
+        self.path = '/tmp/test'
         StoreTestCase.setUp(self)
 
 class BDBOptimizedStoreTestCase(StoreTestCase):
@@ -114,7 +114,7 @@ class BDBOptimizedStoreTestCase(StoreTestCase):
     def setUp(self):
         print("Setting up BDBOptimized")
         self.store = "BDBOptimized"
-        self.path = '/var/tmp/test'
+        self.path = '/tmp/test'
         StoreTestCase.setUp(self)
 
 class BerkeleyDBStoreTestCase(StoreTestCase):
@@ -122,14 +122,14 @@ class BerkeleyDBStoreTestCase(StoreTestCase):
     def setUp(self):
         print("Setting up BerkeleyDB")
         self.store = "BerkeleyDB"
-        self.path = '/var/tmp/bdbtest'
+        self.path = '/tmp/bdbtest'
         StoreTestCase.setUp(self)
 
 class SQLiteStoreTestCase(StoreTestCase):
     store = "SQLite"
     def setUp(self):
         self.store = "SQLite"
-        self.path = "/var/tmp/sqlitetest"
+        self.path = "/tmp/sqlitetest"
         StoreTestCase.setUp(self)
 
 class ZODBStoreTestCase(StoreTestCase):
@@ -137,7 +137,7 @@ class ZODBStoreTestCase(StoreTestCase):
     store = "ZODBGraph"
     def setUp(self):
         self.store = "ZODBGraph"
-        self.path = '/var/tmp/zodbtest'
+        self.path = '/tmp/zodbtest'
         StoreTestCase.setUp(self)
 
 class MySQLTestCase(StoreTestCase):

@@ -10,7 +10,7 @@ class SQLiteGraphTestCase(test_graph.GraphTestCase):
     storetest = True
     def setUp(self):
         self.store_name = "SQLite"
-        self.path = "/var/tmp/test.sqlite"
+        self.path = "/tmp/test.sqlite"
         test_graph.GraphTestCase.setUp(self)
     
     def testStatementNode(self):
@@ -20,7 +20,7 @@ class SQLiteContextTestCase(test_context.ContextTestCase):
     storetest = True
     def setUp(self):
         self.store_name = "SQLite"
-        self.path = "/var/tmp/test.sqlite"
+        self.path = "/tmp/test.sqlite"
         test_context.ContextTestCase.setUp(self)
     
     def testConjunction(self):

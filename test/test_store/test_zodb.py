@@ -18,17 +18,17 @@ from rdflib.graph import GraphValue
 class ZODBGraphTestCase(test_graph.GraphTestCase):
     store_name = "ZODB"
     storetest = True
-    path = '/var/tmp/zodb_local2.fs'
-    url='file:///var/tmp/zodb_local2.fs'
+    path = '/tmp/zodb_local2.fs'
+    url='file:///tmp/zodb_local2.fs'
     
     def setUp(self):
         if self.url.endswith('.fs'): 
             from ZODB.FileStorage import FileStorage
             if os.path.exists(self.path):
-                os.unlink('/var/tmp/zodb_local2.fs')
-                os.unlink('/var/tmp/zodb_local2.fs.index')
-                os.unlink('/var/tmp/zodb_local2.fs.tmp')
-                os.unlink('/var/tmp/zodb_local2.fs.lock')
+                os.unlink('/tmp/zodb_local2.fs')
+                os.unlink('/tmp/zodb_local2.fs.index')
+                os.unlink('/tmp/zodb_local2.fs.tmp')
+                os.unlink('/tmp/zodb_local2.fs.lock')
             openstr = os.path.abspath(os.path.expanduser(self.url[7:])) 
             fs=FileStorage(openstr) 
         else: 
@@ -54,10 +54,10 @@ class ZODBGraphTestCase(test_graph.GraphTestCase):
     
     def tearDown(self):
         self.graph.close()
-        os.unlink('/var/tmp/zodb_local2.fs')
-        os.unlink('/var/tmp/zodb_local2.fs.index')
-        os.unlink('/var/tmp/zodb_local2.fs.tmp')
-        os.unlink('/var/tmp/zodb_local2.fs.lock')
+        os.unlink('/tmp/zodb_local2.fs')
+        os.unlink('/tmp/zodb_local2.fs.index')
+        os.unlink('/tmp/zodb_local2.fs.tmp')
+        os.unlink('/tmp/zodb_local2.fs.lock')
     
     def addStuff(self):
         tarek = self.tarek

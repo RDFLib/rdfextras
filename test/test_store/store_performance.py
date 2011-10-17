@@ -45,9 +45,9 @@ class StoreTestCase(unittest.TestCase):
             path=configString
             PostgreSQL().destroy(path)
         elif not self.path and self.store == "SQLite":
-            path = mkstemp(dir="/var/tmp", prefix="test", suffix='.sqlite')[1]
+            path = mkstemp(dir="/tmp", prefix="test", suffix='.sqlite')[1]
         elif not self.path and self.store in ["sqlobject", "SQLAlchemy", "Elixir"]:
-            path = mkstemp(dir="/var/tmp", prefix="test", suffix='.sqlite')[1]
+            path = mkstemp(dir="/tmp", prefix="test", suffix='.sqlite')[1]
             path = 'sqlite://'+path
         elif not self.path:
             path = mkdtemp()
@@ -133,7 +133,7 @@ try:
     class SleepycatStoreTestCase(StoreTestCase):
         def setUp(self):
             self.store = "Sleepycat"
-            self.path = '/var/tmp/test'
+            self.path = '/tmp/test'
             StoreTestCase.setUp(self)
 except ImportError, e:
     print("Can not test Sleepycat store:", e)
@@ -142,7 +142,7 @@ try:
     class BDBOptimizedStoreTestCase(StoreTestCase):
         def setUp(self):
             self.store = "BDBOptimized"
-            self.path = '/var/tmp/test'
+            self.path = '/tmp/test'
             StoreTestCase.setUp(self)
 except ImportError, e:
     print("Can not test BDBOptimized store:", e)
@@ -151,7 +151,7 @@ try:
     class BerkeleyDBStoreTestCase(StoreTestCase):
         def setUp(self):
             self.store = "BerkeleyDB"
-            self.path = '/var/tmp/test'
+            self.path = '/tmp/test'
             StoreTestCase.setUp(self)
 except ImportError, e:
     print("Can not test BerkeleyDB store:", e)
@@ -168,7 +168,7 @@ try:
     class SQLiteStoreTestCase(StoreTestCase):
         def setUp(self):
             self.store = "SQLite"
-            self.path = "/var/tmp/test"
+            self.path = "/tmp/test"
             StoreTestCase.setUp(self)
 except ImportError, e:
     print("Can not test SQLite store:", e)
@@ -179,7 +179,7 @@ try:
         non_standard_dep = True
         def setUp(self):
             self.store = "ZODB"
-            self.path = '/var/tmp/test'
+            self.path = '/tmp/test'
             StoreTestCase.setUp(self)
 except ImportError, e:
     print("Can not test ZODB store:", e)
