@@ -1,5 +1,6 @@
 #!/d/Bin/Python/python.exe
 # -*- coding: utf-8 -*-
+from __future__ import with_statement
 #
 """
 This is an RDFLib store around Ivan Herman et al.'s SPARQL service wrapper. 
@@ -22,6 +23,7 @@ __contact__ = 'Ivan Herman, ivan_herman@users.sourceforge.net'
 __date__    = "2011-01-30"
 
 import re
+import warnings
 try:
     from SPARQLWrapper import SPARQLWrapper, XML
     from SPARQLWrapper.Wrapper import QueryResult
@@ -52,9 +54,31 @@ def TraverseSPARQLResultDOM(doc,asDictionary=False):
     """
     
     # namespace handling in elementtree xpath sub-set is not pretty :(
-    vars = [Variable(v.attrib["name"]) for v in
-             doc.findall('/{http://www.w3.org/2005/sparql-results#}head/{http://www.w3.org/2005/sparql-results#}variable')]
-    for result in doc.findall('/{http://www.w3.org/2005/sparql-results#}results/{http://www.w3.org/2005/sparql-results#}result'):
+    # and broken in < 1.3, according to two  FutureWarnings:
+    # 1.
+    # FutureWarning: This search is broken in 1.3 and earlier, and will 
+    # be fixed in a future version.  If you rely on the current behaviour, 
+    # change it to 
+    # './{http://www.w3.org/2005/sparql-results#}head/{http://www.w3.org/2005/sparql-results#}variable'
+    # 2.
+    # FutureWarning: This search is broken in 1.3 and earlier, and will be 
+    # fixed in a future version.  If you rely on the current behaviour, 
+    # change it to 
+    # './{http://www.w3.org/2005/sparql-results#}results/{http://www.w3.org/2005/sparql-results#}result'
+    # Handle ElementTree warning
+    variablematch = '/{http://www.w3.org/2005/sparql-results#}head/{http://www.w3.org/2005/sparql-results#}variable'
+    resultmatch = '/{http://www.w3.org/2005/sparql-results#}results/{http://www.w3.org/2005/sparql-results#}result'
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+    	matched_variables = doc.findall(variablematch)
+        if len(w) == 1:
+            variablematch = '.' + variablematch
+            resultmatch = '.' + resultmatch
+            # Could be wrong result, re-do from start
+            matched_variables = doc.findall(variablematch)
+
+    vars = [Variable(v.attrib["name"]) for v in matched_variables]
+    for result in doc.findall(resultmatch):
         currBind = {}
         values = []
         for binding in result.findall('{http://www.w3.org/2005/sparql-results#}binding'):
@@ -92,7 +116,10 @@ def CastToTerm(node):
         elif '{http://www.w3.org/XML/1998/namespace}lang' in node.attrib:
             return Literal(node.text, lang=node.attrib["{http://www.w3.org/XML/1998/namespace}lang"])
         else:
-            return Literal(node.text)
+            if False:#not node.xpath('*'):
+                return Literal('')
+            else:
+                return Literal(node.text)
     else:
         raise Exception('Unknown answer type')
 
@@ -111,7 +138,16 @@ class SPARQLResult(QueryResult):
         self.askAnswer = None
 
     def _parseResults(self):
-        self.askAnswer=self.result.findall('/{http://www.w3.org/2005/sparql-results#}boolean')
+        # Handle ElementTree warning, see LOC#51 (above)
+        booleanmatch = '/{http://www.w3.org/2005/sparql-results#}boolean'
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            matched_results = self.result.findall(booleanmatch)
+            if len(w) == 1:
+                # Could be wrong result, re-do from start
+                booleanmatch = '.' + booleanmatch
+                matched_results = self.askAnswer=self.result.findall(booleanmatch)
+            return matched_results
 
     def __len__(self):
         raise NotImplementedError("Results are an iterable!")
@@ -153,7 +189,7 @@ class SPARQLStore(SPARQLWrapper,Store):
         """
         super(SPARQLStore, self).__init__(identifier,returnFormat=XML)
         self.bNodeAsURI = bNodeAsURI
-        self.nsBindings={}
+        self.nsBindings = sparqlNsBindings
         self.sparql11=sparql11
 
     #Database Management Methods
