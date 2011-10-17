@@ -7,7 +7,7 @@ except ImportError, e:
     print "Can not test REGEX bits:", e
 
 from rdflib import Graph, URIRef, BNode, ConjunctiveGraph, RDF, RDFS
-configString="user=root,password=ost,host=localhost,db=test"
+configString="user=gjh,password=50uthf0rk,host=localhost,db=test"
 
 
 import rdflib

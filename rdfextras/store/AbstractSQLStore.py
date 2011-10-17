@@ -1,20 +1,23 @@
 from __future__ import generators
-
-from rdflib import RDF, Graph, Literal, URIRef
-
-
-try:
-    from hashlib import sha1 as sha
+from rdflib.term import BNode, URIRef, Literal
+from rdflib.namespace import RDF
+from pprint import pprint
+try: 
+    from hashlib import sha1 
 except ImportError:
-    import sha
+    from sha import new as sha1
 
-#from rdflib.term_utils import *
+import sys, weakref
+from rdfextras.tools.termutils import REVERSE_TERM_COMBINATIONS
+from rdfextras.tools.termutils import TERM_INSTANTIATION_DICT
+from rdfextras.tools.termutils import constructGraph
+from rdfextras.tools.termutils import type2TermCombination
+from rdfextras.tools.termutils import statement2TermCombination
+from rdfextras.tools.termutils import escape_quotes
+from rdfextras.store.REGEXMatching import PYTHON_REGEX
+from rdfextras.store.REGEXMatching import REGEXTerm
 from rdflib.graph import QuotedGraph
-from REGEXMatching import REGEXTerm, PYTHON_REGEX
 from rdflib.store import Store
-
-
-from term_utils import REVERSE_TERM_COMBINATIONS, constructGraph, TERM_INSTANCIATION_DICT, type2TermCombination, statement2TermCombination
 Any = None
 
 COUNT_SELECT   = 0
@@ -374,7 +377,7 @@ class AbstractSQLStore(SQLGenerator,Store):
         """
         self.identifier = identifier and identifier or 'hardcoded'
         #Use only the first 10 bytes of the digest
-        self._internedId = INTERNED_PREFIX + sha.new(self.identifier).hexdigest()[:10]
+        self._internedId = INTERNED_PREFIX + sha1(self.identifier).hexdigest()[:10]
 
         #This parameter controls how exlusively the literal table is searched
         #If true, the Literal partition is searched *exclusively* if the object term
