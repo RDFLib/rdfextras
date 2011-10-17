@@ -189,7 +189,7 @@ class SPARQLStore(SPARQLWrapper,Store):
         """
         super(SPARQLStore, self).__init__(identifier,returnFormat=XML)
         self.bNodeAsURI = bNodeAsURI
-        self.nsBindings = sparqlNsBindings
+        self.nsBindings = {} # sparqlNsBindings
         self.sparql11=sparql11
 
     #Database Management Methods
