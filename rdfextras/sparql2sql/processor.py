@@ -1,7 +1,7 @@
 from rdfextras import sparql2sql
 # from rdfextras.sparql2sql import parser
-import rdfextras.sparql2sql.parser
-from rdfextras.sparql2sql.Algebra import TopEvaluate
+import parser
+from Algebra import TopEvaluate
 from rdflib import OWL
 from rdflib import RDF
 from rdflib import RDFS

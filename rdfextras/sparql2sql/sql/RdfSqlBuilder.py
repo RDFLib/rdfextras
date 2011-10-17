@@ -12,11 +12,11 @@ from rdfextras.sparql2sql.sql.SqlBuilder import FLAG_STRAIGHT_JOIN
 from rdfextras.sparql2sql.sql.SqlBuilder import SqlBuilder
 from rdfextras.sparql2sql.sql.QueryCostEstimator import QueryCostEstimator
 
-from rdfextras.tools.term_utils import SUBJECT
-from rdfextras.tools.term_utils import PREDICATE
-from rdfextras.tools.term_utils import OBJECT
-from rdfextras.tools.term_utils import CONTEXT
-from rdfextras.tools.term_utils import term2Letter
+from rdfextras.tools.termutils import SUBJECT
+from rdfextras.tools.termutils import PREDICATE
+from rdfextras.tools.termutils import OBJECT
+from rdfextras.tools.termutils import CONTEXT
+from rdfextras.tools.termutils import term2Letter
 
 # Optimization enumeration constants
 #====================================

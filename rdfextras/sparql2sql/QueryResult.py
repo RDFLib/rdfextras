@@ -355,6 +355,7 @@ class SPARQLQueryResult(Result):
             topUnion = None
         else:
             self.askAnswer = []
+            # print("qResult",qResult)
             result,selectionF,allVars,orderBy,distinct,topUnion = qResult
         self.result = result
         self.topUnion = topUnion

@@ -1372,10 +1372,10 @@ class TestSPARQLAlgebra(unittest.TestCase):
     #                         "Unexpected ?mbox binding :\n %s" % ppd)
     #
     def testExpressions(self):
-        from rdfextras.sparql2sql.bison.Processor import Parse
+        from rdfextras.sparql2sql.parser import parse
         global prolog
         for inExpr,outExpr in ExprTests:
-            p = Parse(inExpr)
+            p = parse(inExpr)
             prolog = p.prolog
             p = p.query.whereClause.parsedGraphPattern.graphPatterns
             if prolog is None:
@@ -1386,9 +1386,9 @@ class TestSPARQLAlgebra(unittest.TestCase):
             self.assertEquals(repr(reduce(ReduceToAlgebra,p,None)),outExpr)
     
     def testSimpleGraphPattern(self):
-        from rdfextras.sparql2sql.bison.Processor import Parse
+        from rdfextras.sparql2sql.parser import parse
         global prolog
-        p = Parse("BASE <http://example.com/> SELECT ?ptrec WHERE { GRAPH ?ptrec { ?data :foo 'bar'. } }")
+        p = parse("BASE <http://example.com/> SELECT ?ptrec WHERE { GRAPH ?ptrec { ?data :foo 'bar'. } }")
         prolog = p.prolog
         p = p.query.whereClause.parsedGraphPattern.graphPatterns
         if prolog is None:

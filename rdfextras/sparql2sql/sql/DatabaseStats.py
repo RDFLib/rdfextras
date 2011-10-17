@@ -9,10 +9,10 @@ from rdflib.store import NO_STORE
 from rdflib.store import Store
 from rdflib.store import VALID_STORE
 from rdfextras.store.FOPLRelationalModel.QuadSlot import normalizeValue
-from rdfextras.tools.term_utils import SUBJECT
-from rdfextras.tools.term_utils import PREDICATE
-from rdfextras.tools.term_utils import OBJECT
-from rdfextras.tools.term_utils import CONTEXT
+from rdfextras.tools.termutils import SUBJECT
+from rdfextras.tools.termutils import PREDICATE
+from rdfextras.tools.termutils import OBJECT
+from rdfextras.tools.termutils import CONTEXT
 
 #NOTE: adjust this array to change which histogram sizes are generated (and 
 #need to modify histogram formulas/constant value in QueryCostEstimator to be

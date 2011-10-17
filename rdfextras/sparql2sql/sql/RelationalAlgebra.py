@@ -73,10 +73,10 @@ from rdfextras.sparql2sql.sql.RelationalOperators import NoResultsException
 from rdfextras.sparql2sql.sql.SqlBuilder import INNER_JOIN
 from rdfextras.sparql2sql.sql.SqlBuilder import LEFT_OUTER_JOIN
 from rdfextras.sparql2sql.sql.SqlBuilder import FromJoinNode
-from rdfextras.tools.term_utils import SUBJECT
-from rdfextras.tools.term_utils import PREDICATE
-from rdfextras.tools.term_utils import OBJECT
-from rdfextras.tools.term_utils import CONTEXT
+from rdfextras.tools.termutils import SUBJECT
+from rdfextras.tools.termutils import PREDICATE
+from rdfextras.tools.termutils import OBJECT
+from rdfextras.tools.termutils import CONTEXT
 
 class NotImplementedException(Exception):
     def __init__(self):
