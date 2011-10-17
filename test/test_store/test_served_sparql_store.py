@@ -1,5 +1,4 @@
 import unittest
-from exceptions import RuntimeError
 import threading
 import rdflib
 import rdfextras
@@ -37,7 +36,6 @@ class TestSPARQLStore(unittest.TestCase):
         import time
         time.sleep(1)
         store=rdfextras.store.SPARQL.SPARQLStore("http://localhost:57234/sparql")
-        #self.assertRaisesException(RuntimeError, t.start())
         g2=rdflib.Graph(store)
         b=rdflib.URIRef("http://example.org/book/book1")
         b2=rdflib.URIRef("http://example.org/book/b\xc3\xb6\xc3\xb6k8")
