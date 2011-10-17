@@ -1,42 +1,77 @@
 # RdfJsonSerializer.py
 # Author: Rob Sanderson
 # RDFLib 3.1 compatibility updates: Richard Jones
-#
-# This serialiser will output an RDF Graph as an RDF JSON formatted document.
-# See:
-#   http://docs.api.talis.com/platform-api/output-types/rdf-json
-#
-# It was originally written by Rob Sanderson as a plugin for RDFLib 2.x.
-# This version modifies the import paths for compatibility with RDFLib 3.x
-# and changes its name to RdfJsonSerialiser due to the large number of
-# other JSON serialisations of RDF.
-#
-# See:
-#   http://code.google.com/p/rdflib/issues/detail?id=76
-#
+
 # TODO:
-#   This code writes the entire JSON object into memory before serialising,
+#   This code writes the entire JSON object into memory before serializing,
 #   but we should consider streaming the output to deal with arbitrarily
-#   large graphs
+#  large graphs
+
 """
+This serialiser will output an RDF Graph as an RDF JSON formatted document.
+
+See:
+  http://docs.api.talis.com/platform-api/output-types/rdf-json
+
+It was originally written by Rob Sanderson as a plugin for RDFLib 2.x.
+This version modifies the import paths for compatibility with RDFLib 3.x
+and changes its name to RdfJsonSerializer due to the large number of
+other JSON serialisations of RDF.
+
+See:
+  http://code.google.com/p/rdflib/issues/detail?id=76
+
+
 Example usage:
 
-from rdflib import Graph, plugin
-from rdflib.serializer import Serializer
-g = Graph()
-g.parse("test.rdf")
-plugin.register("rdf-json", Serializer, "rdfjson.RdfJsonSerializer", "RdfJsonSerializer")
-g.serialize(None, "rdf-json")
+.. sourcecode:: pycon
 
-plugin.register("rdf-json-pretty", Serializer, "rdfjson.RdfJsonSerializer", "PrettyRdfJsonSerializer")
-g.serialize(None, "rdf-json-pretty")
+    >>> from rdflib import Graph, plugin
+    >>> from rdflib.serializer import Serializer
+    >>> from StringIO import StringIO
+    >>> plugin.register("rdf-json", Serializer, 
+    ...     "rdfextras.serializers.rdfjson", "RdfJsonSerializer")
+    ...
+    >>> plugin.register("rdf-json-pretty", Serializer,
+    ...     "rdfextras.serializers.rdfjson", "PrettyRdfJsonSerializer")
+    ...
+    >>> test = '''
+    ... <http://example.org/about> 
+    ...     <http://purl.org/dc/elements/1.1/title> 
+    ...    "Anna's Homepage" .'''
+    ...
+    >>> g = Graph()
+    >>> g.parse(StringIO(test), format="n3") # doctest: +ELLIPSIS
+    <Graph identifier=... (<class 'rdflib.graph.Graph'>)>
+    >>> print(g.serialize(None, format="rdf-json")) 
+    {
+      "http://example.org/about": {
+        "http://purl.org/dc/elements/1.1/title": [
+          {
+            "type": "literal", 
+            "value": "Anna's Homepage"
+          }
+        ]
+      }
+    }
+    >>> print(g.serialize(None, format="rdf-json-pretty")) 
+    {
+      "xmlns$rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#", 
+      "http://example.org/about": {
+        "ns1$title": [
+          {
+            "type": "literal", 
+            "value": "Anna's Homepage"
+          }
+        ]
+      }, 
+      "xmlns$ns1": "http://purl.org/dc/elements/1.1/"
+    }
 """
 
 from rdflib.serializer import Serializer
-
 from rdflib.term import URIRef
 from rdflib.term import Literal
-from rdflib.term import BNode
 
 try:
     import json
@@ -44,18 +79,45 @@ except ImportError:
     import simplejson as json
 
 from rdflib.util import uniq
-from rdflib.exceptions import Error
-from rdflib.namespace import split_uri
-
-from xml.sax.saxutils import quoteattr, escape
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
 
 class RdfJsonSerializer(Serializer):
+    """
+    This serialiser outputs an RDF Graph as an RDF JSON formatted document.
+    Output may be direct to console: 
 
+    .. sourcecode:: python
+        
+        g.serialize(None, format="rdf-json)
+
+    or to a named file:
+
+    .. sourcecode:: python
+        
+        g.serialize("/tmp/results.json", format="rdf-json)
+
+    See:
+        http://docs.api.talis.com/platform-api/output-types/rdf-json
+
+    Params:
+    :stream: a stream, or None, as per standard with rdflib serializers
+    :base: a base URI
+    :encoding: type of RDFJson encoding - either "rdf-json" for vanilla, 
+               RDFJson or "rdf-json-pretty" for a prettified output. 
+
+    Example usage:
+    
+    .. sourcecode:: python
+        from rdflib import Graph, plugin
+        from rdflib.serializer import Serializer
+
+        plugin.register("rdf-json", Serializer, 
+                "rdfextras.serializers.rdfjson", "RdfJsonSerializer")
+
+        g = Graph()
+        g.parse("test.rdf")
+        g.serialize(None, "rdf-json")
+
+    """
     gdataColon = 0
 
     def __init__(self, store):
@@ -133,6 +195,42 @@ class RdfJsonSerializer(Serializer):
         return data
 
 class PrettyRdfJsonSerializer(RdfJsonSerializer):
+    """
+    This serialiser outputs an RDF Graph as an RDF JSON formatted document.
+    Output may be direct to console: 
+
+    .. sourcecode:: python
+        
+        g.serialize(None, format="rdf-json)
+
+    or to a named file:
+
+    .. sourcecode:: python
+        
+        g.serialize("/tmp/results.json", format="rdf-json)
+
+    See:
+        http://docs.api.talis.com/platform-api/output-types/rdf-json
+
+    Params:
+    :stream: a stream, or None, as per standard with rdflib serializers
+    :base: a base URI
+    :encoding: type of RDF/JSON encoding - either "rdf-json" (for vanilla RDF/JSON) or "rdf-json-pretty" (for a prettified output). 
+
+    Example usage:
+    
+    .. sourcecode:: python
+        from rdflib import Graph, plugin
+        from rdflib.serializer import Serializer
+
+        plugin.register("rdf-json-pretty", Serializer, 
+            "rdfextras.serializers.rdfjson", "PrettyRdfJsonSerializer")
+
+        g = Graph()
+        g.parse("test.rdf")
+        g.serialize("/tmp/results.json", "rdf-json-pretty")
+    
+    """
 
     def __init__(self, store):
         super(PrettyRdfJsonSerializer, self).__init__(store)
@@ -157,3 +255,4 @@ class PrettyRdfJsonSerializer(RdfJsonSerializer):
     def initObj(self):
         for b in self.__bindings():            
             self.jsonObj['xmlns$%s' % b[0]] = '%s' % b[1]
+

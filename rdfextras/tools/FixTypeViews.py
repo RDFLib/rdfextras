@@ -12,8 +12,6 @@ except ImportError:
     import warnings
     warnings.warn("MySQLdb is not installed")
     __test__=False
-    from nose.exc import SkipTest
-    raise SkipTest("MySQLdb is not installed")
 
 def FixViewsString(configStr, storeName='rdfstore'):
     # Get the mysql plugin. You may have to install the python mysql libraries

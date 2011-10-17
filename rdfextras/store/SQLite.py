@@ -1,4 +1,7 @@
 from __future__ import generators
+from rdflib.term import BNode
+from rdflib.term import Literal
+from pprint import pprint
 try:
     from sqlite3 import dbapi2
 except ImportError:
@@ -7,8 +10,9 @@ except ImportError:
     except ImportError:
         import warnings
         warnings.warn("pysqlite2 is not installed")
-        __test__=False
+        #__test__=False
 import re, os
+from rdflib.graph import Graph
 from rdflib.graph import QuotedGraph
 from rdflib.graph import RDF
 from rdflib.store import CORRUPTED_STORE
@@ -18,7 +22,7 @@ from rdflib.term import Literal
 from rdfextras.tools.termutils import escape_quotes
 from rdfextras.store.REGEXMatching import REGEXTerm
 from rdfextras.store.REGEXMatching import PYTHON_REGEX
-from rdfextras.store.AbstractSQLStore import AbstractSQLStore, Graph
+from rdfextras.store.AbstractSQLStore import AbstractSQLStore
 from rdfextras.store.AbstractSQLStore import extractTriple, unionSELECT
 from rdfextras.store.AbstractSQLStore import ASSERTED_NON_TYPE_PARTITION
 from rdfextras.store.AbstractSQLStore import ASSERTED_TYPE_PARTITION
@@ -26,28 +30,22 @@ from rdfextras.store.AbstractSQLStore import ASSERTED_LITERAL_PARTITION
 from rdfextras.store.AbstractSQLStore import QUOTED_PARTITION
 from rdfextras.store.AbstractSQLStore import table_name_prefixes
 from rdfextras.store.AbstractSQLStore import TRIPLE_SELECT_NO_ORDER
-
 Any = None
 
+#User-defined REGEXP operator
 def regexp(expr, item):
-    """
-    User-defined REGEXP operator
-    """
     r = re.compile(expr)
     return r.match(item) is not None
 
 class SQLite(AbstractSQLStore):
     """
-    SQLite store formula-aware implementation.  It stores its triples in the 
-    following partitions:
-    
+    SQLite store formula-aware implementation.  It stores it's triples in the following partitions:
+
     - Asserted non rdf:type statements
     - Asserted rdf:type statements (in a table which models Class membership)
-        The motivation for this partition is primarily query speed and 
-        scalability as most graphs will always have more rdf:type statements 
-        than others
+    The motivation for this partition is primarily query speed and scalability as most graphs will always have more rdf:type statements than others
     - All Quoted statements
-    
+
     In addition it persists namespace mappings in a seperate table
     """
     context_aware = True
@@ -55,8 +53,8 @@ class SQLite(AbstractSQLStore):
     transaction_aware = True
     regex_matching = PYTHON_REGEX
     autocommit_default = False
-    _Store__node_pickler = None
-    
+    _node_pickler = None
+
     def open(self, db_path, create=True):
         """
         Opens the store specified by the configuration string. If
@@ -75,11 +73,11 @@ class SQLite(AbstractSQLStore):
                 c.execute(CREATE_ASSERTED_STATEMENTS_TABLE % self._internedId)
             except dbapi2.OperationalError, e:
                 # Raise any error aside from existing table.
-                if (str(e) != 'table %s_asserted_statements already exists' 
-                        % self._internedId):
+                if (str(e) != 'table %s_asserted_statements already exists' %
+                        self._internedId):
                     raise dbapi2.OperationalError, e
             else:
-                c.execute(CREATE_ASSERTED_TYPE_STATEMENTS_TABLE %
+                c.execute(CREATE_ASSERTED_TYPE_STATEMENTS_TABLE % 
                         self._internedId)
                 c.execute(CREATE_QUOTED_STATEMENTS_TABLE % self._internedId)
                 c.execute(CREATE_NS_BINDS_TABLE % self._internedId)
@@ -130,33 +128,17 @@ class SQLite(AbstractSQLStore):
                         ],
                     )]:
                     for indexName, columns in indices:
-                        c.execute("CREATE INDEX %s on %s (%s)" %
-                                (indexName % self._internedId,
-                                tblName % self._internedId,
+                        c.execute("CREATE INDEX %s on %s (%s)" % 
+                                (indexName % self._internedId, 
+                                tblName % self._internedId, 
                                 ','.join(columns)))
                 c.close()
                 db.commit()
                 db.close()
-        
+
         self._db = dbapi2.connect(db_path)
         self._db.create_function("regexp", 2, regexp)
-        
-        #if os.path.exists(db_path):
-        #    c = self._db.cursor()
-        #    c.execute("SELECT * FROM sqlite_master WHERE type='table'")
-        #    tbls = [rt[1] for rt in c.fetchall()]
-        #    c.close()
-        #    for tn in [tbl%(self._internedId) for tbl in table_name_prefixes]:
-        #        if tn not in tbls:
-        #            # The database exists, but one of the partitions doesn't 
-        #            # exist
-        #            return 0
-        #    # Everything is there (the database and the partitions)
-        #    return 1
-        ## The database doesn't exist - nothing is there
-        #return -1
 
-        # Alcides fix
         if os.path.exists(db_path):
             c = self._db.cursor()
             c.execute("SELECT * FROM sqlite_master WHERE type='table'")
@@ -167,7 +149,7 @@ class SQLite(AbstractSQLStore):
             for tn in [tbl%(self._internedId) for tbl in table_name_prefixes]:
                 if tn not in tbls:
                     missing +=1
-        
+
             if missing == len(table_name_prefixes):
                 return NO_STORE
             elif missing > 0:
@@ -178,7 +160,6 @@ class SQLite(AbstractSQLStore):
         # The database doesn't exist - nothing is there
         return NO_STORE
 
-    
     def destroy(self, db_path):
         """
         FIXME: Add documentation
@@ -187,154 +168,115 @@ class SQLite(AbstractSQLStore):
         c=db.cursor()
         for tblsuffix in table_name_prefixes:
             try:
-                c.execute('DROP table %s' 
-                    % tblsuffix%(self._internedId))
+                c.execute('DROP table %s'%tblsuffix%(self._internedId))
             except:
-                print("unable to drop table: %s" 
-                    % (tblsuffix%(self._internedId)))
-        
-        # Note, this only removes the associated tables for the closed world 
-        # universe given by the identifier.
-        print("Destroyed Close World Universe %s ( in SQLite database %s)" 
-                        % (self.identifier,db_path))
+                print "unable to drop table: %s"%(tblsuffix%(self._internedId))
+
+        #Note, this only removes the associated tables for the closed world universe given by the identifier
+        print "Destroyed Close World Universe %s ( in SQLite database %s)"%(self.identifier,db_path)
         db.commit()
         c.close()
         db.close()
         os.remove(db_path)
-    
-    def EscapeQuotes(self, qstr):
-        return escape_quotes(qstr)
 
-    # This is overridden in order to leave unicode terms as is instead of 
-    # converting them to ascii (which is the default behavior)
-    def normalizeTerm(self, term):
+    def EscapeQuotes(self,qstr):
+        """
+        Ported from Ft.Lib.DbUtil
+        """
+        if qstr is None:
+            return ''
+        tmp = qstr.replace("\\","\\\\")
+        tmp = tmp.replace('"', '""')
+        tmp = tmp.replace("'", "\\'")
+        return tmp
+
+    #This is overridden to leave unicode terms as is
+    #Instead of converting them to ascii (the default behavior)
+    def normalizeTerm(self,term):
         if isinstance(term,(QuotedGraph,Graph)):
             return term.identifier
         elif isinstance(term,Literal):
             return self.EscapeQuotes(term)
-        elif term is None or isinstance(term, (list,REGEXTerm)):
+        elif term is None or isinstance(term,(list,REGEXTerm)):
             return term
         else:
             return term
-    
-    # "Where Clause" utility Functions
-    # The predicate and object clause builders are modified in order to 
-    # optimize subjects and objects utility functions which can take lists 
-    # as their last argument (object,predicate - respectively)
+
+    #Where Clause  utility Functions
+    #The predicate and object clause builders are modified in order to optimize
+    #subjects and objects utility functions which can take lists as their last argument (object,predicate - respectively)
     def buildSubjClause(self,subject,tableName):
         if isinstance(subject,REGEXTerm):
-            return " REGEXP (%s,"+" %s)" % \
-                (tableName and '%s.subject'%tableName or 'subject'),[subject]
+            return " REGEXP (%s,"+" %s)"%(tableName and '%s.subject'%tableName or 'subject'),[subject]
         elif isinstance(subject,list):
             clauseStrings=[]
             paramStrings = []
             for s in subject:
                 if isinstance(s,REGEXTerm):
-                    clauseStrings.append(
-                    " REGEXP (%s,"+" %s)" 
-                    % (tableName and '%s.subject'%tableName or 'subject') 
-                        + " %s")
+                    clauseStrings.append(" REGEXP (%s,"+" %s)"%(tableName and '%s.subject'%tableName or 'subject') + " %s")
                     paramStrings.append(self.normalizeTerm(s))
                 elif isinstance(s,(QuotedGraph,Graph)):
-                    clauseStrings.append("%s=" % \
-                        (tableName and '%s.subject'%tableName or 'subject') 
-                            + "%s")
+                    clauseStrings.append("%s="%(tableName and '%s.subject'%tableName or 'subject')+"%s")
                     paramStrings.append(self.normalizeTerm(s.identifier))
                 else:
-                    clauseStrings.append(
-                        "%s=" 
-                        % (tableName and '%s.subject' 
-                            % tableName or 'subject') 
-                                + "%s")
+                    clauseStrings.append("%s="%(tableName and '%s.subject'%tableName or 'subject')+"%s")
                     paramStrings.append(self.normalizeTerm(s))
             return '('+ ' or '.join(clauseStrings) + ')', paramStrings
         elif isinstance(subject,(QuotedGraph,Graph)):
-            return "%s=" % \
-                    (tableName and '%s.subject'%tableName or 'subject') + \
-                            "%s", [self.normalizeTerm(subject.identifier)]
+            return "%s="%(tableName and '%s.subject'%tableName or 'subject')+"%s",[self.normalizeTerm(subject.identifier)]
         else:
-            return subject is not None and "%s=" % \
-                    (tableName and '%s.subject'%tableName or 'subject') + \
-                    "%s",[subject] or None
-    
-    # Capable of taking a list of predicates as well (in which case sub 
-    # clauses are joined with 'OR')
+            return subject is not None and "%s="%(tableName and '%s.subject'%tableName or 'subject')+"%s",[subject] or None
+
+    #Capable off taking a list of predicates as well (in which case sub clauses are joined with 'OR')
     def buildPredClause(self,predicate,tableName):
         if isinstance(predicate,REGEXTerm):
-            return " REGEXP (%s,"+" %s)" % \
-                    (tableName and '%s.predicate' % \
-                            tableName or 'predicate'),[predicate]
+            return " REGEXP (%s,"+" %s)"%(tableName and '%s.predicate'%tableName or 'predicate'),[predicate]
         elif isinstance(predicate,list):
             clauseStrings=[]
             paramStrings = []
             for p in predicate:
                 if isinstance(p,REGEXTerm):
-                    clauseStrings.append(" REGEXP (%s,"+" %s)"% \
-                        (tableName and '%s.predicate' % \
-                                    tableName or 'predicate'))
+                    clauseStrings.append(" REGEXP (%s,"+" %s)"%(tableName and '%s.predicate'%tableName or 'predicate'))
                 else:
-                    clauseStrings.append("%s=" % \
-                            (tableName and '%s.predicate' % \
-                                        tableName or 'predicate')+"%s")
+                    clauseStrings.append("%s="%(tableName and '%s.predicate'%tableName or 'predicate')+"%s")
                 paramStrings.append(self.normalizeTerm(p))
             return '('+ ' or '.join(clauseStrings) + ')', paramStrings
         else:
-            return predicate is not None and "%s=" % \
-                (tableName and '%s.predicate'%tableName or 'predicate') + \
-                "%s",[predicate] or None
-    
+            return predicate is not None and "%s="%(tableName and '%s.predicate'%tableName or 'predicate')+"%s",[predicate] or None
+
+    #Capable of taking a list of objects as well (in which case sub clauses are joined with 'OR')
     def buildObjClause(self,obj,tableName):
-        """
-        Capable of taking a list of objects as well (in which case sub-clauses
-        are joined with 'OR')
-        """
         if isinstance(obj,REGEXTerm):
-            return " REGEXP (%s,"+" %s)" % \
-                    (tableName and '%s.object'%tableName or 'object'),[obj]
+            return " REGEXP (%s,"+" %s)"%(tableName and '%s.object'%tableName or 'object'),[obj]
         elif isinstance(obj,list):
             clauseStrings=[]
             paramStrings = []
             for o in obj:
                 if isinstance(o,REGEXTerm):
-                    clauseStrings.append(" REGEXP (%s,"+" %s)" % \
-                        (tableName and '%s.object'%tableName or 'object'))
+                    clauseStrings.append(" REGEXP (%s,"+" %s)"%(tableName and '%s.object'%tableName or 'object'))
                     paramStrings.append(self.normalizeTerm(o))
                 elif isinstance(o,(QuotedGraph,Graph)):
-                    clauseStrings.append("%s="%(tableName and '%s.object' % \
-                        tableName or 'object')+"%s")
+                    clauseStrings.append("%s="%(tableName and '%s.object'%tableName or 'object')+"%s")
                     paramStrings.append(self.normalizeTerm(o.identifier))
                 else:
-                    clauseStrings.append("%s="%(tableName and '%s.object' % \
-                        tableName or 'object')+"%s")
+                    clauseStrings.append("%s="%(tableName and '%s.object'%tableName or 'object')+"%s")
                     paramStrings.append(self.normalizeTerm(o))
             return '('+ ' or '.join(clauseStrings) + ')', paramStrings
         elif isinstance(obj,(QuotedGraph,Graph)):
-            return "%s=" % \
-                    (tableName and '%s.object'%tableName or 'object') + \
-                            "%s",[self.normalizeTerm(obj.identifier)]
+            return "%s="%(tableName and '%s.object'%tableName or 'object')+"%s",[self.normalizeTerm(obj.identifier)]
         else:
-            return obj is not None and "%s=" % \
-                    (tableName and '%s.object' % \
-                        tableName or 'object')+"%s",[obj] or None
-    
+            return obj is not None and "%s="%(tableName and '%s.object'%tableName or 'object')+"%s",[obj] or None
+
     def buildContextClause(self,context,tableName):
-        context = context is not None \
-                    and self.normalizeTerm(context.identifier) \
-                    or context
+        context = context is not None and self.normalizeTerm(context.identifier) or context
         if isinstance(context,REGEXTerm):
-            return " REGEXP (%s,"+" %s)" % \
-                (tableName and '%s.context' % \
-                        tableName or 'context'),[context]
+            return " REGEXP (%s,"+" %s)"%(tableName and '%s.context'%tableName or 'context'),[context]
         else:
-            return context is not None and "%s=" % \
-                (tableName and '%s.context' % tableName or 'context') + \
-                    "%s", [context] or None
-    
+            return context is not None and "%s="%(tableName and '%s.context'%tableName or 'context')+"%s",[context] or None
+
     def buildTypeMemberClause(self,subject,tableName):
         if isinstance(subject,REGEXTerm):
-            return " REGEXP (%s,"+" %s)" % \
-                    (tableName and '%s.member' % \
-                            tableName or 'member'), [subject]
+            return " REGEXP (%s,"+" %s)"%(tableName and '%s.member'%tableName or 'member'),[subject]
         elif isinstance(subject,list):
             clauseStrings=[]
             paramStrings = []
@@ -347,57 +289,50 @@ class SQLite(AbstractSQLStore):
             return '('+ ' or '.join(clauseStrings) + ')', paramStrings
         else:
             return subject and u"%s.member = "%(tableName)+"%s",[subject]
-    
+
     def buildTypeClassClause(self,obj,tableName):
         if isinstance(obj,REGEXTerm):
-            return " REGEXP (%s,"+" %s)" % \
-                    (tableName and '%s.klass' % \
-                            tableName or 'klass'), [obj]
+            return " REGEXP (%s,"+" %s)"%(tableName and '%s.klass'%tableName or 'klass'),[obj]
         elif isinstance(obj,list):
             clauseStrings=[]
             paramStrings = []
             for o in obj:
-                clauseStrings.append("%s.klass=" % tableName + "%s")
+                clauseStrings.append("%s.klass="%tableName+"%s")
                 if isinstance(o,(QuotedGraph,Graph)):
                     paramStrings.append(self.normalizeTerm(o.identifier))
                 else:
                     paramStrings.append(self.normalizeTerm(o))
             return '('+ ' or '.join(clauseStrings) + ')', paramStrings
         else:
-            return obj is not None and "%s.klass = " % \
-                    tableName + "%s", [obj] or None
-    
+            return obj is not None and "%s.klass = "%tableName+"%s",[obj] or None
+
     def triples(self, (subject, predicate, obj), context=None):
         """
         A generator over all the triples matching pattern. Pattern can
         be any objects for comparing against nodes in the store, for
         example, RegExLiteral, Date? DateRange?
-        
+
         quoted table:                <id>_quoted_statements
         asserted rdf:type table:     <id>_type_statements
         asserted non rdf:type table: <id>_asserted_statements
-        
-        triple columns: subject,predicate,object,context,
-                        termComb,objLanguage,objDatatype
 
+        triple columns: subject,predicate,object,context,termComb,objLanguage,objDatatype
         class membership columns: member,klass,context termComb
-        
+
         FIXME:  These union all selects *may* be further optimized by joins
-        
+
         """
-        quoted_table = "%s_quoted_statements" % self._internedId
-        asserted_table = "%s_asserted_statements" % self._internedId
-        asserted_type_table = "%s_type_statements" % self._internedId
-        literal_table = "%s_literal_statements" % self._internedId
-        c = self._db.cursor()
-        
+        quoted_table="%s_quoted_statements"%self._internedId
+        asserted_table="%s_asserted_statements"%self._internedId
+        asserted_type_table="%s_type_statements"%self._internedId
+        literal_table = "%s_literal_statements"%self._internedId
+        c=self._db.cursor()
+
         parameters = []
-        
+
         if predicate == RDF.type:
-            # select from asserted rdf:type partition and 
-            # quoted table (if a context is specified)
-            clauseString,params = self.buildClause(
-                'typeTable',subject,RDF.type, obj,context,True)
+            #select from asserted rdf:type partition and quoted table (if a context is specified)
+            clauseString,params = self.buildClause('typeTable',subject,RDF.type, obj,context,True)
             parameters.extend(params)
             selects = [
                 (
@@ -407,21 +342,12 @@ class SQLite(AbstractSQLStore):
                   ASSERTED_TYPE_PARTITION
                 ),
             ]
-        
-        elif isinstance(predicate,REGEXTerm) \
-                and predicate.compiledExpr.match(RDF.type) \
-                or not predicate:
-            # Select from quoted partition (if context is specified), 
-            # literal partition if (obj is Literal or None) and 
-            # asserted non rdf:type partition (if obj is URIRef or None)
+
+        elif isinstance(predicate,REGEXTerm) and predicate.compiledExpr.match(RDF.type) or not predicate:
+            #Select from quoted partition (if context is specified), literal partition if (obj is Literal or None) and asserted non rdf:type partition (if obj is URIRef or None)
             selects = []
-            if not self.STRONGLY_TYPED_TERMS or \
-                    isinstance(obj,Literal) \
-                    or not obj \
-                    or (self.STRONGLY_TYPED_TERMS \
-                        and isinstance(obj,REGEXTerm)):
-                clauseString,params = self.buildClause(
-                        'literal',subject,predicate,obj,context)
+            if not self.STRONGLY_TYPED_TERMS or isinstance(obj,Literal) or not obj or (self.STRONGLY_TYPED_TERMS and isinstance(obj,REGEXTerm)):
+                clauseString,params = self.buildClause('literal',subject,predicate,obj,context)
                 parameters.extend(params)
                 selects.append((
                   literal_table,
@@ -429,12 +355,8 @@ class SQLite(AbstractSQLStore):
                   clauseString,
                   ASSERTED_LITERAL_PARTITION
                 ))
-            if not isinstance(obj,Literal) \
-                and not (isinstance(obj,REGEXTerm) \
-                and self.STRONGLY_TYPED_TERMS) \
-                or not obj:
-                clauseString,params = self.buildClause(
-                    'asserted',subject,predicate,obj,context)
+            if not isinstance(obj,Literal) and not (isinstance(obj,REGEXTerm) and self.STRONGLY_TYPED_TERMS) or not obj:
+                clauseString,params = self.buildClause('asserted',subject,predicate,obj,context)
                 parameters.extend(params)
                 selects.append((
                   asserted_table,
@@ -442,9 +364,8 @@ class SQLite(AbstractSQLStore):
                   clauseString,
                   ASSERTED_NON_TYPE_PARTITION
                 ))
-            
-            clauseString,params = self.buildClause(
-                    'typeTable',subject,RDF.type,obj,context,True)
+
+            clauseString,params = self.buildClause('typeTable',subject,RDF.type,obj,context,True)
             parameters.extend(params)
             selects.append(
                 (
@@ -454,19 +375,13 @@ class SQLite(AbstractSQLStore):
                   ASSERTED_TYPE_PARTITION
                 )
             )
-        
+
+
         elif predicate:
-            # select from asserted non rdf:type partition (optionally), 
-            # quoted partition (if context is speciied), and literal 
-            # partition (optionally)
+            #select from asserted non rdf:type partition (optionally), quoted partition (if context is speciied), and literal partition (optionally)
             selects = []
-            if not self.STRONGLY_TYPED_TERMS \
-                    or isinstance(obj,Literal) \
-                    or not obj \
-                    or (self.STRONGLY_TYPED_TERMS \
-                        and isinstance(obj,REGEXTerm)):
-                clauseString,params = self.buildClause(
-                    'literal',subject,predicate,obj,context)
+            if not self.STRONGLY_TYPED_TERMS or isinstance(obj,Literal) or not obj or (self.STRONGLY_TYPED_TERMS and isinstance(obj,REGEXTerm)):
+                clauseString,params = self.buildClause('literal',subject,predicate,obj,context)
                 parameters.extend(params)
                 selects.append((
                   literal_table,
@@ -474,12 +389,8 @@ class SQLite(AbstractSQLStore):
                   clauseString,
                   ASSERTED_LITERAL_PARTITION
                 ))
-            if not isinstance(obj,Literal) \
-                    and not (isinstance(obj,REGEXTerm) \
-                    and self.STRONGLY_TYPED_TERMS) \
-                    or not obj:
-                clauseString,params = self.buildClause(
-                        'asserted',subject,predicate,obj,context)
+            if not isinstance(obj,Literal) and not (isinstance(obj,REGEXTerm) and self.STRONGLY_TYPED_TERMS) or not obj:
+                clauseString,params = self.buildClause('asserted',subject,predicate,obj,context)
                 parameters.extend(params)
                 selects.append((
                   asserted_table,
@@ -487,10 +398,9 @@ class SQLite(AbstractSQLStore):
                   clauseString,
                   ASSERTED_NON_TYPE_PARTITION
                 ))
-        
+
         if context is not None:
-            clauseString,params = self.buildClause(
-                'quoted',subject,predicate, obj,context)
+            clauseString,params = self.buildClause('quoted',subject,predicate, obj,context)
             parameters.extend(params)
             selects.append(
                 (
@@ -500,19 +410,15 @@ class SQLite(AbstractSQLStore):
                   QUOTED_PARTITION
                 )
             )
-        
-        q = self._normalizeSQLCmd(unionSELECT(
-                selects,selectType=TRIPLE_SELECT_NO_ORDER))
+
+        q=self._normalizeSQLCmd(unionSELECT(selects,selectType=TRIPLE_SELECT_NO_ORDER))
         self.executeSQL(c,q,parameters)
-        # NOTE: SQLite does not support ORDER BY terms that aren't 
-        # integers, so the entire result set must be iterated
-        # in order to be able to return a generator of contexts
+        #NOTE: SQLite does not support ORDER BY terms that aren't integers, so the entire result set must be iterated
+        #in order to be able to return a generator of contexts
         tripleCoverage = {}
         result = c.fetchall()
         c.close()
         for rt in result:
-            # Fix by Alcides Fonseca
-            # https://github.com/slok/rdflib/commit/e05827b080772e785290b270da63dce64addfc7c#diff-0
             tmp = []
             for i,r in enumerate(rt):
                 if r == u"NULL":
@@ -527,8 +433,6 @@ class SQLite(AbstractSQLStore):
 
         for (s,p,o),contexts in tripleCoverage.items():
             yield (s,p,o),(c for c in contexts)
-    
-
 
 CREATE_ASSERTED_STATEMENTS_TABLE = """
 CREATE TABLE %s_asserted_statements (

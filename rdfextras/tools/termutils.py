@@ -236,3 +236,4 @@ def escape_quotes(qstr):
 # from rdfextras.tools.termutils import type2TermCombination
 # from rdfextras.tools.termutils import statement2TermCombination
 # from rdfextras.tools.termutils import escape_quotes
+

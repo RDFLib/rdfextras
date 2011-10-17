@@ -1,14 +1,13 @@
 try:
     import MySQLdb
 except ImportError:
-    from nose.exc import SkipTest
-    raise SkipTest("MySQLdb not installed")
-
+    import warnings
+    warnings.warn("MySQLdb is not installed")
+    __test__=False
 import sys
 import test_graph
 import test_context
 import unittest
-from nose.exc import SkipTest
 from tempfile import mkdtemp
 from tempfile import mkstemp
 from test_n3_2 import implies
@@ -41,12 +40,15 @@ class MySQLGraphTestCase(test_graph.GraphTestCase):
     storetest = True
     path = configString
     create = True
-
+    
     def testGraphValue(self):
-        raise SkipTest("Known issue.")
+        from nose.exc import SkipTest
+        raise SkipTest("Known issue")
 
     def testStatementNode(self):
-        raise SkipTest("Known issue.")
+        from nose.exc import SkipTest
+        raise SkipTest("Known issue")
+
 
 class MySQLContextTestCase(test_context.ContextTestCase):
     store_name = "MySQL"
@@ -55,7 +57,9 @@ class MySQLContextTestCase(test_context.ContextTestCase):
     create = True
 
     def testLenInMultipleContexts(self):
-        raise SkipTest("Known issue.")
+        from nose.exc import SkipTest
+        raise SkipTest("Known issue")
+
 
 class MySQLStoreTests(unittest.TestCase):
     storetest = True
@@ -91,12 +95,10 @@ class MySQLStoreTests(unittest.TestCase):
                 else:
                     os.remove(self.path)
 
-    def test_MySQL_testN3_store(self):
-        raise SkipTest("Known issue")
-        testN3Store('MySQL',configString)
-
     def testRegex(self):
+        from nose.exc import SkipTest
         raise SkipTest("Known issue")
+
         g = self.graph
         g.parse(data=testN3, format="n3")
         try:
