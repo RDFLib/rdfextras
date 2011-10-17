@@ -8,7 +8,11 @@ from rdflib import plugin
 from rdflib.store import Store, NO_STORE, VALID_STORE
 from rdflib import URIRef
 import time
-from rdfextras.store.FOPLRelationalModel.QuadSlot import *
+from rdfextras.store.FOPLRelationalModel.QuadSlot import normalizeValue
+from rdfextras.tools.termutils import SUBJECT
+from rdfextras.tools.termutils import PREDICATE
+from rdfextras.tools.termutils import OBJECT
+from rdfextras.tools.termutils import CONTEXT
 
 plugin.register('MySQL', rdflib.store.Store,
                         'rdfextras.store.MySQL', 'MySQL')
@@ -155,9 +159,10 @@ def GetDatabaseStats(graph):
                   lit = graph.store.literalProperties,
                   rel = graph.store.binaryRelations,
                   all = graph.store._internedId + '_all')
+    # FIXME Unused code
     realTables = dict(type = graph.store.aboxAssertions,
-                  lit = graph.store.literalProperties,
-                  rel = graph.store.binaryRelations)
+                      lit = graph.store.literalProperties,
+                      rel = graph.store.binaryRelations)
     # columnNames[OBJECT]
     
     cursor = graph.store._db.cursor()

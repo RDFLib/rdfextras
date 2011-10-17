@@ -1,6 +1,4 @@
-from rdflib.graph import ConjunctiveGraph
-from rdflib.term import URIRef, Literal
-from rdflib.namespace import RDFS
+from rdflib import ConjunctiveGraph, URIRef #, Literal
 from StringIO import StringIO
 import unittest
 
@@ -27,14 +25,14 @@ WHERE {
     FILTER (!bound(?OP)) }"""
 
 class TestSparqlOPT_FILTER2(unittest.TestCase):
-    debug = True
+    debug = False
     def setUp(self):
         self.graph = ConjunctiveGraph()
         self.graph.load(StringIO(testContent), format='n3')
     def test_OPT_FILTER(self):
         results = self.graph.query(QUERY,
                                    processor="sparql2sql", 
-                                   DEBUG=self.debug).serialize(format='python')
+                                   DEBUG=self.debug) #.serialize(format='python')
         results = list(results)
         self.failUnless(
             results == [doc1],

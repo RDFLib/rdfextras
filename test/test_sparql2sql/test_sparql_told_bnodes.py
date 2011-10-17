@@ -7,10 +7,27 @@ import unittest
 
 global store,debug
 
+"""
+This test is actually completely broken 
+SPARQL defines bnode IDs in queries to be distinct from all other bnodes, 
+i.e. using bnode IDs in filter expressions like done here is not meant to work
+
+Note: the presence of a BNode in the SPARQL FILTER query in 
+testToldBNodeWithBinding would seem to trigger a ParseException:
+
+ParseException: Expected "}" (at char 44), (line:1, col:45)
+-------------------- >> begin captured stdout << ---------------------
+SELECT ?subj WHERE { { ?subj ?prop ?obj } . FILTER ( ?subj != _:ub81bL5C12 ) }
+
+char 44:                                  ^
+"""
+
+
 class TestSPARQLToldBNodes(unittest.TestCase):
-    
+
+    known_issue=True
     sparql = True
-    debug = True
+    debug = False
     
     def setUp(self):
         # NS = u"http://example.org/"

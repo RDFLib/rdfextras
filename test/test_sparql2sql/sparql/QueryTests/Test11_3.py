@@ -48,8 +48,8 @@ from testSPARQL import ns_ns
 from testSPARQL import ns_book
 
 from rdflib import Literal
-from rdfextras.sparql.graph import GraphPattern
-from rdfextras.sparql.operators import isURI
+from rdfextras.sparql2sql.graphPattern import GraphPattern
+from rdfextras.sparql2sql.sparqlOperators import isURI
 
 
 select      = ["?name", "?mbox"]

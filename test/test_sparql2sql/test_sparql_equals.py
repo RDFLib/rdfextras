@@ -18,7 +18,7 @@ class TestSparqlEquals(unittest.TestCase):
             <http://example.org/doc/2> rdfs:label "Document 2"@en .
             <http://example.org/doc/3> rdfs:label "Document 3"@en .
         """ % self.PREFIXES
-        self.graph = graph = ConjunctiveGraph()
+        self.graph = ConjunctiveGraph()
         self.graph.load(StringIO(testContent), format='n3')
 
     def test_uri_equals(self):
@@ -33,7 +33,7 @@ class TestSparqlEquals(unittest.TestCase):
         """) % self.PREFIXES
         res = self.graph.query(query, processor='sparql2sql', DEBUG=self.debug)
         expected = [uri]
-        self.assertEqual(res.selected,expected)
+        self.assertEqual(list(res),expected)
 
 if __name__ == "__main__":
     unittest.main()

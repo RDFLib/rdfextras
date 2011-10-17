@@ -15,7 +15,7 @@ from rdflib.store import CORRUPTED_STORE
 from rdflib.store import NO_STORE
 from rdflib.store import VALID_STORE
 from rdflib.term import Literal
-from rdfextras.tools.term_utils import escape_quotes
+from rdfextras.tools.termutils import escape_quotes
 from rdfextras.store.REGEXMatching import REGEXTerm
 from rdfextras.store.REGEXMatching import PYTHON_REGEX
 from rdfextras.store.AbstractSQLStore import AbstractSQLStore, Graph

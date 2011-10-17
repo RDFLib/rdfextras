@@ -20,7 +20,7 @@ WHERE {
     FILTER (!bound(?otherLabel)) }"""
 
 class TestSparqlOPT_FILTER(unittest.TestCase):
-    debug = True
+    debug = False
     def setUp(self):
         self.graph = ConjunctiveGraph()
         self.graph.load(StringIO(testContent), format='n3')
@@ -28,7 +28,7 @@ class TestSparqlOPT_FILTER(unittest.TestCase):
         results = self.graph.query(QUERY,
                                    processor="sparql2sql", 
                                    DEBUG=self.debug,
-                                   initBindings={'?label':RDFS.label}).serialize(format='python')
+                                   initBindings={'?label':RDFS.label}) #.serialize(format='python')
         self.failUnless(list(results) == [doc2],
                 "expecting : %s"%repr([doc2]))
 

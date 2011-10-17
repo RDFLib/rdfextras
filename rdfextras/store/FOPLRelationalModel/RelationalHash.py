@@ -21,8 +21,8 @@ from rdflib.term import Literal
 from rdflib.namespace import RDF
 from rdflib.graph import QuotedGraph
 from rdflib.graph import Graph
-from rdfextras.tools.term_utils import OBJECT
-from rdfextras.tools.term_utils import escape_quotes
+from rdfextras.tools.termutils import OBJECT
+from rdfextras.tools.termutils import escape_quotes
 from rdfextras.store.REGEXMatching import REGEXTerm
 from rdfextras.store.FOPLRelationalModel.QuadSlot import normalizeValue
 Any = None

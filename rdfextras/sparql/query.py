@@ -1366,7 +1366,6 @@ def retToJSON(val):
     elif isinstance(val,Literal):
         if val.language != "":
             return '"type": "literal", "xml:lang" : "%s", "value" : "%s"' % (val.language, val)
-            attr += ' xml:lang="%s" ' % val.language
         elif val.datatype != "" and val.datatype != None:
             return '"type": "typed=literal", "datatype" : "%s", "value" : "%s"' % (val.datatype, val)
         else:

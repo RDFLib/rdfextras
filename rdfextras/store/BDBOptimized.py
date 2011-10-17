@@ -5,10 +5,17 @@ except ImportError:
     from bsddb3 import db
 from urllib import pathname2url
 from os import mkdir, makedirs
-from os.path import exists, abspath
+from os.path import abspath
+from os.path import exists
+from os.path import join
 
 from rdflib.term import URIRef
-from rdflib.store import Store, VALID_STORE, CORRUPTED_STORE, NO_STORE, UNKNOWN
+from rdflib.store import Store
+from rdflib.store import NO_STORE
+from rdflib.store import CORRUPTED_STORE
+from rdflib.store import UNKNOWN
+from rdflib.store import VALID_STORE
+
 
 SUPPORT_MULTIPLE_STORE_ENVIRON = False
 
@@ -400,14 +407,18 @@ class QuadIndex:
     
 
 class BDBOptimized(Store):
-    """ An alternative BDB store implementing the index-structure proposed in:
-     http://sw.deri.org/2005/02/dexa/yars.pdf
+    """
+    An alternative BDB store implementing the index-structure 
+    proposed in Harth and Decker's (2005) paper 
+    `Optimized Index Structures for Querying RDF from the Web <http://sw.deri.org/2005/02/dexa/yars.pdf>`_ 
+    and as used in `YARS <http://sw.deri.org/2004/06/yars/>`_
      
-     Index structures
-     key -> int, int -> key for variable to id and id -> variable
-     Triple indices: spoc, pocs, ocsp, cspo, cpso, ospc
+    Index structures
+    key -> int, int -> key for variable to id and id -> variable
+    Triple indices: spoc, pocs, ocsp, cspo, cpso, ospc
      
-     This store is both transaction and context-aware.
+    This store is both transaction and context-aware.
+    
     """
     
     context_aware = True
@@ -420,7 +431,7 @@ class BDBOptimized(Store):
         self.__open = False
         self.__identifier = identifier
         self.configuration = configuration
-        self.__locks = 5000
+        self.__locks = 10000
         self.__db_env = None
         self.__id_mapper = None
         self.__quad_index = None
@@ -453,7 +464,7 @@ class BDBOptimized(Store):
                 return NO_STORE
         
         db_env = db.DBEnv()
-        db_env.set_cachesize(0, 1024*1024*50) # TODO
+        db_env.set_cachesize(0, 1024*1024*100) # TODO
         
         # enable deadlock-detection
         db_env.set_lk_detect(db.DB_LOCK_MAXLOCKS)

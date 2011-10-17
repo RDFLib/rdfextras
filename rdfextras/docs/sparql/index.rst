@@ -195,6 +195,7 @@ Modules
    graph.rst
    operators.rst
    parser.rst
+   processor.rst
    query.rst
 
 

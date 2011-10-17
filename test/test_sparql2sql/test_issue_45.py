@@ -8,7 +8,7 @@ from rdfextras.sparql2sql import Algebra as algebra
 from StringIO import StringIO
 
 class TestSparqlASK(unittest.TestCase):
-    debug = True
+    debug = False
     def setUp(self):
         self.graph = Graph()
 
@@ -37,9 +37,10 @@ class TestSparqlASK(unittest.TestCase):
             'ASK { <http://goonmill.org/2007/skill.n3#bar> a <http://goonmill.org/2007/skill.n3#Foo> } ',
             processor="sparql2sql",
             DEBUG=self.debug)
-        self.assertEquals(res.askAnswer, [True], "The answer should have been that the triple was found")
+        # print("res.askAnswer", res.askAnswer)
+        self.assertTrue(res.askAnswer in ([True], True), "The answer should have been that the triple was found")
 
-    test_ask_true.known_issue = True
+    # test_ask_true.known_issue = True
 
     def test_ask_false(self):
         """
@@ -49,7 +50,8 @@ class TestSparqlASK(unittest.TestCase):
             'ASK { <http://goonmill.org/2007/skill.n3#baz> a <http://goonmill.org/2007/skill.n3#Foo> } ',
             processor="sparql2sql",
             DEBUG=self.debug)
-        self.assertEquals(res.askAnswer, [False], "The answer should have been that the triple was not found")
+        # print("res.askAnswer", res.askAnswer)
+        self.assertTrue(res.askAnswer in ([False], False), "The answer should have been that the triple was not found")
 
 # class TestSparqlASKWithCompliance(TestSparqlASK):
 #     def setUp(self):

@@ -156,9 +156,11 @@ class BerkeleyDB(Sleepycat):
         """
         Start a bsddb transaction. If the current thread already has a running
         transaction, a nested transaction with the first transaction for this
-        thread as parent is started. See:
-        http://pybsddb.sourceforge.net/ref/transapp/nested.html for more on
-        nested transactions in BDB.
+        thread as parent is started. More detailed information on using nested
+        transactions in BDB is available on the
+        `pybsddb <http://pybsddb.sourceforge.net/ref/transapp/nested.html>`_ 
+        sourceforge web site.
+
         """
         # A user should be able to wrap several operations in a transaction.
         # For example, two or more adds when adding a graph.
@@ -204,7 +206,7 @@ class BerkeleyDB(Sleepycat):
                     del self.__dbTxn[thread.get_ident()]
                 else:
                     txn = self.__dbTxn[thread.get_ident()].pop()
-                    _logger.debug("committing")
+                    # _logger.debug("committing")
                     #before = self.db_env.lock_stat()['nlocks']
                     txn.commit(0)
                     # print("committing a transaction", 
@@ -229,7 +231,7 @@ class BerkeleyDB(Sleepycat):
         """
         
         if thread.get_ident() in self.__dbTxn and self.is_open():
-            _logger.debug("rollingback")
+            # _logger.debug("rollingback")
             try:
                 if rollback_root == True:
                     # same as commit, when root aborts, all childs abort

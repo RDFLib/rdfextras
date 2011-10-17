@@ -19,6 +19,9 @@ MANIFEST
 .svn
 .hg
 .git*
+.tox
+.coverage
+coverdata
 .hgignore
 .orig
 .bz2

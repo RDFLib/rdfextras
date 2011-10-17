@@ -1,6 +1,15 @@
+try:
+    import bsddb
+except ImportError:
+    try:
+        import bsddb3
+    except ImportError:
+        from nose.exc import SkipTest
+        raise SkipTest("bsddb[3] not installed")
+
 import unittest, time
-from test_context import ContextTestCase
-from test_graph import GraphTestCase
+import test_context
+import test_graph
 from rdflib import BNode
 from rdflib import ConjunctiveGraph
 from rdflib import Graph
@@ -51,14 +60,40 @@ def worker_remove(performed_ops, graph, num_ops, input=[]):
     # print("remove time: %.4f, thread: %s" % ((time.time() - t1), currentThread().getName()))
 
 
-class TestBDBGraph(GraphTestCase):
+class TestBDBGraph(test_graph.GraphTestCase):
     store_name = "BerkeleyDB"
     storetest = True
+    
+    def setUp(self):
+        self.graph = ConjunctiveGraph(store="BerkeleyDB")
+        self.path = mkdtemp()
+        self.graph.open(self.path, create=True)
+    
+    def tearDown(self):
+        self.graph.close()
+        import os
+        if hasattr(self, 'path') and self.path is not None:
+            if os.path.exists(self.path):
+                for f in os.listdir(self.path): os.unlink(self.path+'/'+f)
+                os.rmdir(self.path)
 
 
-class TestBDBContext(ContextTestCase):
+class TestBDBContext(test_context.ContextTestCase):
     store = "BerkeleyDB"
     storetest = True
+    
+    def setUp(self):
+        self.graph = ConjunctiveGraph(store="BerkeleyDB")
+        self.path = mkdtemp()
+        self.graph.open(self.path, create=True)
+    
+    def tearDown(self):
+        self.graph.close()
+        import os
+        if hasattr(self, 'path') and self.path is not None:
+            if os.path.exists(self.path):
+                for f in os.listdir(self.path): os.unlink(self.path+'/'+f)
+                os.rmdir(self.path)
 
 
 class TestBDBTransactions(unittest.TestCase):

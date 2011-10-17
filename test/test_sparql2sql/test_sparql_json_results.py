@@ -1,4 +1,5 @@
 from rdflib.graph import ConjunctiveGraph
+import rdflib
 from StringIO import StringIO
 import unittest
 
@@ -89,7 +90,7 @@ def make_method(testname):
 
 
 class TestSparqlJsonResults(unittest.TestCase):
-    debug = True
+    debug = False
     def setUp(self):
         self.graph = ConjunctiveGraph()
         self.graph.parse(StringIO(test_data), format="n3")
@@ -117,7 +118,9 @@ class TestSparqlJsonResults(unittest.TestCase):
     testSelectVars = make_method('select_vars')
     
     testWildcardVars = make_method('wildcard_vars')
-    
+
+TestSparqlJsonResults.known_issue = True
+
 if __name__ == "__main__":
     unittest.main()
 

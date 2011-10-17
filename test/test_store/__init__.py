@@ -38,7 +38,7 @@ plugin.register(
 
 plugin.register(
         'ZODB', store.Store,
-        'rdfextras.store.ZODB', 'ZODB')
+        'rdfextras.store.ZODB', 'ZODBGraph')
 
 plugin.register(
         'KyotoCabinet', store.Store,

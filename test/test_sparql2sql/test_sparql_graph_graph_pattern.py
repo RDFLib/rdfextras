@@ -1,7 +1,9 @@
 from rdflib.graph import ConjunctiveGraph
-from rdflib import URIRef, Literal, RDFS
+import rdflib
+from rdflib import URIRef #, Literal, RDFS
 from StringIO import StringIO
 import unittest
+
 
 testContent = """
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
@@ -26,14 +28,14 @@ WHERE {
     FILTER (!bound(?OP)) }"""
 
 class TestSparqlOPT_FILTER2(unittest.TestCase):
-    debug = True
+    debug = False
     def setUp(self):
         self.graph = ConjunctiveGraph()
         self.graph.load(StringIO(testContent), format='n3')
     def test_OPT_FILTER(self):
         results = self.graph.query(QUERY,
                                    processor="sparql2sql",
-                                   DEBUG=self.debug).serialize(format='python')
+                                   DEBUG=self.debug)#.serialize(format='python')
         results = list(results)
         self.failUnless(
             results == [doc1],

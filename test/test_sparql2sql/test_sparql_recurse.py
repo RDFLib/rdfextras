@@ -1,8 +1,8 @@
-from rdflib.graph import ConjunctiveGraph
-from rdflib import URIRef, Literal, RDFS
-from rdfextras.sparql2sql.Algebra import RenderSPARQLAlgebra
+
+from rdflib import ConjunctiveGraph
+import rdflib
 from StringIO import StringIO
-import unittest, sys
+import unittest
 import nose
 
 testContent = """
@@ -55,10 +55,10 @@ RECUR ?t TO ?x
 { ?x rdfs:subClassOf ?t }
 '''
 
-ANSWER1 = URIRef('http://del.icio.us/rss/chimezie/paper')
+ANSWER1 = rdflib.term.URIRef('http://del.icio.us/rss/chimezie/paper')
 
 class RecursionTests(unittest.TestCase):
-    debug = True
+    debug = False
     def setUp(self):
         self.graph = ConjunctiveGraph()
         self.graph.load(StringIO(testContent), format='n3')
@@ -68,29 +68,37 @@ class RecursionTests(unittest.TestCase):
         graph.load(StringIO(BASIC_KNOWS_DATA), format='n3')
         results = graph.query(KNOWS_QUERY,
                               processor="sparql2sql", 
-                              DEBUG=self.debug).serialize(format='python')
-        results = set([tuple(result) for result in results])
-        person1 = URIRef('ex:person.1')
-        person2 = URIRef('ex:person.2')
+                              DEBUG=self.debug) #.serialize(format='python')
+        print("results", tuple(list(results)[0]))
+        results = set(tuple(list(results)[0]))
+        person1 = rdflib.term.URIRef('ex:person.1')
+        person2 = rdflib.term.URIRef('ex:person.2')
         nose.tools.assert_equal(
           results,
-          set([(person1, None), (person1, Literal('person 3')),
-               (person2, Literal('person 3'))]))
+          set([(person1, None), (person1, rdflib.term.Literal('person 3')),
+               (person2, rdflib.term.Literal('person 3'))]))
 
     def test_secondary_recursion(self):
         graph = ConjunctiveGraph()
         graph.load(StringIO(SUBCLASS_DATA), format='n3')
         results = graph.query(SUBCLASS_QUERY, 
                               processor="sparql2sql", 
-                              DEBUG=self.debug).serialize(format='python')
-        results = set([tuple(result) for result in results])
-        ob = URIRef('ex:ob')
-        class1 = URIRef('ex:class.1')
-        class2 = URIRef('ex:class.2')
-        class3 = URIRef('ex:class.3')
+                              DEBUG=self.debug) #.serialize(format='python')
+        print("results", tuple(list(results)[0]))
+        results = set(tuple(list(results)[0]))
+        ob = rdflib.term.URIRef('ex:ob')
+        class1 = rdflib.term.URIRef('ex:class.1')
+        class2 = rdflib.term.URIRef('ex:class.2')
+        class3 = rdflib.term.URIRef('ex:class.3')
         nose.tools.assert_equal(
           results,
           set([(ob, class1), (ob, class2), (ob, class3)]))
 
+RecursionTests.known_issue = True
+
 if __name__ == "__main__":
     unittest.main()
+
+
+
+

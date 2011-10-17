@@ -25,8 +25,8 @@ In an interactive python interpreter, try this:
 
     >>> g = Graph()
 
-    >>> g.parse("demo.nt", format="nt")
-    <Graph identifier=QoYUuWMq0 (<class 'rdflib.Graph.Graph'>)>
+    >>> g.parse("demo.nt", format="nt") # DOCTEST ELLIPSIS
+    <Graph identifier=... (<class 'rdflib.Graph.Graph'>)>
 
     >>> len(g)
     2
@@ -42,14 +42,14 @@ In an interactive python interpreter, try this:
      rdflib.URIRef('http://xmlns.com/foaf/0.1/Person'))
 
 
-The final lines show how rdflib represents the two statements in
+The final lines show how RDFLib represents the two statements in
 the file. The statements themselves are just length-3 tuples; and the
 subjects, predicates, and objects are all rdflib types.
 
 Reading remote graphs
 =====================
 
-Reading graphs from the net is just as easy:
+Reading graphs from the net is just as straightforward:
 
 .. sourcecode:: pycon
 
@@ -61,6 +61,6 @@ Reading graphs from the net is just as easy:
 The format defaults to ``xml``, which is the common format for .rdf files
 you'll find on the net.
 
-See also `the :meth:`~rdflib.graph.Graph.parse` method <http://rdflib.net/rdflib-2.4.0/html/public/rdflib.Graph.Graph-class.html#parse>`_ and
+See also `the :meth:`~rdflib.graph.Graph.parse` method <http://readthedocs/rdflib3/rdflib.Graph.Graph-class.html#parse>`_ and
 
-`other parsers supported by rdflib <http://rdflib.net/rdflib-2.4.0/html/public/rdflib.syntax.parsers-module.html>`_
+`other parsers supported by rdflib 3<http://readthedocs.com/rdflib3/rdflib.syntax.parsers-module.html>`_

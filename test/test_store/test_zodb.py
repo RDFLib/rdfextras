@@ -1,9 +1,14 @@
+try:
+    import ZODB
+except ImportError:
+    from nose.exc import SkipTest
+    raise SkipTest("ZODB not installed")
+
 import logging
 
 _logger = logging.getLogger(__name__)
 
 import os
-import ZODB
 import transaction
 from rdflib import RDF, URIRef, ConjunctiveGraph, Graph
 import test_graph
@@ -148,7 +153,6 @@ class ZODBGraphTestCase(test_graph.GraphTestCase):
         asserte(len(list(triples((Any, Any, Any)))), 0)
     
     def testStatementNode(self):
-        __test__ = False
         graph = self.graph
         
         from rdflib.term import Statement
@@ -192,5 +196,4 @@ class ZODBGraphTestCase(test_graph.GraphTestCase):
         # print(len(graph))
         graph.remove((gv1, RDF.value, gv2))
         # print(len(graph))
-    
     

@@ -20,7 +20,7 @@ def test_bound():
     WHERE { ?x foaf:givenName  ?name .
                     OPTIONAL { ?x dc:date ?date } .
                     FILTER ( bound(?date) ) }"""))
-    expected = [Literal('Bob', lang=None, datatype=None)]
+    expected = [(Literal('Bob', lang=None, datatype=None),)]
     assert res == expected, "Expected %s but got %s" % (expected, res)
 
 if __name__ == '__main__':

@@ -23,11 +23,11 @@ is-a
 {% for p,v in outprops %}
 <tr class="{{ loop.cycle('odd', 'even') }}">
   <td><a href='{{p.url}}'>{{p.label}}</a></td>
-
 	{% if v.url %}
   <td><a href='{{v.url}}'>{{v.label}}</a></td>
 	{% else %}
-	<td>{{v.label}}
+	<td>"{{v.label}}"
+	{% if v.lang %} <i>({{v.lang}})</i> {% endif %}
 	{% endif %}
 </tr>
 {% endfor %}

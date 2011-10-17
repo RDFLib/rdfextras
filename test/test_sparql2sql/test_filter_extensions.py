@@ -1,7 +1,7 @@
 from rdflib.graph import ConjunctiveGraph
 from rdflib import Namespace, RDF, XSD, BNode, Literal
 
-debug = True
+debug = False
 DC = Namespace(u"http://purl.org/dc/elements/1.1/")
 FUNC = Namespace(u"http://example.org/functions#")
 

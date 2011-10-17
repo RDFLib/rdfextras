@@ -1,6 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from rdflib.graph import Graph, ConjunctiveGraph
+from types import FunctionType
+from rdflib.graph import ConjunctiveGraph
+from rdflib.graph import Graph
+from rdflib.term import BNode
+from rdflib.term import Literal
+from rdflib.term import URIRef
+from rdflib.term import Variable
+from rdflib.namespace import NamespaceManager
+from rdfextras.sparql import _questChar
+from rdfextras.sparql import SPARQLError
+from rdflib.util import check_object
+from rdflib.util import check_subject
 
 class SPARQLGraph(object):
     """
@@ -57,10 +68,11 @@ class SPARQLGraph(object):
         """Cluster the triple store: from a seed, transitively get all
         properties and objects in direction of the arcs.
 
-        @param seed: RDFLib Resource
+        :param seed: RDFLib Resource
 
-        @param Cluster: a L{sparqlGraph} instance, that has to be
-        expanded with the new arcs
+        :param Cluster: a :class:`~rdfextras.sparql.graph.SPARQLGraph`  
+            instance, that has to be expanded with the new arcs
+        
         """
         try :
             # get all predicate and object pairs for the seed.
@@ -79,14 +91,15 @@ class SPARQLGraph(object):
         Cluster the triple store: from a seed, transitively get all
         properties and objects in direction of the arcs.
 
-        @param seed: RDFLib Resource
+        :param seed: RDFLib Resource
 
-        @param Cluster: another sparqlGraph instance; if None, a new
-        one will be created. The subgraph will be added to this graph.
+        :param Cluster: another sparqlGraph instance; if None, a new
+            one will be created. The subgraph will be added to this graph.
 
-        @returns: The triple store containing the cluster
+        :returns  The triple store containing the cluster
 
-        @rtype: L{sparqlGraph}
+        :rtype:   :class:`~rdfextras.sparql.graph.SPARQLGraph`  
+        
         """
         if Cluster == None :
             Cluster = SPARQLGraph()
@@ -101,10 +114,11 @@ class SPARQLGraph(object):
         """Cluster the triple store: from a seed, transitively get all
         properties and objects in backward direction of the arcs.
 
-        @param seed: RDFLib Resource
+        :param seed: RDFLib Resource
 
-        @param Cluster: a L{sparqlGraph} instance, that has to be
-        expanded with the new arcs
+        :param Cluster: a :class:`~rdfextras.sparql.graph.SPARQLGraph`
+            instance, that has to be expanded with the new arcs
+        
         """
         try :
             for (s,p) in self.graph.subject_predicates(seed) :
@@ -121,14 +135,15 @@ class SPARQLGraph(object):
         properties and objects 'backward', ie, following the link back
         in the graph.
 
-        @param seed: RDFLib Resource
+        :param seed: RDFLib Resource
 
-        @param Cluster: another sparqlGraph instance; if None, a new
+        :param Cluster: another sparqlGraph instance; if None, a new
         one will be created. The subgraph will be added to this graph.
 
-        @returns: The triple store containing the cluster
+        :returns  The triple store containing the cluster
 
-        @rtype: L{sparqlGraph}
+        :rtype:   :class:`~rdfextras.sparql.graph.SPARQLGraph`  
+        
         """
         if Cluster == None :
             Cluster = SPARQLGraph()
@@ -143,11 +158,12 @@ class SPARQLGraph(object):
         Cluster up and down, by summing up the forward and backward
         clustering
 
-        @param seed: RDFLib Resource
+        :param seed: RDFLib Resource
 
-        @returns: The triple store containing the cluster
+        :returns  The triple store containing the cluster
 
-        @rtype: L{sparqlGraph}
+        :rtype:   :class:`~rdfextras.sparql.graph.SPARQLGraph`  
+        
         """
         raise "Am I getting here?"
         return self.clusterBackward(seed) + self.clusterForward(seed)
@@ -161,16 +177,10 @@ class SPARQLGraph(object):
 """
 Graph pattern class used by the SPARQL implementation
 """
-import sys, os, time, datetime
-from rdflib.term import Literal, BNode, URIRef, Variable
-from types import *
-from rdflib.namespace import NamespaceManager
-from rdflib.graph import Graph
-
-from rdfextras.sparql import _questChar, Debug, SPARQLError
 
 def _createResource(v) :
-    """Create an RDFLib Literal instance with the corresponding XML
+    """
+    Create an RDFLib Literal instance with the corresponding XML
     Schema datatype set. If the variable is already an RDFLib
     resource, it simply returns the resource; otherwise the
     corresponding Literal.  A SPARQLError Exception is raised if the
@@ -180,10 +190,13 @@ def _createResource(v) :
     Python does it by default) with the corresponding XML Schema URI
     set.
 
-    @param v: Python variable
-    @return: either an RDFLib Literal (if 'v' is not an RDFLib Resource), or the same variable if it is already
-    an RDFLib resource (ie, Literal, BNode, or URIRef)
-    @raise SPARQLError: if the type of 'v' is not implemented
+    :param v: Python variable
+    
+    :return: either an RDFLib Literal (if 'v' is not an RDFLib Resource), 
+        or the same variable if it is already an RDFLib resource (i.e., 
+        Literal, BNode, or URIRef)
+    
+    :raise SPARQLError: if the type of 'v' is not implemented
     """
     if isinstance(v,Literal) or isinstance(v,BNode) or isinstance(v,URIRef) :
         # just do nothing
@@ -196,7 +209,7 @@ def _isResQuest(r) :
     """
     Is 'r' a request string (ie, of the form "?XXX")?
 
-    @rtype: Boolean
+    :rtype:   Boolean
     """
     if r and isinstance(r,basestring) and r[0] == _questChar :
         return True
@@ -210,7 +223,7 @@ class GraphPattern :
     """
     def __init__(self,patterns=[]) :
         """
-        @param patterns: an initial list of graph pattern tuples
+        :param patterns: an initial list of graph pattern tuples
         """
         self.patterns    = []
         self.constraints = []
@@ -234,7 +247,8 @@ class GraphPattern :
         stops the graph expansion, its usage might be much more
         optimal than the the 'global' constraint).
 
-        @param tupl: either a three or four element tuple
+        :param tupl: either a three- or four-element tuple
+
         """
         if type(tupl) != tuple :
             raise SPARQLError("illegal argument, pattern must be a tuple, got %s" % type(tupl))
@@ -272,7 +286,8 @@ class GraphPattern :
         stops the graph expansion, its usage might be much more
         optimal than the the 'global' constraint).
 
-        @param tupl: either a three or four element tuple
+        :param tupl: either a three- or four-element tuple
+
         """
         self.patterns.append(self._generatePattern(tupl))
 
@@ -295,7 +310,8 @@ class GraphPattern :
         triplets significantly). API users may be able to do that,
         hence this additional method.
 
-        @param tupl: either a three or four element tuple
+        :param tupl: either a three- or four-element tuple
+        
         """
         self.patterns.insert(0,self._generatePattern(tupl))
 
@@ -311,7 +327,8 @@ class GraphPattern :
         because it stops the graph expansion, its usage might be much
         more optimal than the the 'global' constraint).
 
-        @param lst: list consisting of either a three or four element tuples
+        :param lst: list consisting of either a three- or four-element tuples
+
         """
         for l in lst:
             self.addPattern(l)
@@ -336,7 +353,8 @@ class GraphPattern :
         triplets significantly). API users may be able to do that,
         hence this additional method.
 
-        @param lst: list consisting of either a three or four element tuples
+        :param lst: list consisting of either a three- or four-element tuples
+
         """
         for i in xrange(len(lst)-1,-1,-1) :
             self.insertPattern(lst[i])
@@ -349,7 +367,8 @@ class GraphPattern :
         added methods, ie, I{all} methods must return True to accept a
         binding.
 
-        @param func: filter function
+        :param func: filter function
+
         """
         if type(func) == FunctionType :
             self.constraints.append(func)
@@ -365,7 +384,8 @@ class GraphPattern :
         methods, ie, I{all} methods must return True to accept a
         binding.
 
-        @param lst: list of functions
+        :param lst: list of functions
+
         """
         for l in lst:
             self.addConstraint(l)
@@ -377,8 +397,9 @@ class GraphPattern :
         current Graph Pattern. The method is used to construct a graph
         after a successful querying.
 
-        @param tripleStore: an (rdflib) Triple Store
-        @param bindings: dictionary
+        :param tripleStore: an (rdflib) Triple Store
+        :param bindings: dictionary
+
         """
         localBnodes = {}
         for c in self.bnodes :
@@ -388,7 +409,7 @@ class GraphPattern :
                 if st in bindings :
                     return bindings[st]
                 else :
-					if isinstance(self,GraphPattern2) :
+					if isinstance(self,GraphPattern2) : # @@FIXME undefined
 						return st
 					else :
 						return None
@@ -440,23 +461,29 @@ class GraphPattern :
 
     def isEmpty(self) :
         """Is the pattern empty?
-        @rtype: Boolean
+        :rtype:   Boolean
         """
         return len(self.patterns) == 0
 
 		
 class BasicGraphPattern(GraphPattern) :
-    """One, justified, problem with the current definition of L{GraphPattern<GraphPattern>} is that it
-    makes it difficult for users to use a literal of the type "?XXX", because any string beginning
-    with "?" will be considered to be an unbound variable. The only way of doing this is that the user
-    explicitly creates a Literal object and uses that as part of the pattern.
+    """
+    One justified, problem with the current definition of 
+    :class:`~rdfextras.sparql.graph.GraphPattern` is that it makes it 
+    difficult for users to use a literal of the type ``?XXX``, because
+    any string beginning with ``?`` will be considered to be an unbound
+    variable. The only way of doing this is that the user explicitly 
+    creates a :class:`rdflib.term.Literal` object and uses that as part 
+    of the pattern.
 
-    This class is a superclass of L{GraphPattern<GraphPattern>} which does I{not} do this, but requires the
-    usage of a separate variable class instance"""
+    This class is a superclass of :class:`~rdfextras.sparql.graph.GraphPattern` 
+    which does *not* do this, but requires the usage of a separate variable 
+    class instance
+    """
 
     def __init__(self,patterns=[],prolog=None) :
         """
-        @param patterns: an initial list of graph pattern tuples
+        :param patterns: an initial list of graph pattern tuples
         """
         GraphPattern.__init__(self,patterns)
         self.prolog = prolog
@@ -515,7 +542,8 @@ class BasicGraphPattern(GraphPattern) :
         stops the graph expansion, its usage might be much more
         optimal than the the 'global' constraint).
 
-        @param tupl: either a three or four element tuple
+        :param tupl: either a three- or four-element tuple
+
         """
         if type(tupl) != tuple :
             raise SPARQLError("illegal argument, pattern must be a tuple, got %s" % type(tupl))

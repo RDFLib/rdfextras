@@ -5,12 +5,8 @@
 
 :mod:`~rdfextras.sparql` - SPARQL main API
 ====================================================
-.. autoclass:: rdfextras.sparql.Processor
-   :members:
+.. automodule:: rdfextras.sparql
 
 .. autoclass:: rdfextras.sparql.SPARQLError
    :members:
 
-.. automethod:: rdfextras.sparql.generateCollectionConstraint
-
-.. automodule:: rdfextras.sparql

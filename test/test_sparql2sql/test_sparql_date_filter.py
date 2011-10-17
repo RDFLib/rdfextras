@@ -1,6 +1,5 @@
-from rdflib.graph import ConjunctiveGraph
-from rdflib import URIRef, Literal, RDFS
-from rdfextras.sparql2sql.Algebra import RenderSPARQLAlgebra
+from rdflib import ConjunctiveGraph, URIRef
+import rdflib
 from StringIO import StringIO
 import unittest
 
@@ -54,18 +53,18 @@ WHERE {
 ANSWER1 = URIRef('http://del.icio.us/rss/chimezie/paper')
 
 class DateFilterTest(unittest.TestCase):
-    debug = True
+    debug = False
     def setUp(self):
         self.graph = ConjunctiveGraph()
         self.graph.load(StringIO(testContent), format='n3')
     def test_DATE_FILTER1(self):
         for query in [QUERY1,QUERY2,QUERY3]:
-            print query
+            # print query
             #pQuery = Parse(query)
             #print RenderSPARQLAlgebra(pQuery)
             results = self.graph.query(query,
                                        processor="sparql2sql",
-                                       DEBUG=self.debug).serialize(format='python')
+                                       DEBUG=self.debug)#.serialize(format='python')
             results = list(results)
             self.failUnless(
                 len(results) and results == [ANSWER1],

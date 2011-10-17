@@ -1,5 +1,14 @@
 import logging
 
+try:
+    import bsddb
+except ImportError:
+    try:
+        import bsddb3
+    except:
+        from nose.exc import SkipTest
+        raise SkipTest("bsddb[3] not installed")
+
 _logger = logging.getLogger(__name__)
 
 import test_context

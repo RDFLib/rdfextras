@@ -1,7 +1,23 @@
 from rdflib.graph import ConjunctiveGraph
+import rdflib
 from StringIO import StringIO
 import re
 import unittest
+
+rdflib.plugin.register(
+    'sparql2sql', rdflib.query.Processor,
+    # 'rdfextras.sparql2sql.bison.Processor', 
+    'rdfextras.sparql2sql.processor', 
+    'Processor')
+
+rdflib.plugin.register(
+    'sparql', rdflib.query.Result,
+    'rdfextras.sparql2sql.QueryResult', 'SPARQLQueryResult')
+
+# rdflib.plugin.register(
+#     'xml', rdflib.query.ResultSerializer, 
+#     'rdfextras.sparql2sql.QueryResult','SPARQLQueryResult')
+
 
 test_data = """
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -47,7 +63,7 @@ expected_fragments = [
 class TestSparqlXmlResults(unittest.TestCase):
 
     sparql = True
-    debug = True
+    debug = False
 
     def setUp(self):
         self.graph = ConjunctiveGraph()
@@ -58,9 +74,10 @@ class TestSparqlXmlResults(unittest.TestCase):
 
     def _query_result_contains(self, query, fragments):
         results = self.graph.query(query, processor="sparql2sql", DEBUG=self.debug)
+        # print(results)
         result_xml = results.serialize(format='xml')
         result_xml = normalize(result_xml) # TODO: poor mans c14n..
-        print result_xml
+        print(result_xml)
         for frag in fragments:
             print frag
             self.failUnless(frag in result_xml)
@@ -69,6 +86,7 @@ class TestSparqlXmlResults(unittest.TestCase):
 def normalize(s, exp=re.compile(r'\s+', re.MULTILINE)):
     return exp.sub(' ', s)
 
+# TestSparqlXmlResults.known_issue = True
 
 if __name__ == "__main__":
     unittest.main()

@@ -24,7 +24,6 @@ class TestSPARQLToldBNodes(unittest.TestCase):
     known_issue=True
     sparql = True
 
-    debug = False
     def setUp(self):
         NS = u"http://example.org/"
         self.graph = Graph(store)

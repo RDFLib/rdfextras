@@ -30,7 +30,7 @@ WHERE {
 class TestSPARQLAbbreviations(unittest.TestCase):
 
     sparql = True
-    debug = True
+    debug = False
     def setUp(self):
         NS = u"http://example.org/"
         self.graph = Graph("IOMemory")
@@ -45,24 +45,24 @@ class TestSPARQLAbbreviations(unittest.TestCase):
     def testTypeAbbreviation(self):
         query = """\
 SELECT ?subj WHERE { ?subj a rdfs:Class }"""
-        print query
+        # print query
         rt = self.graph.query(query,processor="sparql2sql",DEBUG=self.debug)
         self.failUnless(len(rt) == 1,"Should be a single match: %s"%len(rt))
         query = """\
 SELECT ?subj WHERE { ?subj a <http://www.w3.org/2000/01/rdf-schema#Class> }"""
-        print query
+        # print query
         rt = self.graph.query(query,processor="sparql2sql",DEBUG=self.debug)
         self.failUnless(len(rt) == 1,"Should be a single match: %s"%len(rt))
         
     def testQNameVSFull(self):
         query = """\
 SELECT ?subj WHERE { ?subj <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> rdfs:Class }"""
-        print query
+        # print query
         rt = self.graph.query(query,processor="sparql2sql",DEBUG=self.debug)
         self.failUnless(len(rt) == 1,"Should be a single matchL: %s"%len(rt))
         query = """\
 SELECT ?subj WHERE { ?subj <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> }"""
-        print query
+        # print query
         rt = self.graph.query(query,processor="sparql2sql",DEBUG=self.debug)
         self.failUnless(len(rt) == 1,"Should be a single match: %s"%len(rt))
         
@@ -93,4 +93,4 @@ if __name__ == '__main__':
     store = plugin.get(options.storeKind,Store)(options.identifier)
     store.open(options.config,create=False)
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSPARQLAbbreviations)
-    unittest.TextTestRunner(verbosity=2).run(suite)    
+    unittest.TextTestRunner(verbosity=0).run(suite)    

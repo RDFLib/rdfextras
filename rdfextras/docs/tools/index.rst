@@ -1,4 +1,4 @@
-.. _rdfextras_tools: RDFExtras tools term_utils
+.. _rdfextras_tools: RDFExtras tools termutils
 
 |today|
 

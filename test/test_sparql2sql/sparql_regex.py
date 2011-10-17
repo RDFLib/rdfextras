@@ -24,7 +24,7 @@ WHERE { ?x foaf:name ?name .
 """
 
 class TestRegex(unittest.TestCase):
-    debug = True
+    debug = False
     def testRegex(self):
         graph = ConjunctiveGraph(plugin.get('IOMemory',Store)())
         graph.parse(StringIO(test_data), format="n3")

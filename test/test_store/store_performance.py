@@ -20,6 +20,7 @@ class StoreTestCase(unittest.TestCase):
     store = 'default'
     path = None
     storetest = True
+    performancetest = True
     
     def setUp(self):
         self.gcold = gc.isenabled()
@@ -41,7 +42,6 @@ class StoreTestCase(unittest.TestCase):
             MySQL().destroy(path)
         elif self.store == "PostgreSQL":
             from test_postgresql import configString
-            from rdflib.store.PostgreSQL import PostgreSQL
             path=configString
             PostgreSQL().destroy(path)
         elif not self.path and self.store == "SQLite":
@@ -155,31 +155,15 @@ try:
             StoreTestCase.setUp(self)
 except ImportError, e:
     print("Can not test BerkeleyDB store:", e)
-# 
-# try:
-#     from rdfextras.store.PostgreSQL import PostgreSQL
-#     class PostgreSQLStoreTestCase(StoreTestCase):
-#         store = "PostgreSQL"
-# except ImportError, e:
-#     print("Can not test PostgreSQL store:", e)
-# 
 
-# try:
-#     from rdfextras.store.SQLAlchemy_dbapi2 import SQLAlchemy
-#     from configstrings import mysqluri, postgresqluri, psycopguri
-#     class SQLAlchemyStoreTestCase(StoreTestCase):
-#         store = "SQLAlchemy"
-#         def testSQLite(self):
-#             path = "sqlite:///var/tmp/rdflibsql.sqlite"
-#         def testMySQL(self):
-#             path = mysqluri
-#         def testPostgres(self):
-#             path = postgresqluri
-#         def testPsycopg(self):
-#             path = psycopguri
-# except ImportError, e:
-#     print("Can not test SQLAlchemy store:", e)
-# 
+try:
+    from rdfextras.store.PostgreSQL import PostgreSQL
+    class PostgreSQLStoreTestCase(StoreTestCase):
+        store = "PostgreSQL"
+except ImportError, e:
+    print("Can not test PostgreSQL store:", e)
+
+
 try:
     class SQLiteStoreTestCase(StoreTestCase):
         def setUp(self):

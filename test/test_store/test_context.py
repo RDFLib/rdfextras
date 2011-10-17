@@ -24,6 +24,7 @@ class ContextTestCase(unittest.TestCase):
 
     def setUp(self):
         self.graph = ConjunctiveGraph(store=self.store_name)
+        self.graph.destroy(self.path)
         if isinstance(self.path, type(None)):
             if self.store_name == "SQLite":
                 self.path = mkstemp(prefix='test',dir='/var/tmp')

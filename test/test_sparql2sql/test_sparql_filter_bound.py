@@ -1,4 +1,4 @@
-from rdflib import Literal, BNode, URIRef, Namespace
+from rdflib import Literal, BNode, Namespace #, URIRef
 from rdflib.graph import ConjunctiveGraph
 import unittest
 DC = Namespace(u"http://purl.org/dc/elements/1.1/")
@@ -12,7 +12,7 @@ graph.add((b, FOAF['givenName'], Literal('Bob')))
 graph.add((b, DC['date'], Literal("2005-04-04T04:04:04Z")))
 
 class TestSparqlFilterBound(unittest.TestCase):
-    debug=True
+    debug=False
     def test_bound(self):
         res = list(graph.query("""PREFIX foaf: <http://xmlns.com/foaf/0.1/>
         PREFIX dc:  <http://purl.org/dc/elements/1.1/>
@@ -27,5 +27,5 @@ class TestSparqlFilterBound(unittest.TestCase):
         assert res == expected, "Expected %s but got %s" % (expected, res)
 
 if __name__ == '__main__':
-    test_bound()
+    TestSparqlFilterBound.test_bound()
 

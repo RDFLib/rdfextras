@@ -22,7 +22,7 @@ PROLOGUE = """
 
 
 class TestSparqlFilterBound(unittest.TestCase):
-    debug=True
+    debug=False
     def test_filter_by_lang(self):
         testdata = [
                 ("en", u'"Document 1"@en'),

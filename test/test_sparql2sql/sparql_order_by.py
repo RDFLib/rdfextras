@@ -25,7 +25,7 @@ ORDER BY ?name
 
 class TestOrderBy(unittest.TestCase):
 
-    debug = True
+    debug = False
     def testOrderBy(self):
         graph = ConjunctiveGraph(plugin.get('IOMemory',Store)())
         graph.parse(StringIO(test_data), format="n3")

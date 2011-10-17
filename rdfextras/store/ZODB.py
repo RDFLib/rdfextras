@@ -17,8 +17,8 @@ from BTrees.IOBTree import IOBTree
 from BTrees.OIBTree import OIBTree
 from BTrees.OOBTree import OOBTree
 
-class ZODB(Persistent, IOMemory):
-
+class ZODBGraph(Persistent, IOMemory):
+    context_aware = True
     def createForward(self):
         return IOBTree()
     
@@ -30,7 +30,8 @@ class ZODB(Persistent, IOMemory):
     
     def createPrefixMap(self):
         return OOBTree()
-    
+
+
     # def remove(self, triple, context=None):
     #     Store.remove(self, triple, context)
     #     if context is not None:

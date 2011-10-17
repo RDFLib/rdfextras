@@ -1,13 +1,13 @@
-from rdflib import URIRef, Literal, Namespace, RDF, RDFS
-from rdflib import plugin
+from rdflib import RDF, ConjunctiveGraph
+import rdflib
+# from rdflib import plugin
 from rdflib.parser import StringInputSource
-from rdflib.graph import Graph, ReadOnlyGraphAggregate, ConjunctiveGraph
 
-import sys
-from pprint import pprint
+# import sys
+# from pprint import pprint
 
 def testSPARQLNotEquals():
-    NS = u"http://example.org/"
+    # NS = u"http://example.org/"
     graph = ConjunctiveGraph()
     graph.parse(StringInputSource("""
        @prefix    : <http://example.org/> .
@@ -25,7 +25,7 @@ def testSPARQLNotEquals():
     for row in rt:        
         #item = row[0]
         item = row
-        assert item == URIRef("http://example.org/bar"), "unexpected item of '%s'" % repr(item)
+        assert item == rdflib.term.URIRef("http://example.org/bar"), "unexpected item of '%s'" % repr(item)
 
 if __name__ == '__main__':
     testSPARQLNotEquals()

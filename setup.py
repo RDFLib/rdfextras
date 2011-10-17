@@ -20,12 +20,10 @@ config = dict(
                 'rdfextras.parsers',
                 'rdfextras.serializers',
                 'rdfextras.tools',
-                'rdfextras.tools.Client',
                 'rdfextras.sparql',
                 'rdfextras.sparql.results',
                 'rdfextras.store',
-                'rdfextras.store.FOPLRelationalModel',
-                'rdfextras.web',],
+		'rdfextras.web',],
     package_dir = { 'rdfextras.web': 'rdfextras/web' },
     package_data={ 'rdfextras.web': [
             'templates/*.html',
@@ -33,6 +31,13 @@ config = dict(
 ]}
 
 )
+
+install_requires = [
+    'rdflib >= 3.2.0-dev',
+    'pyparsing'
+]
+tests_require = install_requires + \
+                ['flask', 'mimeparse', 'jinja2']
 
 try:
     from setuptools import setup
@@ -49,30 +54,15 @@ else:
             ],
             'rdf.plugins.parser': [
                 'rdf-json = rdfextras.parsers.rdfjson:RdfJsonParser',
-                'json-ld = rdfextras.parsers.jsonld:JsonLDParser',
             ],
             'rdf.plugins.serializer': [
                 'rdf-json = rdfextras.serializers.rdfjson:RdfJsonSerializer',
-                'json-ld = rdfextras.serializers.jsonld:JsonLDSerializer', 
             ],
         },
-)
-
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-else:
-    config.update(
-        extras_require = {
-            "sparql" : ['rdflib >= 3.0', 'pyparsing']
-            },
         #test_suite = 'nose.collector',
         #namespace_packages = ['rdfextras'], # TODO: really needed?
-        install_requires = [
-            'rdflib >= 3.2.0-dev',
-            'pyparsing'
-        ],
+        install_requires = install_requires,
+        tests_require = tests_require
     )
 
 setup(**config)

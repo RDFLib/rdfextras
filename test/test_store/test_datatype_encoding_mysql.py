@@ -2,6 +2,8 @@ from rdflib import plugin
 from rdflib import URIRef, BNode, Literal, Graph
 from rdflib.store import Store
 from rdfextras.store.FOPLRelationalModel.QuadSlot import normalizeValue
+import sys
+sys.path.append('..')
 from configstrings import mysqlconfigString as configString
 
 def test_dType_encoding():
@@ -10,7 +12,7 @@ def test_dType_encoding():
     wrong=normalizeValue('http://www.w3.org/2001/XMLSchema#integer', 'L')
     
     store = plugin.get('MySQL',Store)()
-
+    store.destroy(configString)
     store.open(configString,create=True)
     Graph(store).add((BNode(),URIRef('foo'),Literal(1)))
     db=store._db

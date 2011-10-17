@@ -1,7 +1,10 @@
 """
-Based on drewp's TokyoCabinet store implementation.
-http://bigasterisk.com/darcs/?r=tokyo;a=tree
-Copyright 2011 Graham Higgins <gjh@bel-epa.com>
+An adaptation of the BerkeleyDB Store's key-value approach to use Kyoto Cabinet 
+as a back-end. 
+
+Based on an original contribution by Drew Perttula: `TokyoCabinet Store <http://bigasterisk.com/darcs/?r=tokyo;a=tree>`_.
+
+adaptor: Graham Higgins <gjh@bel-epa.com>
 """
 import random
 import logging
@@ -59,13 +62,17 @@ class KyotoCabinet(Store):
         def dbOpen(name):
             db = DB()
             if self.create:
+                # if not db.open(abspath(self.path) + '/' + name + ".kch", 
+                #         DB.OWRITER | DB.OCREATE | DB.OAUTOSYNC | DB.OAUTOTRAN):
                 if not db.open(abspath(self.path) + '/' + name + ".kch", 
-                        DB.OWRITER | DB.OCREATE | DB.OAUTOSYNC | DB.OAUTOTRAN):
+                        DB.OWRITER | DB.OCREATE):
                     raise IOError("open error: " + str(db.error()))
                 return db
             else:
+                # if not db.open(abspath(self.path) + '/' + name + ".kch", 
+                #         DB.OWRITER | DB.OAUTOSYNC | DB.OAUTOTRAN):
                 if not db.open(abspath(self.path) + '/' + name + ".kch", 
-                        DB.OWRITER | DB.OAUTOSYNC | DB.OAUTOTRAN):
+                        DB.OWRITER):
                     raise IOError("open error: " + str(db.error()))
                 return db
                 

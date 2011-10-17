@@ -1,3 +1,9 @@
+try:
+    import kyotocabinet
+except ImportError:
+    from nose.exc import SkipTest
+    raise SkipTest("KyotoCabinet not installed")
+
 import test_context
 import test_graph
 from rdflib import plugin
@@ -15,10 +21,12 @@ plugin.register(storename, store.Store,
 class KyotoCabinetGraphTestCase(test_graph.GraphTestCase):
     store_name = storename
     path = configString
+    storetest = True
 
 class KyotoCabinetContextTestCase(test_context.ContextTestCase):
     store_name = storename
     path = configString
+    storetest = True
 
 testN3Store(storename, configString)
 
