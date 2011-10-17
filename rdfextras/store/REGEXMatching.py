@@ -15,10 +15,12 @@ NATIVE_REGEX = 0
 #Store uses python's re module internally for REGEX matching (SQLite for instance)
 PYTHON_REGEX = 1
 
-#REGEXTerm can be used in any term slot and is interpreted as
-#a request to perform a REGEX match (not a string comparison) using the value
-#(pre-compiled) for checkin rdf:type matches
 class REGEXTerm(unicode):
+    """
+    REGEXTerm can be used in any term slot and is interpreted as a request to 
+    perform a REGEX match (not a string comparison) using the value
+    (pre-compiled) for checkin rdf:type matches
+    """
     def __init__(self,expr):
         self.compiledExpr = re.compile(expr)
 

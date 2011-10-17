@@ -1,6 +1,5 @@
 #!/d/Bin/Python/python.exe
 # -*- coding: utf-8 -*-
-from __future__ import with_statement
 #
 """
 This is an RDFLib store around Ivan Herman et al.'s SPARQL service wrapper. 
@@ -23,7 +22,6 @@ __contact__ = 'Ivan Herman, ivan_herman@users.sourceforge.net'
 __date__    = "2011-01-30"
 
 import re
-import warnings
 try:
     from SPARQLWrapper import SPARQLWrapper, XML
     from SPARQLWrapper.Wrapper import QueryResult
@@ -38,6 +36,10 @@ from rdflib.store import Store
 from rdflib       import Variable, Namespace, BNode, URIRef, Literal
 
 
+import httplib
+import urlparse
+
+
 BNODE_IDENT_PATTERN = re.compile('(?P<label>_\:[^\s]+)')
 SPARQL_NS        = Namespace('http://www.w3.org/2005/sparql-results#')
 sparqlNsBindings = {u'sparql':SPARQL_NS}
@@ -50,31 +52,9 @@ def TraverseSPARQLResultDOM(doc,asDictionary=False):
     """
     
     # namespace handling in elementtree xpath sub-set is not pretty :(
-    # and broken in < 1.3, according to two  FutureWarnings:
-    # 1.
-    # FutureWarning: This search is broken in 1.3 and earlier, and will 
-    # be fixed in a future version.  If you rely on the current behaviour, 
-    # change it to 
-    # './{http://www.w3.org/2005/sparql-results#}head/{http://www.w3.org/2005/sparql-results#}variable'
-    # 2.
-    # FutureWarning: This search is broken in 1.3 and earlier, and will be 
-    # fixed in a future version.  If you rely on the current behaviour, 
-    # change it to 
-    # './{http://www.w3.org/2005/sparql-results#}results/{http://www.w3.org/2005/sparql-results#}result'
-    # Handle ElementTree warning
-    variablematch = '/{http://www.w3.org/2005/sparql-results#}head/{http://www.w3.org/2005/sparql-results#}variable'
-    resultmatch = '/{http://www.w3.org/2005/sparql-results#}results/{http://www.w3.org/2005/sparql-results#}result'
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-    	matched_variables = doc.findall(variablematch)
-        if len(w) == 1:
-            variablematch = '.' + variablematch
-            resultmatch = '.' + resultmatch
-            # Could be wrong result, re-do from start
-            matched_variables = doc.findall(variablematch)
-
-    vars = [Variable(v.attrib["name"]) for v in matched_variables]
-    for result in doc.findall(resultmatch):
+    vars = [Variable(v.attrib["name"]) for v in
+             doc.findall('/{http://www.w3.org/2005/sparql-results#}head/{http://www.w3.org/2005/sparql-results#}variable')]
+    for result in doc.findall('/{http://www.w3.org/2005/sparql-results#}results/{http://www.w3.org/2005/sparql-results#}result'):
         currBind = {}
         values = []
         for binding in result.findall('{http://www.w3.org/2005/sparql-results#}binding'):
@@ -94,7 +74,7 @@ def localName(qname):
 
 def CastToTerm(node):
     """
-    Helper function that casts domlette node in SPARQL results
+    Helper function that casts XML node in SPARQL results
     to appropriate rdflib term
     """
     if node.tag == '{%s}bnode'%SPARQL_NS:
@@ -109,11 +89,10 @@ def CastToTerm(node):
             else:
                 return Literal(node.text,
                                datatype=dT)
+        elif '{http://www.w3.org/XML/1998/namespace}lang' in node.attrib:
+            return Literal(node.text, lang=node.attrib["{http://www.w3.org/XML/1998/namespace}lang"])
         else:
-            if False:#not node.xpath('*'):
-                return Literal('')
-            else:
-                return Literal(node.text)
+            return Literal(node.text)
     else:
         raise Exception('Unknown answer type')
 
@@ -132,16 +111,7 @@ class SPARQLResult(QueryResult):
         self.askAnswer = None
 
     def _parseResults(self):
-        # Handle ElementTree warning, see LOC#51 (above)
-        booleanmatch = '/{http://www.w3.org/2005/sparql-results#}boolean'
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            matched_results = self.result.findall(booleanmatch)
-            if len(w) == 1:
-                # Could be wrong result, re-do from start
-                booleanmatch = '.' + booleanmatch
-                matched_results = self.askAnswer=self.result.findall(booleanmatch)
-            return matched_results
+        self.askAnswer=self.result.findall('/{http://www.w3.org/2005/sparql-results#}boolean')
 
     def __len__(self):
         raise NotImplementedError("Results are an iterable!")
@@ -178,10 +148,13 @@ class SPARQLStore(SPARQLWrapper,Store):
     transaction_aware = False
     regex_matching = NATIVE_REGEX
     batch_unification = False
-    def __init__(self,identifier=None,bNodeAsURI = False):
+    def __init__(self,identifier=None,bNodeAsURI = False, sparql11=True):
+        """
+        """
         super(SPARQLStore, self).__init__(identifier,returnFormat=XML)
         self.bNodeAsURI = bNodeAsURI
-        self.nsBindings = sparqlNsBindings
+        self.nsBindings={}
+        self.sparql11=sparql11
 
     #Database Management Methods
     def create(self, configuration):
@@ -298,7 +271,20 @@ class SPARQLStore(SPARQLWrapper,Store):
         raise NotImplementedError('Triples choices currently not supported')
 
     def __len__(self, context=None):
-        raise NotImplementedError("For performance reasons, this is not supported")
+        if not self.sparql11: 
+            raise NotImplementedError("For performance reasons, this is not supported for sparql1.0 endpoints")
+        else: 
+            if context is not None:
+                q="SELECT (count(*) as ?c) FROM <%s> WHERE { ?s ?p ?o . }"%context
+            else: 
+                q="SELECT (count(*) as ?c) WHERE { ?s ?p ?o . }"
+
+            self.setQuery(q)
+        
+            doc = xml.etree.ElementTree.parse(SPARQLWrapper.query(self).response)
+            rt,vars=iter(TraverseSPARQLResultDOM(doc,asDictionary=True)).next()
+            return int(rt.get(Variable("c")))
+
 
     def contexts(self, triple=None):
         """
@@ -334,3 +320,83 @@ class SPARQLStore(SPARQLWrapper,Store):
     def namespaces(self):
         for prefix,ns in self.nsBindings.items():
             yield prefix,ns
+
+class SPARQLUpdateStore(SPARQLStore): 
+    
+    """
+    A store using SPARQL queries for read-access
+    and SPARQL Update for changes
+    """
+
+    def __init__(self, queryEndpoint=None,updateEndpoint=None, bNodeAsURI = False):
+        SPARQLStore.__init__(self, queryEndpoint, bNodeAsURI)
+        self.updateEndpoint=updateEndpoint
+        p=urlparse.urlparse(self.updateEndpoint)
+        
+        assert not p.username, "SPARQL Update store does not support HTTP authentication"
+        assert not p.password, "SPARQL Update store does not support HTTP authentication"
+        assert p.scheme=="http", "SPARQL Update is an http protocol!"
+
+        self.host=p.hostname
+        self.port=p.port
+        self.path=p.path        
+
+        self.connection = httplib.HTTPConnection(self.host, self.port)
+        self.headers={'Content-type': "application/sparql-update" }
+
+
+    #Transactional interfaces
+    def commit(self):
+        """ """
+        raise TypeError('The SPARQL Update store is not transaction aware!')
+
+    def rollback(self):
+        """ """
+        raise TypeError('The SPARQL Update store is not transaction aware')
+
+
+    def add(self, (subject, predicate, obj), context=None, quoted=False):
+        """ Add a triple to the store of triples. """
+
+        assert not quoted
+
+        triple="%s %s %s ."%(subject.n3(), predicate.n3(), obj.n3())
+        if context is not None: 
+            q="INSERT DATA { %s }"%triple
+        else: 
+            q="INSERT DATA { GRAPH <%s> { %s } }"%(context, triple)
+        
+        r=self._do_update(q)
+        r.read() # we expect no content
+
+        if r.status not in (200, 204):
+            raise Exception("Could not update: %d %s"%(r.status, r.reason))
+
+
+
+
+    def addN(self, quads):
+        Store.addN(self,quads)
+
+    def remove(self, (subject, predicate, obj), context):
+        """ Remove a triple from the store """
+
+        triple="%s %s %s ."%(subject.n3(), predicate.n3(), obj.n3())
+        if context is not None:
+            q="DELETE DATA { %s }"%triple
+        else: 
+            q="DELETE DATA { GRAPH <%s> { %s } }"%(context, triple)
+        
+        r=self._do_update(q)
+        r.read() # we expect no content
+
+        if r.status not in (200, 204):
+            raise Exception("Could not update: %d %s"%(r.status, r.reason))
+
+    def _do_update(self, update): 
+
+        self.connection.request('POST', self.path, update, self.headers)
+
+        return self.connection.getresponse()
+        
+
