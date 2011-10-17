@@ -46,8 +46,6 @@ class TestSPARQLStore(unittest.TestCase):
 
         self.assertEqual(list(g2.objects(b2,DCtitle))[0], list(g.objects(b2,DCtitle))[0])
         
-
-
-        
+TestSPARQLStore.known_issue = True
         
 
