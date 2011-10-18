@@ -59,7 +59,7 @@ COVERAGE_EXTRA_ARGS = [
         '--cover-package=rdfextras',
         '--cover-inclusive',
         '--cover-html',
-        '--cover-html-dir=coverdata',
+        '--cover-html-dir=coverage',
     ]
 
 DEFAULT_ATTRS = ['!known_issue', '!performancetest'] # ['!known_issue', '!sparql']
