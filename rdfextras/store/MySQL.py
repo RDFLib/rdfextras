@@ -1650,6 +1650,7 @@ class MySQL(SQL):
     # node_pickler = None
     # __node_pickler = None
     _Store__node_pickler = None
+    debug = False
     try:
         import MySQLdb
         def _connect(self, db=None):
