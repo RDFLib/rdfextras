@@ -45,7 +45,7 @@ try:
     expected_fragments = [
         #u"""<sparql:sparql xmlns="http://www.w3.org/2005/sparql-results#"><sparql:head>""",
 
-        u"""<head> <sparql ordered="false" distinct="false">""",
+        u"""</head> <results distinct="false" ordered="false">""",
 
         u"""<binding name="s"> <uri>http://example.org/word</uri> </binding>""",
 
@@ -53,7 +53,7 @@ try:
 
         u"""<binding name="o"> <literal datatype="http://www.w3.org/2001/XMLSchema#integer">1</literal> </binding>""",
 
-        u"""<result> <binding name="s"> <uri>http://example.org/word</uri> </binding><sparql:binding name="o"><sparql:literal xml:lang="en">Word</sparql:literal></sparql:binding></sparql:result>"""
+        u"""<result> <binding name="s"> <uri>http://example.org/word</uri> </binding> <binding name="o"> <literal xml:lang="en">Word</literal> </binding> </result>"""
     ]
 except ImportError:
     expected_fragments = [
