@@ -5,12 +5,12 @@ _logger = logging.getLogger(__name__)
 import test_context
 import test_graph
 from nose.exc import SkipTest
-
+import tempfile
 class SQLiteGraphTestCase(test_graph.GraphTestCase):
     storetest = True
     def setUp(self):
         self.store_name = "SQLite"
-        self.path = "/tmp/test.sqlite"
+        self.path = tempfile.mktemp()
         test_graph.GraphTestCase.setUp(self)
     
     def testStatementNode(self):
@@ -20,7 +20,7 @@ class SQLiteContextTestCase(test_context.ContextTestCase):
     storetest = True
     def setUp(self):
         self.store_name = "SQLite"
-        self.path = "/tmp/test.sqlite"
+        self.path = tempfile.mktemp()
         test_context.ContextTestCase.setUp(self)
     
     def testConjunction(self):

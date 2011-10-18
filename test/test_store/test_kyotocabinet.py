@@ -8,11 +8,12 @@ import test_context
 import test_graph
 from rdflib import plugin
 from rdflib import store
+import tempfile
 from test_n3_2 import testN3Store
 
 storename = "KyotoCabinet"
 storetest = True
-configString = "/tmp/test"
+configString = tempfile.mktemp(prefix='test',dir='/tmp')
 
 plugin.register(storename, store.Store,
                 'rdfextras.store.KyotoCabinet', 
