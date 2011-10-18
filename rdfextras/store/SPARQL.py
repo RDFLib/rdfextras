@@ -70,7 +70,7 @@ def TraverseSPARQLResultDOM(doc,asDictionary=False):
     resultmatch = '/{http://www.w3.org/2005/sparql-results#}results/{http://www.w3.org/2005/sparql-results#}result'
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
-    	matched_variables = doc.findall(variablematch)
+        matched_variables = doc.findall(variablematch)
         if len(w) == 1:
             variablematch = '.' + variablematch
             resultmatch = '.' + resultmatch
@@ -116,10 +116,7 @@ def CastToTerm(node):
         elif '{http://www.w3.org/XML/1998/namespace}lang' in node.attrib:
             return Literal(node.text, lang=node.attrib["{http://www.w3.org/XML/1998/namespace}lang"])
         else:
-            if False:#not node.xpath('*'):
-                return Literal('')
-            else:
-                return Literal(node.text)
+            return Literal(node.text)
     else:
         raise Exception('Unknown answer type')
 
@@ -189,8 +186,8 @@ class SPARQLStore(SPARQLWrapper,Store):
         """
         super(SPARQLStore, self).__init__(identifier,returnFormat=XML)
         self.bNodeAsURI = bNodeAsURI
-        self.nsBindings = {} # sparqlNsBindings
-        self.sparql11=sparql11
+        self.nsBindings = {}
+        self.sparql11 = sparql11
 
     #Database Management Methods
     def create(self, configuration):
@@ -435,4 +432,3 @@ class SPARQLUpdateStore(SPARQLStore):
 
         return self.connection.getresponse()
         
-

@@ -40,20 +40,35 @@ query = PROLOGUE+"""
 SELECT ?s ?o WHERE { ?s ?p ?o . }
 """
 
-expected_fragments = [
-    #u"""<sparql:sparql xmlns="http://www.w3.org/2005/sparql-results#"><sparql:head>""",
+try:
+    from Ft.Xml import MarkupWriter
+    expected_fragments = [
+        #u"""<sparql:sparql xmlns="http://www.w3.org/2005/sparql-results#"><sparql:head>""",
 
-    """</sparql:head><sparql:results distinct="false" ordered="false">""",
+        u"""<head> <sparql ordered="false" distinct="false">""",
 
-    u"""<sparql:binding name="s"><sparql:uri>http://example.org/word</sparql:uri></sparql:binding>""",
+        u"""<binding name="s"> <uri>http://example.org/word</uri> </binding>""",
 
-    u"""<sparql:binding name="o"><sparql:bnode>""",
+        u"""<binding name="o"> <bnode>""",
 
-    u"""<sparql:binding name="o"><sparql:literal datatype="http://www.w3.org/2001/XMLSchema#integer">1</sparql:literal></sparql:binding>""",
+        u"""<binding name="o"> <literal datatype="http://www.w3.org/2001/XMLSchema#integer">1</literal> </binding>""",
 
-    u"""<sparql:result><sparql:binding name="s"><sparql:uri>http://example.org/word</sparql:uri></sparql:binding><sparql:binding name="o"><sparql:literal xml:lang="en">Word</sparql:literal></sparql:binding></sparql:result>"""
-]
+        u"""<result> <binding name="s"> <uri>http://example.org/word</uri> </binding><sparql:binding name="o"><sparql:literal xml:lang="en">Word</sparql:literal></sparql:binding></sparql:result>"""
+    ]
+except ImportError:
+    expected_fragments = [
+        #u"""<sparql:sparql xmlns="http://www.w3.org/2005/sparql-results#"><sparql:head>""",
 
+        u"""</sparql:head><sparql:results ordered="false" distinct="false">""",
+
+        u"""<sparql:binding name="s"><sparql:uri>http://example.org/word</sparql:uri></sparql:binding>""",
+
+        u"""<sparql:binding name="o"><sparql:bnode>""",
+
+        u"""<sparql:binding name="o"><sparql:literal datatype="http://www.w3.org/2001/XMLSchema#integer">1</sparql:literal></sparql:binding>""",
+
+        u"""<sparql:result><sparql:binding name="s"><sparql:uri>http://example.org/word</sparql:uri></sparql:binding><sparql:binding name="o"><sparql:literal xml:lang="en">Word</sparql:literal></sparql:binding></sparql:result>"""
+    ]
 
 # TODO:
 #   - better canonicalization of results to compare with (4Suite-XML has support for this)
@@ -79,7 +94,7 @@ class TestSparqlXmlResults(unittest.TestCase):
         # print(result_xml)
         for frag in fragments:
             # print(frag)
-            self.failUnless(frag in result_xml)
+            self.failUnless(frag in result_xml, (frag, result_xml))
 
 
 def normalize(s, exp=re.compile(r'\s+', re.MULTILINE)):
