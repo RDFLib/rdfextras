@@ -4,22 +4,31 @@
 RDFExtras: extension modules for use with rdflib 3
 ==================================================
 
-RDFExtras is a collection of packages providing extras based on RDFLib 3. The common denominator is "non-core-rdflib".
+.. note :: RDFExtras is a collection of packages providing extras based on RDFLib 3. The common denominator is "non-core-rdflib".
 
-This project is for collecting several packages with distinct uses, such as commandline tools, experimental (or unmaintained) stores and similar. It will be close to RDFLib but the intent is to keep things here a bit more loose.
+   This project is a collection of several packages with distinct uses, such as commandline tools, experimental (or unmaintained) stores and similar. It will be close to RDFLib but the intent is to keep things here a bit more loose.
 
-These packages are thus to be considered unstable in general. Useful, sometimes near core, but not currently guaranteed to never be renamed/reshuffled/redesigned.
+   These packages are thus to be considered unstable in general. Useful, sometimes near core, but not currently guaranteed to never be renamed/reshuffled/redesigned.
 
+Plug-ins
+========
+The current set of RDFLib plug-ins includes RDF parsers, serializers, stores and SPARQL query processors:
+
+.. image:: /_static/plugins-diagram.jpg
+   :alt: RDFLib plug-in "archtecture"
+   :align: center
+   :width: 720
+   :height: 475
 
 SPARQL
-======
-The SPARQL support which was removed from rdflib core is now being developed externally as various plugins. 
+------
+The SPARQL support which was removed from RDFLib core is now being developed externally as various plugins. 
 
-Pure-Python "no-SQL" SPARQL implementation
-------------------------------------------
-   The pure Python no-sql SPARQL implementation bits that were in the rdflib development trunk are now in :mod:`rdfextras.sparql`.
+"SPARQL-p" implementation
++++++++++++++++++++++++++
+   The pure Python, no-sql SPARQL implementation bits that were in the rdflib development trunk are now in :mod:`rdfextras.sparql`.
 
-   This "default" SPARQL implementation has been developed from the original ``sparql-p`` implementation (by Ivan Herman, Dan Krech and Michel Pelletier) and over time has evolved into a full implementation of the W3C SPARQL Algebra, providing coverage for the full SPARQL grammar including all combinations of ``GRAPH``. The implementation includes unit testing and has been run against the new DAWG testsuite.
+   This "default" SPARQL implementation has been developed from the original ``SPARQL-p`` implementation (by Ivan Herman, Dan Krech and Michel Pelletier) and over time has evolved into a full implementation of the W3C SPARQL Algebra, providing coverage for the full SPARQL grammar including all combinations of ``GRAPH``. The implementation includes unit testing and has been run against the new DAWG testsuite.
 
 .. toctree::
    :maxdepth: 3
@@ -27,12 +36,12 @@ Pure-Python "no-SQL" SPARQL implementation
    sparql/index
 
 
-Pure-Python "SPARQL-to-SQL" implementation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   The bison-parsing SPARQL2SQL implementation contributed by Chimezie Ogbuji
-   et. al. has been moved to a separate branch of development 
-   :mod:`rdfextras.sparql2sql` where unit tests and DAWG tests have similarly 
-   been added.
+"SPARQL-to-SQL" implementation
+++++++++++++++++++++++++++++++
+   The bison-generated (now pure Python) ``SPARQL2SQL`` SQL-using 
+   implementation contributed by Chimezie Ogbuji et. al. has been 
+   moved to a separate branch of development :mod:`rdfextras.sparql2sql` 
+   where unit tests and DAWG tests have also been added.
 
 .. toctree::
    :maxdepth: 3
@@ -41,7 +50,7 @@ Pure-Python "SPARQL-to-SQL" implementation
 
 
 Stores
-++++++
+------
 
    All of the back-end stores except for :class:`~rdflib.plugins.memory.IOMemory` 
    and  :class:`~rdflib.plugins.sleepycat.SleepyCat` have been migrated out of 
@@ -66,8 +75,32 @@ Stores
    store/index
 
 
+Parsers
+-------
+
+RDF/JSON
+++++++++
+
+.. toctree::
+   :maxdepth: 2
+
+   parsers/rdfjson
+
+
+Serializers
+-----------
+
+RDF/JSON
+++++++++
+
+.. toctree::
+   :maxdepth: 2
+
+   serializers/rdfjson
+
+
 Tools
-+++++
+-----
 
    The rdflib "tools" directory and its small collection of tools have been 
    removed from rdflib core and placed into :mod:`rdfextras.tools`.
@@ -79,6 +112,12 @@ Tools
    :maxdepth: 2
    
    tools/index
+
+
+Epydoc API docs
+===============
+
+rdfextras epydoc `API docs <_static/api/index.html>`_
 
 
 Introduction to basic tasks in rdflib 
@@ -104,12 +143,16 @@ Techniques
 
    extensions
 
+Generating a local copy of the API docs
+=======================================
 
-Epydoc API docs
-===============
+To generate a local copy of the API documentation, install the `epydoc`_ package and use the following command-line instruction to create a set of rdflib API docs in the directory ``./apidocs`` (relative to cwd):
 
-rdfextras epydoc `API docs <_static/api/index.html>`_
+.. _epydoc: http://epydoc.sourceforge.net
 
+.. code-block :: bash
+
+    $ epydoc -o /path/to/apidocs --docformat reStructuredText --html rdfextras
 
 Indices and tables
 ==================
@@ -117,3 +160,6 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+|today|
+
