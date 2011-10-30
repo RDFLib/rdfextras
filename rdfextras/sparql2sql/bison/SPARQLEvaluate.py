@@ -1,4 +1,5 @@
 ### Utilities for evaluating a parsed SPARQL expression using sparql-p
+import logging
 import rdflib
 from rdflib import BNode
 from rdflib import Literal
@@ -38,7 +39,14 @@ from rdfextras.sparql2sql.bison.Resource import RDFTerm
 from rdfextras.sparql2sql.bison.Triples import ParsedConstrainedTriples
 from rdfextras.sparql2sql.bison.Util import ListRedirect
 
+log = logging.getLogger(__name__)
+
 DEBUG = False
+
+if DEBUG:
+    log.setLevel(logging.DEBUG)
+else:
+    log.setLevel(logging.WARN)
 
 BinaryOperatorMapping = {
     LessThanOperator           : 'sparqlOperators.lt(%s,%s)%s',
@@ -229,7 +237,7 @@ def mapToOperator(expr, prolog, combinationArg=None, constraint=False):
     terms, and combinator expressions) into strings of their Python 
     equivalent
     """
-    #print expr, type(expr), constraint
+    log.debug("mapToOperator - expr: %s type: %s constraint: %s" % (expr, type(expr), constraint))
     combinationInvokation = combinationArg and '(%s)' % combinationArg or ""
     if isinstance(expr, ListRedirect):
         expr = expr.reduce()
@@ -331,8 +339,10 @@ def createSPARQLPConstraint(filter,prolog):
     reducedFilter = isinstance(filter.filter, ListRedirect) \
                         and filter.filter.reduce() \
                         or filter.filter
+    prolog.DEBUG = DEBUG
     if prolog.DEBUG:
-        print reducedFilter,type(reducedFilter)
+        log.debug("reducedFilter, %s type(reducedFilter) %s" % (
+            reducedFilter,type(reducedFilter)))
     if isinstance(reducedFilter, (ListRedirect,
                                   BinaryOperator,
                                   UnaryOperator,
@@ -355,7 +365,7 @@ def createSPARQLPConstraint(filter,prolog):
                     expr, prolog, combinationArg='i', constraint=const)
                         for expr in reducedFilter]))
         if prolog.DEBUG:
-            print "sparql-p operator(s): %s" % combinationLambda
+            log.debug("sparql-p operator(s): %s" % combinationLambda)
         return eval(combinationLambda)
     elif isinstance(reducedFilter, ParsedRelationalExpressionList):
         combinationLambda = 'lambda(i): %s' % (
@@ -364,12 +374,12 @@ def createSPARQLPConstraint(filter,prolog):
                     expr, prolog, combinationArg='i', constraint=const)
                          for expr in reducedFilter]))
         if prolog.DEBUG:
-            print "sparql-p operator(s): %s" % combinationLambda
+            log.debug("sparql-p operator(s): %s" % combinationLambda)
         return eval(combinationLambda)
     elif isinstance(reducedFilter, BuiltinFunctionCall):
         rt = mapToOperator(reducedFilter, prolog, constraint=const)
         if prolog.DEBUG:
-            print "sparql-p operator(s): %s"%rt
+            log.debug("sparql-p operator(s): %s"%rt)
         return eval(rt)
     elif isinstance(reducedFilter, (
             ParsedAdditiveExpressionList, UnaryOperator, FunctionCall)):
@@ -377,19 +387,19 @@ def createSPARQLPConstraint(filter,prolog):
             mapToOperator(
                 reducedFilter, prolog, combinationArg='i', constraint=const))
         if prolog.DEBUG:
-            print "sparql-p operator(s): %s"%rt
+            log.debug("sparql-p operator(s): %s"%rt)
         return eval(rt)
     elif isinstance(reducedFilter, Variable):
         rt = """sparqlOperators.EBV(rdflib.Variable("%s"))""" % \
                 reducedFilter.n3()
         if prolog.DEBUG:
-            print "sparql-p operator(s): %s"%rt        
+            log.debug("sparql-p operator(s): %s"%rt)
         return eval(rt)
         
 #        reducedFilter = BuiltinFunctionCall(BOUND,reducedFilter)
 #        rt=mapToOperator(reducedFilter,prolog)
 #        if prolog.DEBUG:
-#            print "sparql-p operator(s): %s"%rt
+#            log.debug("sparql-p operator(s): %s"%rt)
 #        return eval(rt)
     else:
         if reducedFilter == u'true' or reducedFilter == u'false':
@@ -397,10 +407,10 @@ def createSPARQLPConstraint(filter,prolog):
                 return True
             def falseFn(arg):
                 return False
-            return reducedFilter == u'true' and trueFn or falseFn        
+            return reducedFilter == u'true' and trueFn or falseFn
         rt = mapToOperator(reducedFilter, prolog, constraint=const)
         if prolog.DEBUG:
-            print "sparql-p operator(s): %s" % rt
+            log.debug("sparql-p operator(s): %s" % rt)
         return eval(rt)
 
 def isTriplePattern(nestedTriples):
