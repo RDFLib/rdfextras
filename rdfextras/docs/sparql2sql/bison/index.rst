@@ -15,23 +15,13 @@
 
 Informative associated postings:
 
---------------------------------
 .. toctree::
    :maxdepth: 2
 
    fullsparql
-Module API
-----------
-
-.. currentmodule:: rdfextras.sparql2sql.bison
-
-:mod:`~rdfextras.sparql2sql.bison`
-++++++++++++++++++++++++++++++++++
-
-.. automodule:: rdfextras.sparql2sql.bison
 
 :mod:`~rdfextras.sparql2sql.bison.Bindings`
-+++++++++++++++++++++++++++++++++++++++++++
+-------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.Bindings
 .. autoclass:: PrefixDeclaration
    :members:
@@ -39,7 +29,7 @@ Module API
    :members:
 
 :mod:`~rdfextras.sparql2sql.bison.Expression`
-+++++++++++++++++++++++++++++++++++++++++++++
+---------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.Expression
 .. autoclass:: ParsedConditionalAndExpressionList
    :members:
@@ -57,7 +47,7 @@ Module API
    :members:
 
 :mod:`~rdfextras.sparql2sql.bison.Filter`
-+++++++++++++++++++++++++++++++++++++++++++++
+---------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.Filter
 .. autoclass:: ParsedFilter
    :members:
@@ -67,7 +57,7 @@ Module API
    :members:
 
 :mod:`~rdfextras.sparql2sql.bison.FunctionLibrary`
-++++++++++++++++++++++++++++++++++++++++++++++++++
+--------------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.FunctionLibrary
 .. autoclass:: FunctionCall
    :members:
@@ -79,7 +69,7 @@ Module API
    :members:
 
 :mod:`~rdfextras.sparql2sql.bison.GraphPattern`
-+++++++++++++++++++++++++++++++++++++++++++++++
+-----------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.GraphPattern
 .. autoclass:: ParsedGroupGraphPattern
    :members:
@@ -95,7 +85,7 @@ Module API
    :members:
 
 :mod:`~rdfextras.sparql2sql.bison.IRIRef`
-+++++++++++++++++++++++++++++++++++++++++++++
+---------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.IRIRef
 .. autoclass:: IRIRef
    :members:
@@ -105,7 +95,7 @@ Module API
    :members:
 
 :mod:`~rdfextras.sparql2sql.bison.Operators`
-+++++++++++++++++++++++++++++++++++++++++++++
+---------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.Operators
 .. autoclass:: BinaryOperator
    :members:
@@ -131,14 +121,14 @@ Module API
    :members:
 
 :mod:`~rdfextras.sparql2sql.bison.Processor`
-+++++++++++++++++++++++++++++++++++++++++++++
+---------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.Processor
 .. autoclass:: Processor
    :members:
 .. autofunction:: sparql_query
 
 :mod:`~rdfextras.sparql2sql.bison.QName`
-+++++++++++++++++++++++++++++++++++++++++++++
+---------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.QName
 .. autoclass:: QName
    :members:
@@ -146,7 +136,7 @@ Module API
    :members:
 
 :mod:`~rdfextras.sparql2sql.bison.Query`
-+++++++++++++++++++++++++++++++++++++++++++++
+---------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.Query
 .. autoclass:: Query
    :members:
@@ -164,7 +154,7 @@ Module API
    :members:
 
 :mod:`~rdfextras.sparql2sql.bison.Resource`
-+++++++++++++++++++++++++++++++++++++++++++++
+---------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.Resource
 .. autoclass:: RDFTerm
    :members:
@@ -176,7 +166,7 @@ Module API
    :members:
 
 :mod:`~rdfextras.sparql2sql.bison.SPARQLEvaluate`
-+++++++++++++++++++++++++++++++++++++++++++++++++
+-------------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.SPARQLEvaluate
 .. autoclass:: Resolver
    :members:
@@ -191,7 +181,7 @@ Module API
 .. autofunction:: isTriplePattern
 
 :mod:`~rdfextras.sparql2sql.bison.SolutionModifier`
-+++++++++++++++++++++++++++++++++++++++++++++++++++
+---------------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.SolutionModifier
 .. autoclass:: SolutionModifier
    :members:
@@ -199,7 +189,7 @@ Module API
    :members:
 
 :mod:`~rdfextras.sparql2sql.bison.Triples`
-+++++++++++++++++++++++++++++++++++++++++++++
+---------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.Triples
 .. autoclass:: PropertyValue
    :members:
@@ -207,7 +197,7 @@ Module API
    :members:
 
 :mod:`~rdfextras.sparql2sql.bison.Util`
-+++++++++++++++++++++++++++++++++++++++++++++
+---------------------------------------------
 .. automodule:: rdfextras.sparql2sql.bison.Util
 .. autoclass:: ListRedirect
    :members:

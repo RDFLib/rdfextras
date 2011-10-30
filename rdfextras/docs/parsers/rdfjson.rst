@@ -1,7 +1,7 @@
 .. _rdfextras.parsers.rdfjson: an rdfxtras plugin parser
 
 ===================================
-RDF/JSON parser plug-in for rdflib
+RDF/JSON parser plugi-n for rdflib
 ===================================
 |today|
 
@@ -10,74 +10,75 @@ RDF/JSON
 
 Lifted directly from the `Talis web site <http://docs.api.talis.com/platform-api/output-types/rdf-json>`_
 
+.. note::
 
-This is a specification for a resource-centric serialisation of RDF in 
-JSON. It aims to serialise RDF in a structure that is easy for developers 
-to work with.
+  This is a specification for a resource-centric serialisation of RDF in 
+  JSON. It aims to serialise RDF in a structure that is easy for developers 
+  to work with.
 
-**Syntax Specification**
+  Syntax Specification
+  --------------------
+  RDF/JSON represents a set of RDF triples as a series of nested data 
+  structures. Each unique subject in the set of triples is represented as 
+  a key in JSON object (also known as associative array, dictionary or hash 
+  table). The value of each key is a object whose keys are the URIs of the 
+  properties associated with each subject. The value of each property key 
+  is an array of objects representing the value of each property.
 
-RDF/JSON represents a set of RDF triples as a series of nested data 
-structures. Each unique subject in the set of triples is represented as 
-a key in JSON object (also known as associative array, dictionary or hash 
-table). The value of each key is a object whose keys are the URIs of the 
-properties associated with each subject. The value of each property key 
-is an array of objects representing the value of each property.
+  Blank node subjects are named using a string conforming to the nodeID 
+  production in Turtle. For example: ``_:A1``
 
-Blank node subjects are named using a string conforming to the nodeID 
-production in Turtle. For example: ``_:A1``
+  In general, a triple (subject ``S``, predicate ``P``, object ``O``) is 
+  encoded in the following structure:
 
-In general, a triple (subject ``S``, predicate ``P``, object ``O``) is 
-encoded in the following structure:
+  .. sourcecode:: text
+      
+      { "S" : { "P" : [ O ] } }
 
-.. sourcecode:: text
-    
-    { "S" : { "P" : [ O ] } }
+  ``O``, the object of the triple, is represented as a further JSON object 
+  with the following keys:
 
-``O``, the object of the triple, is represented as a further JSON object 
-with the following keys:
+  type
+  ^^^^
+  one of 'uri', 'literal' or 'bnode' (required and must be lowercase)
 
-**type**
+  value
+  ^^^^^
+  the lexical value of the object (required, full URIs should be used, 
+  not qnames)
 
-one of 'uri', 'literal' or 'bnode' (required and must be lowercase)
+  lang
+  ^^^^
+  the language of a literal value (optional but if supplied it must 
+  not be empty)
 
-**value**
+  datatype
+  ^^^^^^^^
+  the datatype URI of the literal value (optional)
 
-the lexical value of the object (required, full URIs should be used, 
-not qnames)
+  The ``lang`` and ``datatype`` keys should only be used if the value of the 
+  ``type`` key is "literal".
 
-**lang**
+  For example, the following triple:
 
-the language of a literal value (optional but if supplied it must 
-not be empty)
+  .. sourcecode:: n3
 
-**datatype**
+      <http://example.org/about> 
+          <http://purl.org/dc/elements/1.1/title> 
+          "Anna's Homepage" .
 
-the datatype URI of the literal value (optional)
+  can be encoded in RDF/JSON as:
 
-The ``lang`` and ``datatype`` keys should only be used if the value of the 
-``type`` key is "literal".
+  .. sourcecode:: javascript
 
-For example, the following triple:
-
-.. sourcecode:: n3
-
-    <http://example.org/about> 
-        <http://purl.org/dc/elements/1.1/title> 
-        "Anna's Homepage" .
-
-can be encoded in RDF/JSON as:
-
-.. sourcecode:: javascript
-
-    {
-      "http://example.org/about" : 
-        {
-           "http://purl.org/dc/elements/1.1/title": [ 
-                { "type" : "literal" , "value" : "Anna's Homepage." } 
-            ]
-        }
-    }
+      {
+        "http://example.org/about" : 
+          {
+             "http://purl.org/dc/elements/1.1/title": [ 
+                  { "type" : "literal" , "value" : "Anna's Homepage." } 
+              ]
+          }
+      }
 
 Example usage
 -------------
@@ -122,7 +123,7 @@ Using the plug-in RDF/JSON parser with rdflib
 ---------------------------------------------
 
 Usage with rdflib is straightforward: register the plugin, identify a source 
-of RDF/JSON, pass the source to the parser, manipulate the resulting graph.
+of JSON-LD, pass the source to the parser, manipulate the resulting graph.
 
 For the example, we will use a remote source, a test in the github repository for Bradley Pallen's JSON-LD processor. The JSON-LD code is as follows:
 
@@ -216,7 +217,7 @@ Modules
 
 .. automodule:: rdfextras.parsers.rdfjson
 
-.. autoclass:: RdfJsonParser
+.. autoclass:: RDFJsonParser
    :members: parse
 
 
