@@ -12,10 +12,11 @@ XML_MIME="application/sparql-results+xml"
 
 HTML_MIME="text/html"
 N3_MIME="text/n3"
+TURTLE_MIME="text/turtle"
 RDFXML_MIME="application/rdf+xml"
 NTRIPLES_MIME="text/plain"
 
-FORMAT_MIMETYPE={ "rdf": RDFXML_MIME, "n3": N3_MIME, "nt": NTRIPLES_MIME }
+FORMAT_MIMETYPE={ "rdf": RDFXML_MIME, "n3": N3_MIME, "nt": NTRIPLES_MIME, "turtle": TURTLE_MIME}
 MIMETYPE_FORMAT=dict(map(reversed,FORMAT_MIMETYPE.items()))
 
 def mime_to_format(mimetype): 
@@ -24,6 +25,7 @@ def mime_to_format(mimetype):
     return "rdf"
     
 def format_to_mime(format): 
+    if format=='ttl': format='turtle'
     if format in FORMAT_MIMETYPE:
         return format, FORMAT_MIMETYPE[format]
     return "xml", RDFXML_MIME
