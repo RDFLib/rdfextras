@@ -4,7 +4,14 @@
 
  {% block body %}
 <h1>
+
   {{label}}
+{% if picked %}
+<a href="{{url_for('pick', uri=resource)}}"><img src="{{url_for('static', filename='star_active.png')}}" /></a>
+{% else %}
+<a href="{{url_for('pick', uri=resource)}}"><img src="{{url_for('static', filename='star_inactive.png')}}" /></a>
+{% endif %}
+
   <span class='url'>{{resource}}</span>
 </h1>
 is-a 
@@ -52,11 +59,12 @@ is-a
 {% endif %}
 <hr/>
 <div id="footer">
-	<a href='/'>back to index</a> - 	
+	<a href='/'>back to index</a> - 
+	<a href="{{url_for('picked')}}"><img src="{{url_for('static', filename='star_active.png')}}" /> resources</a> - 	
 Download as: 
 {% if type_ %}
 <a href="{{url_for('data', type_=type_, label=urilabel, format_='nt') }}">ntriples</a> |
-<a href="{{url_for('data', type_=type_, label=urilabel, format_='n3') }}">n3</a> |
+<a href="{{url_for('data', type_=type_, label=urilabel, format_='turtle') }}">turtle</a> |
 <a href="{{url_for('data', type_=type_, label=urilabel, format_='xml') }}">rdf/xml</a>
 | 
 Graph:
