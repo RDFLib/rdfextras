@@ -54,7 +54,7 @@ def testSPARQLNotEqualsNegative():
         item = row[0]
         assert item == URIRef("http://example.org/bar"), "unexpected item of '%s'" % repr(item)
 
-# testSPARQLNotEqualsNegative.known_issue = True
+testSPARQLNotEqualsNegative.known_issue = True
 """
 ======================================================================
 ERROR: This is rdfextras issue 9
