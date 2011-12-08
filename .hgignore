@@ -21,7 +21,7 @@ MANIFEST
 .git*
 .tox
 .coverage
-coverdata
+coverage
 .hgignore
 .orig
 .bz2
@@ -44,3 +44,8 @@ rdfextras.egg-info/*
 ez_setup/*
 Icon*
 configstrings.py
+test/rdfa
+test/data
+test/data-r2
+*/DAWG/data
+*/DAWG/data-r2

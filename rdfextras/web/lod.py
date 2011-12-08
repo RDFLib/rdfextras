@@ -6,7 +6,7 @@ import collections
 
 from endpoint import endpoint as lod
 
-from flask import render_template, request, make_response, redirect, url_for, g
+from flask import render_template, request, make_response, redirect, url_for, g, Response, abort
 
 import mimeutils 
 
@@ -14,6 +14,8 @@ from rdfextras.sparql.results.htmlresults import term_to_string
 
 from werkzeug.routing import BaseConverter
 from werkzeug.urls import url_quote
+
+DOT="/usr/bin/dot"
 
 class RDFUrlConverter(BaseConverter):
     def __init__(self, url_map):
@@ -157,6 +159,42 @@ def download(format_):
 
     return response        
 
+@lod.route("/rdfgraph/<type_>/<rdf:label>.<format_>")
+def rdfgraph(label, type_, format_): 
+    r=get_resource(label, type_)
+    if isinstance(r,tuple): # 404
+        return r
+
+    GRAPH_TYPES={"png": "image/png", 
+                 "svg": "image/svg+xml", 
+                 "dot": "text/x-graphviz", 
+                 "pdf": "application/pdf" }
+
+    if format_ not in GRAPH_TYPES: 
+        return "format '%s' not supported, try %s"%(format_, ", ".join(GRAPH_TYPES)), 415
+
+    graph=rdflib.Graph()
+    graph+=g.graph.triples((r,None,None))
+    graph+=g.graph.triples((None,None,r))
+    
+    from rdfextras.tools import rdf2dot
+    import subprocess
+    import codecs 
+    
+    p=subprocess.Popen([DOT, "-T%s"%format_], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    uw=codecs.getwriter("utf8")(p.stdin)
+    rdf2dot.rdf2dot(graph, stream=uw)
+    #img,nothing=p.communicate()
+    p.stdin.close()
+    def readres(): 
+        s=p.stdout.read(1000)
+        while s!="": 
+            yield s
+            s=p.stdout.read(1000)
+        
+    return Response(readres(), mimetype=GRAPH_TYPES[format_])
+    
+
 
 @lod.route("/data/<type_>/<rdf:label>.<format_>")
 @lod.route("/data/<rdf:label>.<format_>")
@@ -164,13 +202,18 @@ def data(label, format_, type_=None):
     r=get_resource(label, type_)
     if isinstance(r,tuple): # 404
         return r
+
+    
     #graph=g.graph.query('DESCRIBE %s'%r.n3())
     # DESCRIBE <uri> is broken. 
     # http://code.google.com/p/rdfextras/issues/detail?id=25
-    graph=g.graph.query('CONSTRUCT { %s ?p ?o . } WHERE { %s ?p ?o } '%(r.n3(), r.n3())).graph
-    graph+=g.graph.query('CONSTRUCT { ?s ?p %s . } WHERE { ?s ?p %s } '%(r.n3(), r.n3()))
+    graph=rdflib.Graph()
+    graph+=g.graph.triples((r,None,None))
+    graph+=g.graph.triples((None,None,r))
+
 
     format_,mimetype_=mimeutils.format_to_mime(format_)
+
     response=make_response(graph.serialize(format=format_))
 
     response.headers["Content-Type"]=mimetype_

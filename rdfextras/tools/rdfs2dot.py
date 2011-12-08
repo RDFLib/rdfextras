@@ -1,7 +1,8 @@
-import rdflib
+#!/usr/bin/env python
+
 import rdfextras, rdfextras.tools
 
-import getopt,sys
+import sys
 import itertools
 import collections
 
@@ -15,7 +16,7 @@ EDGECOLOR="blue"
 NODECOLOR="black"
 ISACOLOR="black"
 
-def rdfs2dot(g, stream):
+def rdfs2dot(g, stream, opts):
     """
     Convert the RDFS schema in a graph
     writes the dot output to the stream
@@ -33,10 +34,13 @@ def rdfs2dot(g, stream):
 
         l=g.value(x,RDFS.label)
         if l==None: 
-            l=g.namespace_manager.compute_qname(x)[2]
+            try: 
+                l=g.namespace_manager.compute_qname(x)[2]
+            except: 
+                pass # bnodes and some weird URIs cannot be split
         return l
 
-    stream.write("digraph { \n node [ fontname=\"DejaVu Sans\" ] ; \n")
+    stream.write(u"digraph { \n node [ fontname=\"DejaVu Sans\" ] ; \n")
 
     for x in g.subjects(RDF.type, RDFS.Class): 
         n=node(x)
@@ -44,7 +48,7 @@ def rdfs2dot(g, stream):
     for x,y in g.subject_objects(RDFS.subClassOf):
         x=node(x)
         y=node(y)
-        stream.write("\t%s -> %s [ color=%s ] ;\n"%(y,x, ISACOLOR))
+        stream.write(u"\t%s -> %s [ color=%s ] ;\n"%(y,x, ISACOLOR))
 
     for x in g.subjects(RDF.type, RDF.Property): 
         for a,b in itertools.product(g.objects(x,RDFS.domain), g.objects(x,RDFS.range)): 
@@ -59,9 +63,9 @@ def rdfs2dot(g, stream):
 
 
     for u,n in nodes.items():
-        stream.write("# %s %s\n"%(u,n))
-        f=["<tr><td align='left'>%s</td><td>%s</td></tr>"%x for x in sorted(fields[n])]
-        stream.write("%s [ shape=none, color=%s label=< <table color='#666666' cellborder=\"0\" cellspacing='0' border=\"1\"><tr><td colspan=\"2\" bgcolor='grey'><B>%s</B></td></tr>%s</table> > ] \n"%(n, NODECOLOR, label(u,g), f))
+        stream.write(u"# %s %s\n"%(u,n))
+        f=[u"<tr><td align='left'>%s</td><td>%s</td></tr>"%x for x in sorted(fields[n])]
+        stream.write(u"%s [ shape=none, color=%s label=< <table color='#666666' cellborder=\"0\" cellspacing='0' border=\"1\"><tr><td colspan=\"2\" bgcolor='grey'><B>%s</B></td></tr>%s</table> > ] \n"%(n, NODECOLOR, label(u,g), u"".join(f)))
 
     stream.write("}\n")
 
