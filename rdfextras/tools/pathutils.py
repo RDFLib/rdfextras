@@ -130,7 +130,8 @@ def main(target, _help=_help, options=""):
         g.load(sys.stdin, format="xml")
     else: 
         for x in files:
-            f=guess_format(x)
+            if f==None: 
+                f=guess_format(x)
             sys.stderr.write("Loading %s as %s... "%(x,f))
             g.load(x, format=f)
             sys.stderr.write("[done]\n")
