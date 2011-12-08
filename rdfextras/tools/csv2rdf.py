@@ -13,7 +13,7 @@ import urllib2
 import rdflib
 
 from rdflib import RDF, RDFS
-
+from rdflib.namespace import split_uri
 
 HELP="""
 toRDF.py -b <instance-base> -p <property-base> [-c <classname>] [-i <identity column(s)>] [-l <label columns>] [-s <N>] [-o <output>] [-f configfile] [--col<N> <colspec>] [--prop<N> <property>] <[-d <delim>] [-C] [files...]"
@@ -187,17 +187,28 @@ class CSV2RDF(object):
             warnings.warn("No property base given, using http://example.org/property/")
             self.PROPBASE=rdflib.Namespace("http://example.org/props/")
 
-        if self.DEFINECLASS:
-            self.triple(self.CLASS, RDF.type, RDFS.Class)
 
         # skip lines at the start
         for x in range(self.SKIP): csvreader.next()
 
         # read header line
-        headers=dict(enumerate([self.PROPBASE[toProperty(x)] for x in csvreader.next()]))
+        header_labels=list(csvreader.next())                
+        headers=dict(enumerate([self.PROPBASE[toProperty(x)] for x in header_labels]))
         # override header properties if some are given
         for k,v in self.PROPS.iteritems():
             headers[k]=v
+            header_labels[k]=split_uri[1]
+            
+        if self.DEFINECLASS:
+            # output class/property definitions
+            self.triple(self.CLASS, RDF.type, RDFS.Class)
+            for i in range(len(headers)): 
+                h,l=headers[i], header_labels[i]
+                if h=="": continue
+                self.triple(h, RDF.type, RDF.Property)
+                self.triple(h, RDFS.label, rdflib.Literal(l))
+                self.triple(h, RDFS.domain, self.CLASS)
+
 
         rows=0
         for l in csvreader:
