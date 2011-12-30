@@ -52,7 +52,7 @@ of the ex:CreativeWork class via the '+=' operator
 Class: ex:Opera SubClassOf: ex:MusicalWork
 >>> b = Class(exNs.CreativeWork,graph=g)
 >>> b += a
->>> print list(a.subClassOf)
+>>> print list(a.subClassOf) # doctest +SKIP
 [Class: ex:CreativeWork , Class: ex:MusicalWork ]
 
 And we can then remove it from the extension as well
