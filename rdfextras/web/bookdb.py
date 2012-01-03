@@ -13,7 +13,7 @@ bookrdf="""
 
 <http://example.org/book/book2> a book:Book ;
     dc:creator _:RDhmeZZC15;
-    dc:title "Harry Potter and the Chamber of Secrets" .
+    dc:title "Harry Potter & the Chamber of Secrets" .
 
 <http://example.org/book/book3> a book:Book ;
     dc:creator _:RDhmeZZC15;
