@@ -1,197 +1,152 @@
-# RdfJsonParser.py
-# Author: Richard Jones
-#
-# This serialiser will read in an JSON-LD formatted document and create
-# an RDF Graph
-# See:
-#   http://json-ld.org/
-#
-# TODO:
-#   This code reads the entire JSON object into memory before parsing,
-#   but we should consider streaming the input to deal with arbitrarily
-#   large graphs
+# -*- coding: UTF-8 -*-
 """
-Example usage:
+This serialiser will read in an JSON-LD formatted document and create an RDF
+Graph. See:
 
-from rdflib import Graph, plugin
-from rdflib.parser import Parser
-plugin.register("json-ld", Parser, "jsonld.JsonLDParser", "JsonLDParser")
-g = Graph()
-g.parse("test-ld.json", format="json-ld")
+    http://json-ld.org/
+
+Example usage::
+
+    >>> from rdflib import Graph, plugin, URIRef, Literal
+    >>> from rdflib.parser import Parser
+    >>> plugin.register('json-ld', Parser,
+    ...     'rdfextras.parsers.jsonld', 'JsonLDParser')
+    >>> test_json = '''
+    ... {
+    ...     "@context": {
+    ...         "dc": "http://purl.org/dc/terms/",
+    ...         "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    ...         "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+    ...     },
+    ...     "@id": "http://example.org/about",
+    ...     "dc:title": {
+    ...         "@language": "en",
+    ...         "@literal": "Someone's Homepage"
+    ...     }
+    ... }
+    ... '''
+    >>> g = Graph().parse(data=test_json, format='json-ld')
+    >>> list(g) == [(URIRef('http://example.org/about'),
+    ...     URIRef('http://purl.org/dc/terms/title'),
+    ...     Literal(u"Someone's Homepage", lang=u'en'))]
+    True
+
 """
+# NOTE: This code reads the entire JSON object into memory before parsing, but
+# we should consider streaming the input to deal with arbitrarily large graphs.
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import warnings
 
 from rdflib.parser import Parser
+from rdflib.namespace import RDF
 from rdflib.term import URIRef, BNode, Literal
 
-from copy import deepcopy
-import re
+from rdfextras.ldcontext import Context, Term, CONTEXT_KEY, ID_KEY, LIST_KEY
+from rdfextras.ldcontext import json, source_to_json
+
 
 class JsonLDParser(Parser):
-    
     def __init__(self):
-        self.default_subject = None
-        self.namespaces = []
+        super(JsonLDParser, self).__init__()
 
-        # regular expressions used        
-        #self.uriref = r'<([^:]+:[^\s"<>]+)>'
-        #self.literal = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
-        #self.litinfo = r'(?:@([a-z]+(?:-[a-z0-9]+)*)|\^\^' + self.uriref + r')?'
+    def parse(self, source, sink, **kwargs):
+        encoding = kwargs.get('encoding') or 'utf-8'
+        if encoding not in ('utf-8', 'utf-16'):
+            warnings.warn("JSON should be encoded as unicode. " +
+                    "Given encoding was: %s" % encoding)
 
-        #self.r_line = re.compile(r'([^\r\n]*)(?:\r\n|\r|\n)')
-        #self.r_wspace = re.compile(r'[ \t]*')
-        #self.r_wspaces = re.compile(r'[ \t]+')
-        #self.r_tail = re.compile(r'[ \t]*\.[ \t]*')
-        #self.r_uriref = re.compile(self.uriref)
-        #self.r_nodeid = re.compile(r'_:([A-Za-z][A-Za-z0-9]*)')
-        #self.r_literal = re.compile(self.literal + self.litinfo)
-        #self.uriref = r'[<]{0,1}(.*)[>]{0,1}' # uris
+        base = kwargs.get('base') or sink.absolutize(
+                source.getPublicId() or source.getSystemId() or "")
 
-    def parse(self, source, sink, **args):
+        context_data = kwargs.get('context')
 
-        # load the incoming stream into a json object
-        data = source.getByteStream().read()
-        jsonObj = json.loads(data)
+        tree = source_to_json(source)
+        to_rdf(tree, sink, base, context_data)
 
-        self.sink = sink
 
-        # get the default subject which is used if no "@" is provided
-        self.default_subject = args.get("default_subject")
+def to_rdf(tree, graph, base=None, context_data=None):
+    context = Context()
+    context.load(context_data or tree.get(CONTEXT_KEY) or {}, base)
 
-        # get the namespace portion and the graph portion
-        self.namespaces = jsonObj.get("#", [])
-        ld_graph = jsonObj.get("@", [])
+    id_obj = tree.get(context.id_key)
+    resources = id_obj if isinstance(id_obj, list) else [tree]
 
-        # go through the subject portions of the ld_graph and process
-        # them
-        for subject_graph in ld_graph:
-            # go through the predicates in the subject_graph and handle
-            # them
-            self.parse_subject_graph(subject_graph)
+    for term in context.terms:
+        if term.iri and term.iri.endswith(('/', '#', ':')):
+            graph.bind(term.key, term.iri)
 
-    def get_subject(self, subject_dict):
-        subject = subject_dict.get("@", self.default_subject)
-        if subject is None:
-            raise ValueError("No Default Subject and no explicit subject in subject_dict: %s" % str(subject_dict))
-        return URIRef(subject)
+    state = graph, context, base
+    for node in resources:
+        _add_to_graph(state, node)
 
-    def get_subject_namespaces(self, subject_graph):
-        ns = subject_graph.get("#", None)
-        if ns is None:
-            # there are no subject specific namespaces, so just send back   
-            # the default namespaces
-            return self.namespaces
-        local_namespaces = deepcopy(self.namespaces)
-        for n in ns:
-            local_namespaces[n] = ns[n]
-        return local_namespaces
+    return graph
 
-    def get_rdf_types(self, subject_graph):
-        t = subject_graph.get("a", None)
-        if t is None:
-            return None
-        return self.parse_value(t)
 
-    def parse_value(self, value_entity):
-        value_objects = []
+def _add_to_graph(state, node):
+    graph, context, base = state
+    id_val = node.get(context.id_key)
+    subj = URIRef(context.expand(id_val), base) if id_val else BNode()
 
-        # value entity could be a string or an array
-        if isinstance(value_entity, list):
-            for entity in value_entity:
-                value_objs = self.parse_value(entity)
-                if len(value_objs) > 1:
-                    raise ValueError("Multiple nested arrays found in rdf object: " + str(value_entity)) 
-                value_objects.append(value_objs[0]) # there should be only one (see error thrown above)
-            return value_objects
+    for pred_key, obj_nodes in node.items():
+        if pred_key in (CONTEXT_KEY, context.id_key):
+            continue
+        if pred_key == context.type_key:
+            pred = RDF.type
+            term = Term(None, None, context.id_key)
         else:
-            # value of the form (N3 format):
-            # [value]@[lang]^^[datatype]
-            return [self.parse_single_object(value_entity)]
+            pred_uri = context.expand(pred_key)
+            pred = URIRef(pred_uri)
+            term = context.get_term(pred_uri)
 
-    def parse_single_object(self, obj):
-        # taken from the ntriples parser (but couldn't re-use directly)
-        objt = self.uriref(obj) or self.nodeid(obj) or self.literal(obj)
-        if objt is False:
-            raise ValueError("Unrecognised object type: " + str(obj))
-        return objt
+        if not isinstance(obj_nodes, list):
+            obj_nodes = [obj_nodes]
 
-    def uriref(self, obj):
-        if obj.startswith("<") and obj.endswith(">") and not obj.startswith("<_:"):
-            uri = obj[1:len(obj) - 1]
-            return URIRef(uri)
-        return False
+        if term and term.container == LIST_KEY:
+            obj_nodes = [{context.list_key: obj_nodes}]
 
-    def nodeid(self, obj):
-        if obj.startswith("<_") or obj.startswith("_:"):
-            if obj.startswith("<") and obj.endswith(">"):
-                bnode = obj[1:len(obj) - 1]
-                return BNode(bnode)
+        for obj_node in obj_nodes:
+            obj = _to_object(state, term, obj_node)
+            graph.add((subj, pred, obj))
+
+    return subj
+
+
+def _to_object(state, term, node):
+    graph, context, base = state
+
+    if isinstance(node, dict) and context.list_key in node:
+        node_list = node.get(context.list_key)
+        if node_list:
+            first_subj = BNode()
+            l_subj, l_next = first_subj, None
+            for l_node in node_list:
+                if l_next:
+                    graph.add((l_subj, RDF.rest, l_next))
+                    l_subj = l_next
+                l_obj = _to_object(state, None, l_node)
+                graph.add((l_subj, RDF.first, l_obj))
+                l_next = BNode()
+            graph.add((l_subj, RDF.rest, RDF.nil))
+            return first_subj
+        else:
+            node = {context.id_key: unicode(RDF.nil)}
+
+    if not isinstance(node, dict):
+        if not term or not term.coercion:
+            return Literal(node, lang=context.lang)
+        else:
+            if term.coercion == ID_KEY:
+                node = {context.id_key: context.expand(node)}
             else:
-                return BNode(obj)
-        return False
+                node = {context.type_key: term.coercion,
+                        context.literal_key: node}
 
-    def literal(self, obj):
-        rx = re.compile('([^(\\@)^(\^\^)]*)(\\@){0,1}([^\^]*)(\^\^){0,1}(.*)')
-        if not obj.startswith("<") and not obj.startswith("_:"):
-            m = rx.match(obj)
-            # group 1 is the literal
-            # group 3 is the language
-            # group 5 is the datatype
-            literal = m.group(1) if m.group(1) is not None and m.group(1) != "" else None
-            lang = m.group(3) if m.group(3) is not None and m.group(3) != "" else None
-            datatype = m.group(5) if m.group(5) is not None and m.group(5) != "" else None
-            lit = Literal(literal, lang, datatype)
-            return lit
-        return False
+    if context.lang_key in node:
+        return Literal(node[context.literal_key], lang=node[context.lang_key])
+    elif context.type_key and context.literal_key in node:
+        return Literal(node[context.literal_key],
+                datatype=context.expand(node[context.type_key]))
+    else:
+        return _add_to_graph(state, node)
 
-    def parse_predicate(self, pred, local_namespaces):
-        bits = pred.split(":", 1)
-        if len(bits) == 1:
-            # we need to prefix with the #base namespace
-            vocab = local_namespaces.get("#vocab")
-            if vocab is None:
-                raise ValueError("predicate with no prefix provided, and no #vocab provided: " + pred)
-            return URIRef(vocab + bits[0])
-        else:
-            ns = local_namespaces.get(bits[0])
-            if ns is not None:
-                return URIRef(ns + bits[1])
-            vocab = local_namespaces.get("#vocab")
-            if vocab is None:
-                raise ValueError("predicate with un-identified prefix, and no #vocab provided: " + pred)
-            return URIRef(vocab + bits[1])
 
-    def parse_subject_graph(self, subject_graph):
-        
-        # get the subject/default subject or throw an error
-        subject = self.get_subject(subject_graph)
-
-        # get the subject-local namespaces
-        local_namespaces = self.get_subject_namespaces(subject_graph)
-        
-        # handle the special case of rdf:type
-        type_values = self.get_rdf_types(subject_graph)
-
-        # add what we know so far to the sink
-        if type_values is not None:
-            for type_value in type_values:
-                self.sink.add((subject, URIRef("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), type_value))
-
-        for pred in subject_graph.keys():
-            if pred == "@" or pred == "#" or pred == "a":
-                continue # skip the special keys
-
-            # interpret the predicate
-            predicate = self.parse_predicate(pred, local_namespaces)
-
-            # for each predicate, get a list of the predicate and its objects
-            # as tuples (i.e. get a list of tuples)
-            objects = self.parse_value(subject_graph[pred])
-
-            for obj in objects:
-                self.sink.add((subject, predicate, obj))
-            
