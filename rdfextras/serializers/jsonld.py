@@ -48,8 +48,8 @@ from rdfextras.ldcontext import Context, ID_KEY, LIST_KEY, SET_KEY
 from rdfextras.ldcontext import json
 
 
-PLAIN_LITERAL_TYPES = set([XSD.integer, XSD.float, XSD.double, XSD.boolean,
-        XSD.string])
+PLAIN_LITERAL_TYPES = set([XSD.integer, XSD.float, XSD.double, XSD.decimal,
+        XSD.boolean, XSD.string])
 
 
 class JsonLDSerializer(Serializer):
@@ -100,6 +100,7 @@ def to_tree(graph, context_data=None, base=None, generate_compact=True):
 
     state = (graph, context, base)
 
+    # TODO: framing/CBD-with-startnode...
     for s in set(graph.subjects()):
         # only unreferenced.. TODO: not if more than one ref!
         if isinstance(s, URIRef) or not any(graph.subjects(None, s)):

@@ -38,7 +38,7 @@ Example usage::
 import warnings
 
 from rdflib.parser import Parser
-from rdflib.namespace import RDF
+from rdflib.namespace import RDF, XSD
 from rdflib.term import URIRef, BNode, Literal
 
 from rdfextras.ldcontext import Context, Term, CONTEXT_KEY, ID_KEY, LIST_KEY
@@ -133,6 +133,9 @@ def _to_object(state, term, node):
 
     if not isinstance(node, dict):
         if not term or not term.coercion:
+            if isinstance(node, float):
+                # TODO: JSON-LD promotes double over decimal; verify correctness...
+                return Literal(node, datatype=XSD.double)
             return Literal(node, lang=context.lang)
         else:
             if term.coercion == ID_KEY:
