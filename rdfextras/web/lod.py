@@ -310,10 +310,13 @@ def index():
                            resources=resources,
                            graph=g.graph)
 
-@lod.route("/pick")
-def pick(): 
+@lod.before_request
+def setupSession():
     if "picked" not in session:         
         session["picked"]=set()
+
+@lod.route("/pick")
+def pick(): 
     session["picked"]^=set((rdflib.URIRef(request.args["uri"]),)) # xor
     return redirect(request.referrer)
 
