@@ -16,7 +16,7 @@ EDGECOLOR="blue"
 NODECOLOR="black"
 ISACOLOR="black"
 
-def rdfs2dot(g, stream, opts):
+def rdfs2dot(g, stream, opts={}):
     """
     Convert the RDFS schema in a graph
     writes the dot output to the stream

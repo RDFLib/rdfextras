@@ -16,7 +16,7 @@ EDGECOLOR="blue"
 NODECOLOR="black"
 ISACOLOR="black"
 
-def rdf2dot(g, stream):
+def rdf2dot(g, stream, opts={}):
     """
     Convert the RDF graph to DOT
     writes the dot output to the stream

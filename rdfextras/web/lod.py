@@ -3,19 +3,33 @@ import rdflib
 import warnings
 import urllib2
 import collections
+import subprocess
+import codecs 
+import os.path
 
-from endpoint import endpoint as lod
-
-from flask import render_template, request, make_response, redirect, url_for, g, Response, abort
-
-import mimeutils 
-
-from rdfextras.sparql.results.htmlresults import term_to_string
+from flask import render_template, request, make_response, redirect, url_for, g, Response, abort, session
 
 from werkzeug.routing import BaseConverter
 from werkzeug.urls import url_quote
 
-DOT="/usr/bin/dot"
+#from rdfextras.web.endpoint import endpoint as lod
+from endpoint import endpoint as lod
+from rdfextras.web import mimeutils
+from rdfextras.tools import rdf2dot, rdfs2dot
+from rdfextras.sparql.results.htmlresults import term_to_string
+
+
+POSSIBLE_DOT=["/usr/bin/dot", "/usr/local/bin/dot", "/opt/local/bin/dot"]
+for x in POSSIBLE_DOT: 
+    if os.path.exists(x):         
+        DOT=x
+        break
+
+GRAPH_TYPES={"png": "image/png", 
+             "svg": "image/svg+xml", 
+             "dot": "text/x-graphviz", 
+             "pdf": "application/pdf" }
+
 
 class RDFUrlConverter(BaseConverter):
     def __init__(self, url_map):
@@ -152,12 +166,7 @@ def get_resource(label, type_):
 
 @lod.route("/download/<format_>")
 def download(format_):
-    format_,mimetype_=mimeutils.format_to_mime(format_)
-    response=make_response(g.graph.serialize(format=format_))
-
-    response.headers["Content-Type"]=mimetype_
-
-    return response        
+    return serialize(g.graph, format_)
 
 @lod.route("/rdfgraph/<type_>/<rdf:label>.<format_>")
 def rdfgraph(label, type_, format_): 
@@ -165,26 +174,27 @@ def rdfgraph(label, type_, format_):
     if isinstance(r,tuple): # 404
         return r
 
-    GRAPH_TYPES={"png": "image/png", 
-                 "svg": "image/svg+xml", 
-                 "dot": "text/x-graphviz", 
-                 "pdf": "application/pdf" }
+    graph=rdflib.Graph()
+    graph+=g.graph.triples((r,None,None))
+    graph+=g.graph.triples((None,None,r))
+
+    return graphrdf(graph, format_)
+
+def graphrdf(graph, format_):
+    return dot(lambda uw: rdf2dot.rdf2dot(graph, stream=uw), format_)
+
+def graphrdfs(graph, format_):
+    return dot(lambda uw: rdfs2dot.rdfs2dot(graph, stream=uw), format_)
+
+def dot(inputgraph, format_): 
 
     if format_ not in GRAPH_TYPES: 
         return "format '%s' not supported, try %s"%(format_, ", ".join(GRAPH_TYPES)), 415
 
-    graph=rdflib.Graph()
-    graph+=g.graph.triples((r,None,None))
-    graph+=g.graph.triples((None,None,r))
-    
-    from rdfextras.tools import rdf2dot
-    import subprocess
-    import codecs 
-    
     p=subprocess.Popen([DOT, "-T%s"%format_], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     uw=codecs.getwriter("utf8")(p.stdin)
-    rdf2dot.rdf2dot(graph, stream=uw)
-    #img,nothing=p.communicate()
+    inputgraph(uw)
+
     p.stdin.close()
     def readres(): 
         s=p.stdout.read(1000)
@@ -211,6 +221,9 @@ def data(label, format_, type_=None):
     graph+=g.graph.triples((r,None,None))
     graph+=g.graph.triples((None,None,r))
 
+    return serialize(graph, format_)
+
+def serialize(graph, format_):
 
     format_,mimetype_=mimeutils.format_to_mime(format_)
 
@@ -219,6 +232,7 @@ def data(label, format_, type_=None):
     response.headers["Content-Type"]=mimetype_
 
     return response
+
 
 @lod.route("/page/<type_>/<rdf:label>")
 @lod.route("/page/<rdf:label>")
@@ -230,8 +244,10 @@ def page(label, type_=None):
     outprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in g.graph.predicate_objects(r) if x[0]!=rdflib.RDF.type])
     types=sorted([ resolve(x) for x in g.graph.objects(r,rdflib.RDF.type)])
     
-    inprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in g.graph.subject_predicates(r)])
-    
+    inprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in g.graph.subject_predicates(r) if resource!=rdflib.RDFS.Class or x[0]!=rdflib.RDF.type ])
+
+    picked=r in session["picked"]
+
     return render_template("lodpage.html", 
                            outprops=outprops, 
                            inprops=inprops, 
@@ -240,7 +256,8 @@ def page(label, type_=None):
                            graph=g.graph,
                            type_=type_, 
                            types=types,
-                           resource=r)
+                           resource=r, 
+                           picked=picked)
 
 @lod.route("/resource/<type_>/<rdf:label>")
 @lod.route("/resource/<rdf:label>")
@@ -293,6 +310,40 @@ def index():
                            resources=resources,
                            graph=g.graph)
 
+@lod.route("/pick")
+def pick(): 
+    if "picked" not in session:         
+        session["picked"]=set()
+    session["picked"]^=set((rdflib.URIRef(request.args["uri"]),)) # xor
+    return redirect(request.referrer)
+
+@lod.route("/picked/<action>/<format_>")
+@lod.route("/picked/<action>/")
+@lod.route("/picked/")
+def picked(action=None, format_=None): 
+
+    def pickedgraph(): 
+        graph=rdflib.Graph()
+        for x in session["picked"]:
+            graph+=g.graph.triples((x,None,None))
+            graph+=g.graph.triples((None,None,x))
+        return graph
+
+    if action=='download': 
+        return serialize(pickedgraph(), format_)
+    elif action=='rdfgraph': 
+        return graphrdf(pickedgraph(), format_)
+    elif action=='rdfsgraph':
+        return graphrdfs(pickedgraph(), format_)
+    elif action=='clear':
+        session["picked"]=set()
+        return render_template("picked.html",
+                               things=[])
+    else:
+        things=[resolve(x) for x in session["picked"]]
+        return render_template("picked.html",
+                               things=things)
+
 ##################
 
 def serve(graph_,debug=False):
@@ -318,6 +369,8 @@ def get(graph, types='auto',image_patterns=["\.[png|jpg|gif]$"],
 
     lod.config["resources"]=find_resources(graph)
     lod.config["rresources"]=reverse_resources(lod.config["resources"])
+
+    lod.secret_key='veryverysecret'
     
     return lod
 
