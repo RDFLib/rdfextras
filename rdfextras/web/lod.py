@@ -244,7 +244,7 @@ def page(label, type_=None):
     outprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in g.graph.predicate_objects(r) if x[0]!=rdflib.RDF.type])
     types=sorted([ resolve(x) for x in g.graph.objects(r,rdflib.RDF.type)])
     
-    inprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in g.graph.subject_predicates(r)])
+    inprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in g.graph.subject_predicates(r) if resource!=rdflib.RDFS.Class or x[0]!=rdflib.RDF.type ])
 
     picked=r in session["picked"]
 

@@ -34,7 +34,10 @@ def rdfs2dot(g, stream, opts={}):
 
         l=g.value(x,RDFS.label)
         if l==None: 
-            l=g.namespace_manager.compute_qname(x)[2]
+            try: 
+                l=g.namespace_manager.compute_qname(x)[2]
+            except: 
+                pass # bnodes and some weird URIs cannot be split
         return l
 
     stream.write(u"digraph { \n node [ fontname=\"DejaVu Sans\" ] ; \n")
