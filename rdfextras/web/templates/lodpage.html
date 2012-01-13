@@ -23,7 +23,7 @@ is-a
 </span>
 
 {% block special %}{% endblock %}
-
+{% if outprops %}
 <h2>Properties:</h2>
 <table>
 <thead>
@@ -41,6 +41,7 @@ is-a
 </tr>
 {% endfor %}
 </table>
+{% endif %}
 {% if inprops %}
 <h2>Incoming Properties:</h2>
 <table>

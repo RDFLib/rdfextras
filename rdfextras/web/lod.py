@@ -15,7 +15,7 @@ from werkzeug.urls import url_quote
 #from rdfextras.web.endpoint import endpoint as lod
 from endpoint import endpoint as lod
 from rdfextras.web import mimeutils
-from rdfextras.tools import rdf2dot, rdfs2dot
+from rdfextras.tools import rdf2dot, rdfs2dot, graphutils
 from rdfextras.sparql.results.htmlresults import term_to_string
 
 
@@ -242,23 +242,51 @@ def page(label, type_=None):
         return r
 
     outprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in g.graph.predicate_objects(r) if x[0]!=rdflib.RDF.type])
+    
     types=sorted([ resolve(x) for x in g.graph.objects(r,rdflib.RDF.type)])
     
-    inprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in g.graph.subject_predicates(r) if resource!=rdflib.RDFS.Class or x[0]!=rdflib.RDF.type ])
+    inprops=sorted([ (resolve(x[0]), resolve(x[1])) for x in g.graph.subject_predicates(r) ])
 
     picked=r in session["picked"]
 
-    return render_template("lodpage.html", 
-                           outprops=outprops, 
-                           inprops=inprops, 
-                           label=get_label(r),
-                           urilabel=label,
-                           graph=g.graph,
-                           type_=type_, 
-                           types=types,
-                           resource=r, 
-                           picked=picked)
+    params={ "outprops":outprops, 
+        "inprops":inprops, 
+        "label":get_label(r),
+        "urilabel":label,
+        "graph":g.graph,
+        "type_":type_, 
+        "types":types,
+        "resource":r, 
+        "picked":picked }
+    p="lodpage.html"
+        
+    if r==rdflib.RDFS.Class: 
+        # page for all classes
+        roots=graphutils.find_roots(g.graph, rdflib.RDFS.subClassOf, set(lod.config["types"]))
+        params["classes"]=[graphutils.get_tree(g.graph, x, rdflib.RDFS.subClassOf, resolve) for x in roots]
+        
+        p="classes.html"
+        # show classes only once
+        for x in inprops[:]: 
+            if x[1]["url"]==rdflib.RDF.type:
+                inprops.remove(x)
 
+    elif rdflib.RDFS.Class in g.graph.objects(r,rdflib.RDF.type): 
+        # page for a single class
+        params["classes"]=[graphutils.get_tree(g.graph, r, rdflib.RDFS.subClassOf, resolve)]
+            
+        params["instances"]=[]
+        # show subclasses/instances only once
+        for x in inprops[:]: 
+            if x[1]["url"]==rdflib.RDF.type:
+                inprops.remove(x)
+                params["instances"].append(x[0])
+            elif x[1]["url"]==rdflib.RDFS.subClassOf: 
+                inprops.remove(x)
+        p="class.html"
+
+    return render_template(p, **params)
+          
 @lod.route("/resource/<type_>/<rdf:label>")
 @lod.route("/resource/<rdf:label>")
 def resource(label, type_=None): 

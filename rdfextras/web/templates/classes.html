@@ -1,0 +1,21 @@
+{% extends "lodpage.html" %}
+
+{% block special %}
+
+{% if classes %}
+<h2>Class Hierarchy</h2>
+
+<ul>
+{% for node,children in classes recursive %}
+<li><a href="{{node.url}}">{{node.label}}</a>
+{% if children %}
+<ul>
+{{ loop(children) }}
+</ul>
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% endblock %}

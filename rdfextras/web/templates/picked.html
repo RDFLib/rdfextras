@@ -4,6 +4,11 @@
 
 <h1>Picked resources:</h1>
 
+<p>Starring resources lets you export or graph several resources as once, click the star icon next to labels of a few things, then come here and export or graph them together.
+<br/>
+Click the stars in the list below to deselect individual resources.
+</p>
+
 <ul>
 {% if things %}
 {% for r in things %}
@@ -18,7 +23,7 @@
 {% endif %}
 </ul>
 
-<a href="{{url_for('picked', action='clear')}}">clear all</a>
+<a href="{{url_for('picked', action='clear')}}"><img src="{{url_for('static', filename='star_inactive.png')}}" />clear all</a>
 
 
 <div class='inlinelist'><h2>Download as:</h2>
