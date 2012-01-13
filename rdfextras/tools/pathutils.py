@@ -3,10 +3,6 @@ RDF- and RDFlib-centric file and URL path utilities.
 """
 
 from os.path import splitext
-import sys
-import getopt
-import rdflib
-import codecs
 
 def uri_leaf(uri):
     """
@@ -101,52 +97,4 @@ def _get_ext(fpath, lower=True):
     if ext.startswith('.'):
         ext = ext[1:]
     return ext
-
-def _help(): 
-    sys.stderr.write("""
-program.py [-f <format>] [-o <output>] [files...]
-Read RDF files given on STDOUT - does something to the resulting graph
-If no files are given, read from stdin
--o specifies file for output, if not given stdout is used
--f specifies parser to use, if not given it is guessed from extension
-
-""")
-    
-
-def main(target, _help=_help, options=""): 
-    args, files=getopt.getopt(sys.argv[1:], "hf:o:"+options)
-    dargs=dict(args)
-
-    if "-h" in dargs: 
-        _help()
-        sys.exit(-1)
-                     
-    g=rdflib.Graph()
-
-    if "-f" in dargs: 
-        f=dargs["-f"]
-    else: 
-        f=None
-
-    if "-o" in dargs: 
-        sys.stderr.write("Output to %s\n"%dargs["-o"])
-        out=codecs.open(dargs["-o"], "w","utf-8")
-    else: 
-        out=sys.stdout
-
-    if len(files)==0: 
-        sys.stderr.write("Reading RDF/XML from stdin...\n")
-        g.load(sys.stdin, format="xml")
-    else: 
-        for x in files:
-            if f==None: 
-                f=guess_format(x)
-            sys.stderr.write("Loading %s as %s... "%(x,f))
-            g.load(x, format=f)
-            sys.stderr.write("[done]\n")
-
-    sys.stderr.write("Loaded %d triples.\n"%len(g))
-    
-    target(g,out,args)
-
 

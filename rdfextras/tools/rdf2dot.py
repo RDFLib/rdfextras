@@ -85,4 +85,4 @@ Read RDF files given on STDOUT, writes a graph of the RDFS schema in DOT languag
 """)
 
 if __name__=='__main__':
-    rdfextras.tools.pathutils.main(rdf2dot, _help)
+    rdfextras.tools.cmdline.main(rdf2dot, _help)
