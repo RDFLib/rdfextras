@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 """
 The RDFExtras namespace package.
 """
@@ -13,8 +13,6 @@ try:
 except ImportError:
     import pkgutil
     __path__ = pkgutil.extend_path(__path__, __name__)
-
-from rdfextras import sparql
 
 
 import logging

@@ -33,7 +33,7 @@ config = dict(
 )
 
 install_requires = [
-    'rdflib >= 3.2.0-dev',
+    'rdflib >= 3.2.0',
     'pyparsing'
 ]
 tests_require = install_requires + \
