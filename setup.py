@@ -48,6 +48,9 @@ else:
         entry_points = {
             'console_scripts': [
                 'rdfpipe = rdfextras.tools.rdfpipe:main',
+                'csv2rdf = rdfextras.tools.csv2rdf:main',
+                'rdf2dot = rdfextras.tools.rdf2dot:main',
+                'rdfs2dot = rdfextras.tools.rdfs2dot:main',
             ],
             'nose.plugins': [
                 'EARLPlugin = rdfextras.tools.EARLPlugin:EARLPlugin',

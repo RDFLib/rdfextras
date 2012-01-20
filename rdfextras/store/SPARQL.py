@@ -1,4 +1,3 @@
-#!/d/Bin/Python/python.exe
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
 #

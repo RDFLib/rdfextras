@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 r"""
 Parse SPARQL queries with the `parse` method.
 

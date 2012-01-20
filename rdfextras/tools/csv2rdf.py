@@ -267,9 +267,8 @@ class CSV2RDF(object):
 
                         
 
-if __name__=='__main__':
 
-
+def main():
     csv2rdf=CSV2RDF()
     
     opts,files=getopt.getopt(sys.argv[1:], 
@@ -361,3 +360,5 @@ if __name__=='__main__':
 
 
 
+if __name__=='__main__':
+    main()

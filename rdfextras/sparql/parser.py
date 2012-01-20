@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import sys
 
 from pyparsing import (Regex, Suppress, Combine, Optional, CaselessKeyword,
