@@ -1,4 +1,3 @@
-#!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 """
 An implementation of the W3C SPARQL Algebra on top of sparql-p's expansion trees
@@ -12,25 +11,46 @@ query nodes as described in the section "Evaluation Semantics".
 We define eval(D(G), graph pattern) as the evaluation of a graph pattern with respect 
 to a dataset D having active graph G. The active graph is initially the default graph.
 """
-import unittest, os, sys
+import unittest
+import os
+import sys
 from StringIO import StringIO
-from rdflib.graph import Graph, ReadOnlyGraphAggregate, ConjunctiveGraph
+from rdflib.graph import ConjunctiveGraph
+from rdflib.graph import Graph
+from rdflib.graph import ReadOnlyGraphAggregate
 from rdflib import plugin
-from rdflib.term import URIRef, Variable, BNode, Literal
+from rdflib.term import BNode
+from rdflib.term import Literal
+from rdflib.term import URIRef
+from rdflib.term import Variable
 from rdflib.util import first
 from rdflib.store import Store 
-from rdfextras.sparql.components import AskQuery, SelectQuery, DescribeQuery, Query, Prolog
-from rdfextras.sparql.components import NamedGraph,RemoteGraph
+from rdfextras.sparql.components import AskQuery
+from rdfextras.sparql.components import DescribeQuery
+from rdfextras.sparql.components import Prolog
+from rdfextras.sparql.components import Query
+from rdfextras.sparql.components import SelectQuery
+from rdfextras.sparql.components import NamedGraph
+from rdfextras.sparql.components import RemoteGraph
 from rdfextras.sparql.components import ASCENDING_ORDER
-from rdfextras.sparql import graph, operators, SPARQLError, DESCRIBE
+from rdfextras.sparql import DESCRIBE
+from rdfextras.sparql import graph
+from rdfextras.sparql import operators
+from rdfextras.sparql import SPARQLError
 from rdfextras.sparql import query as sparql_query
-from rdfextras.sparql.evaluate import unRollTripleItems, _variablesToArray
-from rdfextras.sparql.components import ParsedGroupGraphPattern, BlockOfTriples, GraphPattern, ParsedOptionalGraphPattern, ParsedAlternativeGraphPattern, ParsedGraphGraphPattern
-
-from rdfextras.sparql.graph import BasicGraphPattern
+from rdfextras.sparql.evaluate import _variablesToArray
+from rdfextras.sparql.evaluate import unRollTripleItems
+from rdfextras.sparql.components import BlockOfTriples
+from rdfextras.sparql.components import GraphPattern
+from rdfextras.sparql.components import ParsedAlternativeGraphPattern
 from rdfextras.sparql.components import ParsedConstrainedTriples
-from rdfextras.sparql.evaluate import createSPARQLPConstraint,\
-     CONSTRUCT_NOT_SUPPORTED,convertTerm
+from rdfextras.sparql.components import ParsedGraphGraphPattern
+from rdfextras.sparql.components import ParsedGroupGraphPattern
+from rdfextras.sparql.components import ParsedOptionalGraphPattern
+from rdfextras.sparql.graph import BasicGraphPattern
+from rdfextras.sparql.evaluate import CONSTRUCT_NOT_SUPPORTED
+from rdfextras.sparql.evaluate import convertTerm
+from rdfextras.sparql.evaluate import createSPARQLPConstraint
 #A variable to determine whether we obey SPARQL definition of RDF dataset
 #which does not allow matching of default graphs (or any graph with a BNode for a name)
 #"An RDF Dataset comprises one graph, 
@@ -42,7 +62,8 @@ def ReduceGraphPattern(graphPattern,prolog):
     """
     Takes parsed graph pattern and converts it into a BGP operator
     
-    .. Replace all basic graph patterns by BGP(list of triple patterns) ..
+    Replace all basic graph patterns by BGP(list of triple patterns)
+
     """
     if isinstance(graphPattern.triples[0],list) and len(graphPattern.triples) == 1:
         graphPattern.triples = graphPattern.triples[0]
@@ -79,17 +100,21 @@ def ReduceToAlgebra(left,right):
     
     12.2.1 Converting Graph Patterns
     
-    [20] GroupGraphPattern ::= '{' TriplesBlock? ( ( GraphPatternNotTriples | Filter )
-         '.'? TriplesBlock? )* '}'
-    [22] GraphPatternNotTriples ::= OptionalGraphPattern | GroupOrUnionGraphPattern | 
-         GraphGraphPattern
-    [26] Filter ::= 'FILTER' Constraint
-    [27] Constraint ::= BrackettedExpression | BuiltInCall | FunctionCall
-    [56] BrackettedExpression  ::= '(' ConditionalOrExpression ')'
+    .. sourcecode:: text
+
+        [20] GroupGraphPattern ::= '{' TriplesBlock? ( ( GraphPatternNotTriples | Filter )
+             '.'? TriplesBlock? )* '}'
+        [22] GraphPatternNotTriples ::= OptionalGraphPattern | GroupOrUnionGraphPattern | 
+             GraphGraphPattern
+        [26] Filter ::= 'FILTER' Constraint
+        [27] Constraint ::= BrackettedExpression | BuiltInCall | FunctionCall
+        [56] BrackettedExpression  ::= '(' ConditionalOrExpression ')'
             
     
-    ( GraphPatternNotTriples | Filter ) '.'? TriplesBlock?
-      nonTripleGraphPattern     filter         triples
+        ( GraphPatternNotTriples | Filter ) '.'? TriplesBlock?
+           nonTripleGraphPattern     filter         triples
+        
+    
     """
     if not isinstance(right,AlgebraExpression):
         if isinstance(right,ParsedGroupGraphPattern):
@@ -775,10 +800,12 @@ class NonSymmetricBinaryOperator(AlgebraExpression):
 
 class Join(NonSymmetricBinaryOperator):
     """
-    [[(P1 AND P2)]](D,G) = [[P1]](D,G) compat [[P2]](D,G)
-    
-    Join(Ω1, Ω2) = { merge(μ1, μ2) | μ1 in Ω1 and μ2 in Ω2, and μ1 and μ2 are \
-                     compatible }
+    .. sourcecode:: text
+
+        [[(P1 AND P2)]](D,G) = [[P1]](D,G) compat [[P2]](D,G)
+        
+        Join(Ω1, Ω2) = { merge(μ1, μ2) | μ1 in Ω1 and μ2 in Ω2, and μ1 and μ2 are \
+                         compatible }
     
     Pseudocode implementation:
     
@@ -905,20 +932,22 @@ def _ExpandLeftJoin(node,expression,tripleStore,prolog,optionalTree=False):
         
 class LeftJoin(NonSymmetricBinaryOperator):
     """
-    Let Ω1 and Ω2 be multisets of solution mappings and F a filter. We define:
-    LeftJoin(Ω1, Ω2, expr) = 
-        Filter(expr, Join(Ω1, Ω2)) set-union Diff(Ω1, Ω2, expr)
-    
-    LeftJoin(Ω1, Ω2, expr) = 
-    { merge(μ1, μ2) | μ1 in Ω1 and μ2 in Ω2, and 
-                      μ1 and μ2 are compatible, and 
-                      expr(merge(μ1, μ2)) is true }
-    set-union
-    { μ1 | μ1 in Ω1 and μ2 in Ω2, and 
-           μ1 and μ2 are not compatible }
-    set-union
-    { μ1 | μ1 in Ω1and μ2 in Ω2, and μ1 and μ2 are compatible and 
-           expr(merge(μ1, μ2)) is false }
+    .. codeblock:: text
+
+        Let Ω1 and Ω2 be multisets of solution mappings and F a filter. We define:
+        LeftJoin(Ω1, Ω2, expr) = 
+            Filter(expr, Join(Ω1, Ω2)) set-union Diff(Ω1, Ω2, expr)
+        
+        LeftJoin(Ω1, Ω2, expr) = 
+        { merge(μ1, μ2) | μ1 in Ω1 and μ2 in Ω2, and 
+                          μ1 and μ2 are compatible, and 
+                          expr(merge(μ1, μ2)) is true }
+        set-union
+        { μ1 | μ1 in Ω1 and μ2 in Ω2, and 
+               μ1 and μ2 are not compatible }
+        set-union
+        { μ1 | μ1 in Ω1and μ2 in Ω2, and μ1 and μ2 are compatible and 
+               expr(merge(μ1, μ2)) is false }
     
     """
     def __init__(self,BGP1,BGP2,expr=None):
@@ -1041,10 +1070,13 @@ class Union(AlgebraExpression):
 
 class GraphExpression(AlgebraExpression):
     """
-    [24] GraphGraphPattern ::=  'GRAPH'  VarOrIRIref  GroupGraphPattern
-    eval(D(G), Graph(IRI,P)) = eval(D(D[i]), P)
-    eval(D(G), Graph(var,P)) =
-        multiset-union over IRI i in D : Join( eval(D(D[i]), P) , Omega(?v->i) )    
+    .. sourcecode:: text
+
+        [24] GraphGraphPattern ::=  'GRAPH'  VarOrIRIref  GroupGraphPattern
+        eval(D(G), Graph(IRI,P)) = eval(D(D[i]), P)
+        eval(D(G), Graph(var,P)) =
+            multiset-union over IRI i in D : Join( eval(D(D[i]), P) , Omega(?v->i) )    
+    
     """
     def __init__(self,iriOrVar,GGP):
         self.iriOrVar  = iriOrVar

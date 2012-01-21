@@ -33,7 +33,7 @@ config = dict(
 )
 
 install_requires = [
-    'rdflib >= 3.2.0-dev',
+    'rdflib >= 3.2.0',
     'pyparsing'
 ]
 tests_require = install_requires + \
@@ -48,17 +48,18 @@ else:
         entry_points = {
             'console_scripts': [
                 'rdfpipe = rdfextras.tools.rdfpipe:main',
+                'csv2rdf = rdfextras.tools.csv2rdf:main',
+                'rdf2dot = rdfextras.tools.rdf2dot:main',
+                'rdfs2dot = rdfextras.tools.rdfs2dot:main',
             ],
             'nose.plugins': [
                 'EARLPlugin = rdfextras.tools.EARLPlugin:EARLPlugin',
             ],
             'rdf.plugins.parser': [
                 'rdf-json = rdfextras.parsers.rdfjson:RdfJsonParser',
-                'json-ld = rdfextras.parsers.jsonld:JsonLDParser',
             ],
             'rdf.plugins.serializer': [
                 'rdf-json = rdfextras.serializers.rdfjson:RdfJsonSerializer',
-                'json-ld = rdfextras.serializers.jsonld:JsonLDSerializer', 
             ],
         },
         #test_suite = 'nose.collector',

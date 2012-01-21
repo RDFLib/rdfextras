@@ -65,6 +65,7 @@ RECUR ?t TO ?x
 ANSWER1 = URIRef('http://del.icio.us/rss/chimezie/paper')
 
 class RecursionTests(unittest.TestCase):
+    # debug = True
     def setUp(self):
         self.graph = ConjunctiveGraph()
         self.graph.load(StringIO(testContent), format='n3')
@@ -73,6 +74,7 @@ class RecursionTests(unittest.TestCase):
         graph = ConjunctiveGraph()
         graph.load(StringIO(BASIC_KNOWS_DATA), format='n3')
         results = graph.query(KNOWS_QUERY,
+                              processor="sparql", 
                               DEBUG=False)
         results = set(results)
         person1 = URIRef('ex:person.1')
@@ -86,6 +88,7 @@ class RecursionTests(unittest.TestCase):
         graph = ConjunctiveGraph()
         graph.load(StringIO(SUBCLASS_DATA), format='n3')
         results = graph.query(SUBCLASS_QUERY,
+                              processor="sparql", 
                               DEBUG=False)
         results = set(results)
         ob = URIRef('ex:ob')
@@ -98,3 +101,7 @@ class RecursionTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+
+

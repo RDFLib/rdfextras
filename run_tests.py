@@ -45,15 +45,24 @@ NOSE_ARGS = [
         '--with-doctest',
         '--doctest-extension=.doctest',
         '--doctest-tests',
-#        '--with-EARL',
+        #'--with-coverage',
+        #'--enable-cover',
+        #'--enable-audit',
+        #'--extra-include=rdfextras',
+        #'--source-folder=rdfextras',
+        # '--trim-errors',
+        # '--with-EARL',
+        #'--with-xunit',
     ]
 
 COVERAGE_EXTRA_ARGS = [
         '--cover-package=rdfextras',
         '--cover-inclusive',
+        '--cover-html',
+        '--cover-html-dir=coverage',
     ]
 
-DEFAULT_ATTRS = ['!known_issue'] # ['!known_issue', '!sparql']
+DEFAULT_ATTRS = ['!known_issue', '!performancetest'] # ['!known_issue', '!sparql']
 
 DEFAULT_DIRS = ['test', 'rdfextras']
 
@@ -71,7 +80,7 @@ if __name__ == '__main__':
     Exiting. """; exit(1)
 
 
-    if '--with-coverage' in argv:
+    if '--with-coverage' in argv + NOSE_ARGS:
         try: import coverage
         except ImportError:
             print >>stderr, "No coverage module found, skipping code coverage."

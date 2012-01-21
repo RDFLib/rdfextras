@@ -4,7 +4,6 @@ RDF- and RDFlib-centric file and URL path utilities.
 
 from os.path import splitext
 
-
 def uri_leaf(uri):
     """
     Get the "leaf" - fragment id or last segment - of a URI. Useful e.g. for
@@ -15,9 +14,18 @@ def uri_leaf(uri):
         >>> uri_leaf('http://example.org/ns/stuff/item')
         'item'
         >>> uri_leaf('http://example.org/ns/stuff/')
-        ''
+        >>>
+        >>> uri_leaf('urn:example.org:stuff')
+        'stuff'
+        >>> uri_leaf('example.org')
+        >>>
     """
-    return uri.rsplit('/', 1)[-1].rsplit('#', 1)[-1]
+    for char in ('#', '/', ':'):
+        if uri.endswith(char):
+            break
+        base, sep, leaf = uri.rpartition(char)
+        if sep and leaf:
+            return leaf
 
 
 SUFFIX_FORMAT_MAP = {
@@ -82,12 +90,11 @@ def _get_ext(fpath, lower=True):
         'rdf'
     """
     ext = splitext(fpath)[-1]
-    if ext=='' and fpath.startswith("."): 
-        ext=fpath
+    if ext == '' and fpath.startswith("."): 
+        ext = fpath
     if lower:
         ext = ext.lower()
     if ext.startswith('.'):
         ext = ext[1:]
     return ext
-
 

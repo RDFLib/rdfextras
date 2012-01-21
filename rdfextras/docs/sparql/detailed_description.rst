@@ -245,7 +245,6 @@ be expressed in two different ways:
     where.addConstraint(lambda binding: int(binding["?x"]) &lt; 10)
     result = sparqlGr.query(select,where)
 
-
 or:
 
 .. sourcecode:: python

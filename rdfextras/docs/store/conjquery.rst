@@ -25,28 +25,35 @@ historical character in literature.
 
 The FOAF graphs for both Wen and Wu are (preceded by the name of each graph):
 
-.. sourcecode:: n3
+.. sourcecode:: xml
 
     <urn:literature:characters:KingWen>
 
-    @prefix : <http://xmlns.com/foaf/0.1/>.
-    @prefix rel: <http://purl.org/vocab/relationship/>.
+.. code-block:: n3
 
-    <http://en.wikipedia.org/wiki/King_Wen_of_Zhou> a :Person;
-        :name “King Wen”;
-        :mbox <mailto:kingWen@historicalcharacter.com>;
-        rel:parentOf [ a :Person; :mbox <mailto:kingWu@historicalcharacter.com> ].
+    @prefix : <http://xmlns.com/foaf/0.1/> .
+    @prefix rel: <http://purl.org/vocab/relationship/> .
 
+    <http://en.wikipedia.org/wiki/King_Wen_of_Zhou> a :Person ;
+        :name "King Wen" ;
+        :mbox <mailto:kingWen@historicalcharacter.com> ;
+        rel:parentOf [ a :Person; :mbox <mailto:kingWu@historicalcharacter.com> ] .
+    
+
+.. sourcecode:: xml
 
     <urn:literature:characters:KingWu>
+
+.. code-block:: n3
 
     @prefix : <http://xmlns.com/foaf/0.1/>.
     @prefix rel: <http://purl.org/vocab/relationship/>.
 
     <http://en.wikipedia.org/wiki/King_Wu_of_Zhou> a :Person;
-        :name “King Wu”;
+        :name "King Wu";
         :mbox <mailto:kingWu@historicalcharacter.com>;
         rel:childOf [ a :Person; :mbox <mailto:kingWen@historicalcharacter.com> ].
+    
 
 In each case, Wikipedia URLs are used as identifiers for each historical
 character. There are better ways for using Wikipedia URLs within RDF, but
@@ -72,7 +79,7 @@ and nowhere else.
 So, the relationship between King Wen and his son, expressed with the term
 ``ref:parentOf``, will only be asserted in
 
-.. sourcecode:: n3
+.. sourcecode:: text
 
     urn:literature:characters:KingWen.
 
@@ -108,7 +115,7 @@ asserted in:
 .. sourcecode:: python
 
     for s,p,o,containingGraph in aConjunctiveGraph.quads(s,p,o):
-      ... do something with containingGraph ..
+        do_something_with(containingGraph)
 
 It's likely that most other QuadStores have similar mechanisms and given the
 great value in optimizing queries across large aggregations of named RDF
@@ -119,13 +126,13 @@ Most of what is needed is already there (in both Versa and SPARQL). Consider a
 SPARQL extension function which returns a boolean indicating whether the given
 triple pattern is asserted in a graph with the given name:
 
-.. sourcecode:: n3
+.. sourcecode:: text
 
     rdfg:AssertedIn(?subj,?pred,?obj,?graphIdentifier)
 
 We can then get the email of King Wen's son efficiently with:
 
-.. sourcecode:: sparql
+.. code-block:: sparql
 
     BASE  <http://xmlns.com/foaf/0.1/>
     PREFIX rel: <http://purl.org/vocab/relationship/>
@@ -134,7 +141,7 @@ We can then get the email of King Wen's son efficiently with:
     SELECT ?mbox
     WHERE {
         GRAPH ?foafGraph {
-          ?kingWen :name “King Wen”;
+          ?kingWen :name "King Wen";
                            rel:parentOf [ a :Person; :mbox ?mbox ] .
         }  
          FILTER (rdfg:AssertedIn(?kingWen,:name,”King Wen”,?foafGraph) ) .
@@ -147,7 +154,7 @@ with the graph identifiers themselves, such as:
 .. sourcecode:: n3
 
     <urn:literature:characters:KingWen> 
-      :primaryTopic <http://en.wikipedia.org/wiki/King_Wen_of_Zhou>.
+      :primaryTopic <http://en.wikipedia.org/wiki/King_Wen_of_Zhou> .
 
 However, I think that the relationship between an RDF triple and the graph in
 which it is asserted, although currently outside the scope of the RDF model,
@@ -155,7 +162,7 @@ should have its semantics outlined in the RDF abstract syntax instead of
 using terms in an RDF vocabulary. The demonstrated value in RDF query
 optimization makes for a strong argument:
 
-.. sourcecode:: sparql
+.. code-block:: sparql
 
     BASE  <http://xmlns.com/foaf/0.1/>
     PREFIX rel: <http://purl.org/vocab/relationship/>

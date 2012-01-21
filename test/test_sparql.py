@@ -48,7 +48,7 @@ class TestSimpleQueries(unittest.TestCase):
         WHERE
         {
           <http://example.org/book/book1> <http://purl.org/dc/elements/1.1/title> ?title .
-        }    
+        }
         """)
         result_data = list(results)
         self.assertEqual(len(result_data), 1)

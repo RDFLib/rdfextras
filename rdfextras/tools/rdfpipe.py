@@ -7,6 +7,7 @@ resulting graph to a chosen format.
 
 import sys
 from optparse import OptionParser
+import os
 import logging
 
 import rdflib

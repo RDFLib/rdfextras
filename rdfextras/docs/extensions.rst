@@ -20,10 +20,10 @@ for each particular case.
 Basic graph patterns stand in the same relation to triple patterns that RDF
 graphs do to RDF triples, and much of the same terminology can be applied to
 them. In particular, two basic graph patterns are said to be equivalent if
-there is a bijection M between the terms of the triple patterns that maps
+there is a bijection ``M`` between the terms of the triple patterns that maps
 blank nodes to blank nodes and maps variables, literals and IRIs to
-themselves, such that a triple ( s, p, o ) is in the first pattern if and only
-if the triple ( M(s), M(p) M(o) ) is in the second. This definition extends
+themselves, such that a triple ``( s, p, o )`` is in the first pattern if and only
+if the triple ``( M(s), M(p) M(o) )`` is in the second. This definition extends
 that for RDF graph equivalence to basic graph patterns by preserving variable
 names across equivalent patterns.
 

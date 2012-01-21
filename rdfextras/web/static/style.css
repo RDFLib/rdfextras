@@ -31,11 +31,23 @@ h1 .url {
     color: #aaa;
 }
 
+h1 img { height: 24px; }
+
 #versions { 
-    font-size: 0.6em;
-    color: #bbb;
+    font-size: 0.7em;
 }
 
 hr { 
     border-color: #ddd;
 }
+
+#versions, #footer { color: #555; }
+#versions a, #footer a { color: #6285cb; }
+#footer img { height: 16px; }
+
+.inlinelist ul li { 
+    float: left; 
+    display: block; 
+    margin-left: 5px;
+}
+

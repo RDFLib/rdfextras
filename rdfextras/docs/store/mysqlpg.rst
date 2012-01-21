@@ -9,7 +9,7 @@ Summary Overview of using MySQL or PostgreSQL as a triple store.
 Introduction
 ------------
 
-The RDFLib 3.0.0 plugin interface supports using either a MySQL or PostgreSQL
+The RDFLib 3 plugin interface supports using either a MySQL or PostgreSQL
 database to store and query your RDF graphs. This document describes how to
 use these backends, from loading large datasets into them to taking advantage
 of their query capabilities.
@@ -116,7 +116,7 @@ following command:
 
 .. sourcecode:: bash
 
-    $ time python -m rdflib.store.FOPLRelationalModel.MySQLMassLoader \
+    $ time python -m rdfextras.store.FOPLRelationalModel.MySQLMassLoader \
       -c db=Becker_dbpedia,host=localhost,user=username,password=password \
       -i Becker_dbpedia \
       --nt=data/infoboxes-fixed.nt --nt=data/geocoordinates-fixed.nt \
@@ -133,16 +133,16 @@ The results for the bulk load times are listed below. Note that in addition to
 the hardware differences listed above, we are also doing a bulk load of all
 the pieces at once, instead of loading the three pieces in stages.
 
-    || *Backend* || *Load time (seconds)* ||
-    || MySQL || 28,612 ||
-    || PostgreSQL || 7,812 ||
++-----------------------+-----------------------+
+|       *Backend*       | *Load time (seconds)* |
++=======================+=======================+
+|        MySQL          |         28,612        |
++-----------------------+-----------------------+
+| PostgreSQL (8.4beta1) |         7,812         |
++-----------------------+-----------------------+
 
-Note that the PostgreSQL and MySQL load strategies are *very different*, which
-may account for the dramatic difference. Interestingly, it was a missing
-feature (the `IGNORE` keyword on the delimited load statement) that led to the
-construction of a different load mechanism in PostgreSQL, but it may turn out
-that the alternate load mechanism may work better on MySQL as well. I will
-continue to experiment with that.
+
+.. note:: the PostgreSQL and MySQL load strategies are *very different*, which may account for the dramatic difference. Interestingly, it was a missing feature (the `IGNORE` keyword on the delimited load statement) that led to the construction of a different load mechanism in PostgreSQL, but it may turn out that the alternate load mechanism may work better on MySQL as well. I will continue to experiment with that.
 
 Queries
 -------
@@ -150,8 +150,7 @@ Queries
 Becker's benchmark set includes five amusing queries; we can currently run the
 first three of these queries, but the last two use SPARQL features that are
 not currently supported by the RDFLib SPARQL processor. To run these queries,
-we will use the `sparqler.py` script, which is available under `rdflib_tools`
-in Subversion trunk.
+we will use the :mod:`rdfextras.tools.sparqler` script.
 
 For both backends, we will run each query in up to four different ways. The
 RDFLib SPARQL processor has a new component that can completely translate
@@ -166,9 +165,9 @@ All available information about a specific subject
 We run this query using the SPARQL to SQL translator using the `sparqler.py`
 command line below.
 
-.. sourcecode:: python
+.. sourcecode:: bash
 
-    $ time python /home/john/development/rdflib/rdflib_tools/sparqler.py -s MySQL \
+    $ time python /home/john/development/rdfextras/tools/sparqler.py -s MySQL \
     db=Becker_dbpedia,host=localhost,user=username,password=password Becker_dbpedia \
     'SELECT ?p ?o WHERE {
       <http://dbpedia.org/resource/Metropolitan_Museum_of_Art> ?p ?o
@@ -180,7 +179,7 @@ We run this query using the original SPARQL implementation using the command lin
 
 .. sourcecode:: bash
 
-    $ time python /home/john/development/rdflib/rdflib_tools/sparqler.py \
+    $ time python /home/john/development/rdfextras/tools/sparqler.py \
     --originalSPARQL -s MySQL \
     db=Becker_dbpedia,host=localhost,user=username,password=password Becker_dbpedia \
     'SELECT ?p ?o WHERE {                                                               
@@ -196,9 +195,13 @@ The results for this query are listed below. All times are in seconds. For
 this query, we do not add any range information, because we don't know
 anything about the properties that may be involved.
 
-    || *Backend* || *SPARQL to SQL translator* || *Original implementation* ||
-    || MySQL || 2.063 || 2.013 ||
-    || PostgreSQL (8.4beta1) || 1.993 || 2.002 ||
++------------------------+----------------------------+---------------------------+
+|        *Backend*       | *SPARQL to SQL translator* | *Original implementation* |
++========================+============================+===========================+
+|           MySQL        |            2.063           |         2.013             |
++------------------------+----------------------------+---------------------------+
+| PostgreSQL (8.4beta1)  |            1.993           |         2.002             |
++------------------------+----------------------------+---------------------------+
 
 Two degrees of separation from Kevin Bacon
 ------------------------------------------
@@ -225,9 +228,13 @@ time, we will also run the query with the range optimization; we know the
 we can add `-r http://dbpedia.org/property/starring` to the query command line
 to provide this hint to the query processor.
 
-    || *Backend* || *Translator* || *Original* || *Translator with hint* || *Original with hint* ||
-    || MySQL || 843 || 645 || 23.58 || 25.216 ||
-    || PostgreSQL (8.4beta1) || 68.36 || 82.64 || 23.38 || 80.45 ||
++-----------------------+--------------+------------+------------------------+----------------------+
+|     *Backend*         | *Translator* | *Original* | *Translator with hint* | *Original with hint* |
++=======================+==============+============+========================+======================+
+|        MySQL          |      843     |     645    |         23.58          |        25.216        |
++-----------------------+--------------+------------+------------------------+----------------------+
+| PostgreSQL (8.4beta1) |      68.36   |    82.64   |         23.38          |         80.45        |
++-----------------------+--------------+------------+------------------------+----------------------+
 
 Unconstrained query for artworks, artists, museums and their directors
 ----------------------------------------------------------------------
@@ -248,9 +255,13 @@ To run this query, we can replace the query in the above commands with the new q
 The results for this query are listed below. All times are in seconds. We will
 not use any range optimizations for this query.
 
-    || *Backend* || *SPARQL to SQL translator* || *Original implementation* ||
-    || MySQL || 1026 || 336 ||
-    || PostgreSQL (8.4beta1) || 98 || 5.074 ||
++-----------------------+----------------------------+----------------------------+
+|       *Backend*       | *SPARQL to SQL translator* | *Original implementation*  |
++=======================+============================+============================+
+|         MySQL         |             1026           |               336          |
++-----------------------+----------------------------+----------------------------+
+| PostgreSQL (8.4beta1) |              98            |             5.074          |
++-----------------------+----------------------------+----------------------------+
 
 API
 ===
@@ -258,9 +269,11 @@ API
 This section describes how to use the RDFLib API to use either a MySQL or
 PostgreSQL backend as a `ConjunctiveGraph`. This section assumes that you have
 MySQL or PostgreSQL installed and configured correctly (particularly
-permissions), as well as either the MySQLdb, the pgdb, or the postgresql
-Python modules installed. Setting up the database server is outside the scope
-of this document, and installing the modules probably is, too.
+permissions), as well as either the ``MySQLdb``, the ``pgdb``, the ``postgresql``
+or the ``psycopg`` Python modules installed.
+
+Setting up the database server is outside the scope of this document and so is 
+installing the modules.
 
 Here's an example:
 
@@ -269,18 +282,20 @@ Here's an example:
     import rdflib
     from rdflib import plugin, term, graph, namespace
 
-    db_type = 'PostgreSQL' # Use 'MySQL' instead, if that's the type of database you're using
+    db_type = 'PostgreSQL' # Use 'MySQL' instead, if that's what you have
     store = plugin.get(db_type, rdflib.store.Store)(
-      identifier = 'some_ident',
-      configuration = 'user=u,password=p,host=h,db=d')
-    store.open(create=True) # only use create=True when you are opening a store for the first time
+                          identifier = 'some_ident',
+                          configuration = 'user=u,password=p,host=h,db=d')
+    store.open(create=True) # only True when opening a store for the first time
 
     g = graph.ConjunctiveGraph(store)
-    sg = graph.Graph(store,
-      identifier=term.URIRef('tag:jlc6@po.cwru.edu,2009-08-20:bookmarks'))
-    sg.add((term.URIRef('http://www.google.com/'), namespace.RDFS.label,
+    sg = graph.Graph(store, identifier=term.URIRef(
+                                'tag:jlc6@po.cwru.edu,2009-08-20:bookmarks'))
+    sg.add((term.URIRef('http://www.google.com/'), 
+            namespace.RDFS.label,
             term.Literal('Google home page')))
-    sg.add((term.URIRef('http://wikipedia.org/'), namespace.RDFS.label,
+    sg.add((term.URIRef('http://wikipedia.org/'), 
+            namespace.RDFS.label,
             term.Literal('Wikipedia home page')))
 
 Other general Graph/ConjunctiveGraph API uses here

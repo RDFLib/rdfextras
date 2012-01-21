@@ -14,7 +14,7 @@ endpoint = Flask(__name__)
 
 endpoint.jinja_env.globals["rdflib_version"]=rdflib.__version__
 endpoint.jinja_env.globals["rdfextras_version"]=rdfextras.__version__
-endpoint.jinja_env.globals["python_version"]=sys.version
+endpoint.jinja_env.globals["python_version"]="%d.%d.%d"%(sys.version_info[0], sys.version_info[1], sys.version_info[2])
 
 
 @endpoint.route("/sparql", methods=['GET', 'POST'])

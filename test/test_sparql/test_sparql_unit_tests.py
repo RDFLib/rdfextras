@@ -1,16 +1,17 @@
-
+# -*- coding: UTF-8 -*-
 from cStringIO import StringIO
-from rdflib import plugin
 from rdflib import URIRef
 from rdflib.graph import Graph, ConjunctiveGraph
-from optparse import OptionParser
-
+# from optparse import OptionParser
+import rdflib
 from rdflib.store import Store, NO_STORE
 
-import unittest, getpass
-global singleGraph
+import unittest #, getpass
 
 global singleGraph
+
+rdflib.plugin.register('sparql', rdflib.query.Result,
+                    'rdfextras.sparql.query', 'SPARQLQueryResult')
 
 class Option(object):
     def __init__(self):
@@ -85,8 +86,10 @@ class TestOPTVariableCorrelationTest(AbstractSPARQLUnitTestCase):
     TEST_FACT_FORMAT = 'n3'
     def test_OPT_FILTER(self):
         rt=list(self.graph.query(BROKEN_OPTIONAL,
+                                 processor="sparql",
                                  DEBUG=self.debug))
         self.assertEqual(len(rt),1)
+        print("rt[0]", rt[0])
         self.failUnless(rt[0][0]==URIRef('http://example.org/interval3'),
                         "ex:interval3 is the only other interval that preceded interval1")
 
@@ -134,14 +137,14 @@ class testSPARQLUnitTests(unittest.TestCase):
     #We setup a global store.  A store is what a Graph instance uses to manage the persistence of RDF statements
     #We want to create a connection to the specified MySQL dataset as a store
     
-    # store = plugin.get('MySQL',Store)(options.identifier)
+    # store = rdflib.plugin.get('MySQL',Store)(options.identifier)
     # configurationString = 'user=%s,host=%s,db=%s,password=%s'%(
     #                          options.user,
     #                          options.host,
     #                          options.database,
     #                          options.password)
     # rt = store.open(configurationString,create=False)
-    store = plugin.get('IOMemory',Store)(options.identifier)
+    store = rdflib.plugin.get('IOMemory',Store)(options.identifier)
     configurationString = ''
     rt = store.open(configurationString,create=False)
     if not options.liveDB:

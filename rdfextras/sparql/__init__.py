@@ -67,7 +67,7 @@ The three most important classes in RDFLib for the average user are
 Namespace, URIRef and Literal; these are also imported, so the user
 can also use, eg::
 
-    from rdflibUtils import Namespace, URIRef, Literal
+    from rdflib import Namespace, URIRef, Literal
 
 History
 =======

@@ -8,7 +8,8 @@ rdflib.plugin.register('sparql', rdflib.query.Processor,
                        'rdfextras.sparql.processor', 'Processor')
 rdflib.plugin.register('sparql', rdflib.query.Result,
                        'rdfextras.sparql.query', 'SPARQLQueryResult')
-
+rdflib.plugin.register('xml', rdflib.query.ResultSerializer, 
+                       'rdfextras.sparql.results.xmlresults','XMLResultSerializer')
 
 test_data = """
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
