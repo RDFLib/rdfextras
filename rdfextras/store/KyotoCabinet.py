@@ -395,13 +395,11 @@ class KyotoCabinet(Store):
     
     def namespace(self, prefix):
         prefix = prefix.encode("utf-8")
-        p = self.__namespace.get(prefix)
-        return p if p else None
+        return self.__namespace.get(prefix)
     
     def prefix(self, namespace):
         namespace = namespace.encode("utf-8")
-        p = self.__prefix.get(namespace)
-        return p if p else None
+        return self.__prefix.get(namespace)
 
     def namespaces(self):
         for prefix in self.__namespace:

@@ -71,10 +71,13 @@ if DEBUG:
                 self.writer.simpleElement(u'fail', attributes={
                   u'err': unicode(repr(e))})
                 #self.writer.endElement(u'attempt')
-                raise
-            finally:
                 self.writer.endElement(u'trace')
                 self.writer.endDocument()
+
+                raise
+            
+            self.writer.endElement(u'trace')
+            self.writer.endDocument()
 
             return result
 

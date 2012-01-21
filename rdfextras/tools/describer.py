@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 """
 A Describer is a stateful utility for creating RDF statements in a
 semi-declarative manner. It has methods for creating literal values, rel and
@@ -238,7 +237,7 @@ class Describer(object):
     @contextmanager
     def _subject_stack(self, subject):
         self._subjects.append(subject)
-        yield
+        yield None
         self._subjects.pop()
 
 

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import with_statement
 #
 """
 This is an RDFLib store around Ivan Herman et al.'s SPARQL service wrapper. 

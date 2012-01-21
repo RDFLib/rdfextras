@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 """
 This serialiser will read in an JSON-LD formatted document and create an RDF
 Graph. See:
@@ -69,7 +69,8 @@ def to_rdf(tree, graph, base=None, context_data=None):
     context.load(context_data or tree.get(CONTEXT_KEY) or {}, base)
 
     id_obj = tree.get(context.id_key)
-    resources = id_obj if isinstance(id_obj, list) else [tree]
+    resources = id_obj 
+    if not isinstance(id_obj, list): resources=[tree]
 
     for term in context.terms:
         if term.iri and term.iri.endswith(('/', '#', ':')):
@@ -85,7 +86,10 @@ def to_rdf(tree, graph, base=None, context_data=None):
 def _add_to_graph(state, node):
     graph, context, base = state
     id_val = node.get(context.id_key)
-    subj = URIRef(context.expand(id_val), base) if id_val else BNode()
+    if id_val:
+        subj = URIRef(context.expand(id_val), base) 
+    else:
+        subj = BNode()
 
     for pred_key, obj_nodes in node.items():
         if pred_key in (CONTEXT_KEY, context.id_key):

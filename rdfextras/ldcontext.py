@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 """
 Implementation of a Linked Data Context structure based on the JSON-LD
 definition of contexts. See:
@@ -8,7 +8,6 @@ definition of contexts. See:
 """
 
 from __future__ import with_statement
-from contextlib import closing
 from urlparse import urljoin
 try:
     import json
@@ -59,7 +58,10 @@ class Context(object):
     def load(self, source, base=None, visited_urls=None):
         if CONTEXT_KEY in source:
             source = source[CONTEXT_KEY]
-        sources = source if isinstance(source, list) else [source]
+        if isinstance(source, list): 
+            sources = source 
+        else:
+            sources=[source]
         terms, simple_terms = [], []
         for obj in sources:
             if isinstance(obj, basestring):
@@ -76,7 +78,10 @@ class Context(object):
                     self._key_map[value] = key
                 else:
                     term = self._create_term(key, value)
-                    (terms if term.coercion else simple_terms).append(term)
+                    if term.coercion:
+                        terms.append(term)
+                    else:
+                        simple_terms.append(term)
         for term in simple_terms + terms:
             # TODO: expansion for these shoold be done by recursively looking up
             # keys in source (would also avoid this use of simple_terms).
@@ -89,7 +94,7 @@ class Context(object):
     def _create_term(self, key, dfn):
         if isinstance(dfn, dict):
             iri = dfn.get(ID_KEY)
-            coercion = dfn[TYPE_KEY] if TYPE_KEY in dfn else None
+            coercion = dfn.get(TYPE_KEY)
             container = dfn.get(CONTAINER_KEY)
             if not container and dfn.get(LIST_KEY) is True:
                 container = LIST_KEY
@@ -170,7 +175,11 @@ class Term(object):
 def source_to_json(source):
     # TODO: conneg for JSON (fix support in rdflib's URLInputSource!)
     source = create_input_source(source)
-    with closing(source.getByteStream()) as stream:
+    
+    stream=source.getByteStream()
+    try: 
         return json.load(stream)
+    finally: 
+        stream.close()
 
 
