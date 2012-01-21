@@ -3,7 +3,7 @@ import getopt
 import rdflib
 import codecs
 
-from rdfextras.tools.pathutils import guess_format
+from rdfextras.utils.pathutils import guess_format
 
 def _help(): 
     sys.stderr.write("""

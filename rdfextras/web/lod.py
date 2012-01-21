@@ -15,7 +15,8 @@ from werkzeug.urls import url_quote
 #from rdfextras.web.endpoint import endpoint as lod
 from endpoint import endpoint as lod
 from rdfextras.web import mimeutils
-from rdfextras.tools import rdf2dot, rdfs2dot, graphutils
+from rdfextras.tools import rdf2dot, rdfs2dot
+from rdfextras.utils import graphutils
 from rdfextras.sparql.results.htmlresults import term_to_string
 
 

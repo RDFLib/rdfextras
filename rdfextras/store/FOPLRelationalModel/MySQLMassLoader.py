@@ -4,7 +4,7 @@ import rdflib
 from rdflib import BNode
 from rdflib import RDF
 from rdflib.store import Store
-from rdfextras.tools.termutils import OBJECT
+from rdfextras.utils.termutils import OBJECT
 from rdflib.graph import ConjunctiveGraph
 from rdfextras.store.MySQL import SQL, MySQL, PostgreSQL
 from rdfextras.store.FOPLRelationalModel.QuadSlot import genQuadSlots

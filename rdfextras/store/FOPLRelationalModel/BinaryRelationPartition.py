@@ -20,11 +20,11 @@ from rdflib.term import Literal
 from rdflib.term import URIRef
 from rdflib.term import Variable
 from rdflib.namespace import RDF
-from rdfextras.tools.termutils import SUBJECT
-from rdfextras.tools.termutils import PREDICATE
-from rdfextras.tools.termutils import OBJECT
-from rdfextras.tools.termutils import CONTEXT
-from rdfextras.tools.termutils import term2Letter
+from rdfextras.utils.termutils import SUBJECT
+from rdfextras.utils.termutils import PREDICATE
+from rdfextras.utils.termutils import OBJECT
+from rdfextras.utils.termutils import CONTEXT
+from rdfextras.utils.termutils import term2Letter
 from rdfextras.store.REGEXMatching import REGEXTerm
 from rdfextras.store.FOPLRelationalModel.QuadSlot import Any
 from rdfextras.store.FOPLRelationalModel.QuadSlot import DATATYPE_INDEX

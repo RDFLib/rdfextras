@@ -4,10 +4,10 @@ import random
 import math
 from rdflib import Variable
 import time
-from rdfextras.tools.termutils import SUBJECT
-from rdfextras.tools.termutils import PREDICATE
-from rdfextras.tools.termutils import OBJECT
-from rdfextras.tools.termutils import CONTEXT
+from rdfextras.utils.termutils import SUBJECT
+from rdfextras.utils.termutils import PREDICATE
+from rdfextras.utils.termutils import OBJECT
+from rdfextras.utils.termutils import CONTEXT
 from rdfextras.sparql2sql.sql.DatabaseStats import Key2Dict
 from rdfextras.sparql2sql.sql.DatabaseStats import HistClass
 

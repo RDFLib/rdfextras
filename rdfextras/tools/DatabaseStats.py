@@ -9,10 +9,10 @@ from rdflib.store import Store, NO_STORE, VALID_STORE
 from rdflib import URIRef
 import time
 from rdfextras.store.FOPLRelationalModel.QuadSlot import normalizeValue
-from rdfextras.tools.termutils import SUBJECT
-from rdfextras.tools.termutils import PREDICATE
-from rdfextras.tools.termutils import OBJECT
-from rdfextras.tools.termutils import CONTEXT
+from rdfextras.utils.termutils import SUBJECT
+from rdfextras.utils.termutils import PREDICATE
+from rdfextras.utils.termutils import OBJECT
+from rdfextras.utils.termutils import CONTEXT
 
 plugin.register('MySQL', rdflib.store.Store,
                         'rdfextras.store.MySQL', 'MySQL')

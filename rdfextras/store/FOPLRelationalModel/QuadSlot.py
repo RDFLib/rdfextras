@@ -10,12 +10,12 @@ from rdflib.term import Literal
 from rdfextras.store.REGEXMatching import REGEXTerm
 from rdflib.graph import Graph
 from rdflib.graph import QuotedGraph
-from rdfextras.tools.termutils import SUBJECT
-from rdfextras.tools.termutils import PREDICATE
-from rdfextras.tools.termutils import OBJECT
-from rdfextras.tools.termutils import CONTEXT
-from rdfextras.tools.termutils import term2Letter
-from rdfextras.tools.termutils import escape_quotes
+from rdfextras.utils.termutils import SUBJECT
+from rdfextras.utils.termutils import PREDICATE
+from rdfextras.utils.termutils import OBJECT
+from rdfextras.utils.termutils import CONTEXT
+from rdfextras.utils.termutils import term2Letter
+from rdfextras.utils.termutils import escape_quotes
 
 Any = None
 

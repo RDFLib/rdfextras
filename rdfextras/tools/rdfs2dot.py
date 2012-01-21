@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import rdfextras, rdfextras.tools
+import rdfextras, rdfextras.tools, rdfextras.utils
 
 import sys
 import itertools
@@ -79,7 +79,7 @@ Read RDF files given on STDOUT, writes a graph of the RDFS schema in DOT languag
 """)
 
 def main(): 
-    rdfextras.tools.cmdline.main(rdfs2dot, _help)
+    rdfextras.utils.cmdlineutils.main(rdfs2dot, _help)
 
 if __name__=='__main__':
     main()

@@ -18,7 +18,7 @@ from rdflib.namespace import Namespace, RDF, RDFS, OWL, XSD
 from rdflib.parser import Parser
 from rdflib.serializer import Serializer
 
-from rdfextras.tools.pathutils import guess_format
+from rdfextras.utils.pathutils import guess_format
 
 
 STORE_CONNECTION = ''

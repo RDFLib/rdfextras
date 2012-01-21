@@ -77,7 +77,7 @@ def normalizeGraph(graph):
     >>> from rdflib.graph import Graph, ConjunctiveGraph, QuotedGraph
     >>> from rdflib.store import Store
     >>> from rdflib import URIRef, Namespace
-    >>> from rdfextras.tools.termutils import normalizeGraph
+    >>> from rdfextras.utils.termutils import normalizeGraph
     >>> memstore = plugin.get('IOMemory', Store)()
     >>> g = Graph(memstore, URIRef("http://purl.org/net/bel-epa/gjh"))
     >>> normalizeGraph(g)
@@ -113,7 +113,7 @@ def term2Letter(term):
     >>> from rdflib.term import BNode, Literal, Variable, Statement
     >>> from rdflib.graph import Graph, ConjunctiveGraph, QuotedGraph
     >>> from rdflib.store import Store
-    >>> from rdfextras.tools.termutils import term2Letter
+    >>> from rdfextras.utils.termutils import term2Letter
     >>> term2Letter(URIRef('http://purl.org/net/bel-epa.com/'))
     'U'
     >>> term2Letter(BNode())
@@ -160,7 +160,7 @@ def constructGraph(key):
     """Given a key (one of 'F', 'U' or 'B'), returns 
     a tuple containing a ``Graph`` and an appropriate referent.
             
-    >>> from rdfextras.tools.termutils import constructGraph
+    >>> from rdfextras.utils.termutils import constructGraph
     >>> constructGraph('F')
     (<class 'rdflib.graph.QuotedGraph'>, <class 'rdflib.term.URIRef'>)
     >>> constructGraph('U')
@@ -221,18 +221,18 @@ def escape_quotes(qstr):
 
 # Convenience for replacing "from termutils import *"
 
-# from rdfextras.tools.termutils import SUBJECT
-# from rdfextras.tools.termutils import PREDICATE
-# from rdfextras.tools.termutils import OBJECT
-# from rdfextras.tools.termutils import CONTEXT
-# from rdfextras.tools.termutils import TERM_COMBINATIONS
-# from rdfextras.tools.termutils import REVERSE_TERM_COMBINATIONS
-# from rdfextras.tools.termutils import TERM_INSTANTIATION_DICT
-# from rdfextras.tools.termutils import GRAPH_TERM_DICT
-# from rdfextras.tools.termutils import normalizeGraph
-# from rdfextras.tools.termutils import term2Letter
-# from rdfextras.tools.termutils import constructGraph
-# from rdfextras.tools.termutils import triplePattern2termCombinations
-# from rdfextras.tools.termutils import type2TermCombination
-# from rdfextras.tools.termutils import statement2TermCombination
-# from rdfextras.tools.termutils import escape_quotes
+# from rdfextras.utils.termutils import SUBJECT
+# from rdfextras.utils.termutils import PREDICATE
+# from rdfextras.utils.termutils import OBJECT
+# from rdfextras.utils.termutils import CONTEXT
+# from rdfextras.utils.termutils import TERM_COMBINATIONS
+# from rdfextras.utils.termutils import REVERSE_TERM_COMBINATIONS
+# from rdfextras.utils.termutils import TERM_INSTANTIATION_DICT
+# from rdfextras.utils.termutils import GRAPH_TERM_DICT
+# from rdfextras.utils.termutils import normalizeGraph
+# from rdfextras.utils.termutils import term2Letter
+# from rdfextras.utils.termutils import constructGraph
+# from rdfextras.utils.termutils import triplePattern2termCombinations
+# from rdfextras.utils.termutils import type2TermCombination
+# from rdfextras.utils.termutils import statement2TermCombination
+# from rdfextras.utils.termutils import escape_quotes

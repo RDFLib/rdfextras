@@ -21,10 +21,10 @@ from rdflib.store import CORRUPTED_STORE
 from rdflib.store import NO_STORE
 from rdflib.store import VALID_STORE
 from rdflib.store import Store
-from rdfextras.tools.termutils import PREDICATE
-from rdfextras.tools.termutils import CONTEXT
-from rdfextras.tools.termutils import constructGraph
-from rdfextras.tools.termutils import TERM_INSTANTIATION_DICT
+from rdfextras.utils.termutils import PREDICATE
+from rdfextras.utils.termutils import CONTEXT
+from rdfextras.utils.termutils import constructGraph
+from rdfextras.utils.termutils import TERM_INSTANTIATION_DICT
 from rdfextras.store.REGEXMatching import NATIVE_REGEX
 from rdfextras.store.REGEXMatching import REGEXTerm
 from rdfextras.store.AbstractSQLStore import INTERNED_PREFIX
