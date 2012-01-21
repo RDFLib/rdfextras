@@ -379,12 +379,18 @@ def picked(action=None, format_=None):
 ##################
 
 def serve(graph_,debug=False):
+    """Serve the given graph on localhost with the LOD App"""
+
     get(graph_).run(debug=debug)
 
 
 def get(graph, types='auto',image_patterns=["\.[png|jpg|gif]$"], 
         label_properties=LABEL_PROPERTIES, 
         hierarchy_properties=[ rdflib.RDFS.subClassOf, rdflib.RDFS.subPropertyOf ] ):
+
+    """
+    Get the LOD Flask App setup to serve the given graph
+    """
 
     lod.config["graph"]=graph
     lod.config["label_properties"]=label_properties

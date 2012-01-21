@@ -80,6 +80,26 @@ Tools
    
    tools/index
 
+Utils
++++++
+
+:mod:`rdfextras.utils` contains collections of utility functions. 
+
+.. toctree::
+   :maxdepth: 2
+   
+   utils/index
+
+Web
++++++
+
+:mod:`rdfextras.web` contains two web-apps build on the Flask microframework
+
+.. toctree::
+   :maxdepth: 2
+   
+   web/index
+
 
 Introduction to basic tasks in rdflib 
 =====================================

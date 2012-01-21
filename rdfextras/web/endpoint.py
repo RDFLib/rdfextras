@@ -1,3 +1,17 @@
+"""
+This is a Flask web-app for a SPARQL Endpoint 
+confirming to the SPARQL 1.0 Protocol.
+
+The application can be started from commandline:
+
+  python -m rdfextras.web.endpoint <RDF-file>
+
+and the file will be served from http://localhost:5000
+
+You can also start the server from your application by calling the :py:func:`serve` method
+or get the application object yourself by called :py:func:`get` function
+
+"""
 try:
     from flask import Flask, render_template, request, make_response, Markup, g
 except:
@@ -61,6 +75,8 @@ def index():
     return render_template("index.html")
 
 def serve(graph_,debug=False):
+    """Serve the given graph on localhost with the LOD App"""
+
     a=get(graph_)
     a.run(debug=debug)
     return a
@@ -74,6 +90,10 @@ def _set_graph():
 
 
 def get(graph_):
+    """
+    Get the LOD Flask App setup to serve the given graph
+    """
+
     endpoint.config["graph"]=graph_
     return endpoint
 

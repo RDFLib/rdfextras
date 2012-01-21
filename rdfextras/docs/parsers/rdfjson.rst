@@ -1,7 +1,7 @@
 .. _rdfextras.parsers.rdfjson: an rdfxtras plugin parser
 
 ===================================
-RDF/JSON parser plugi-n for rdflib
+RDF/JSON parser plugin for rdflib
 ===================================
 |today|
 
@@ -16,8 +16,8 @@ Lifted directly from the `Talis web site <http://docs.api.talis.com/platform-api
   JSON. It aims to serialise RDF in a structure that is easy for developers 
   to work with.
 
-  Syntax Specification
-  --------------------
+Syntax Specification
+--------------------
   RDF/JSON represents a set of RDF triples as a series of nested data 
   structures. Each unique subject in the set of triples is represented as 
   a key in JSON object (also known as associative array, dictionary or hash 
@@ -38,22 +38,22 @@ Lifted directly from the `Talis web site <http://docs.api.talis.com/platform-api
   ``O``, the object of the triple, is represented as a further JSON object 
   with the following keys:
 
-  type
-  ^^^^
+type
+^^^^
   one of 'uri', 'literal' or 'bnode' (required and must be lowercase)
 
-  value
-  ^^^^^
+value
+^^^^^
   the lexical value of the object (required, full URIs should be used, 
   not qnames)
 
-  lang
-  ^^^^
+lang
+^^^^
   the language of a literal value (optional but if supplied it must 
   not be empty)
 
-  datatype
-  ^^^^^^^^
+datatype
+^^^^^^^^
   the datatype URI of the literal value (optional)
 
   The ``lang`` and ``datatype`` keys should only be used if the value of the 

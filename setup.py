@@ -22,7 +22,12 @@ config = dict(
                 'rdfextras.tools',
                 'rdfextras.sparql',
                 'rdfextras.sparql.results',
+                'rdfextras.sparql2sql',
+                'rdfextras.sparql2sql.sql',
+                'rdfextras.sparql2sql.bison',
                 'rdfextras.store',
+                'rdfextras.store.FOPLRelationalModel',
+                'rdfextras.utils',
 		'rdfextras.web',],
     package_dir = { 'rdfextras.web': 'rdfextras/web' },
     package_data={ 'rdfextras.web': [

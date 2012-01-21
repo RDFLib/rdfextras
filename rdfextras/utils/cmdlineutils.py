@@ -17,6 +17,11 @@ If no files are given, read from stdin
     
 
 def main(target, _help=_help, options=""): 
+    """
+    A main function for tools that read RDF from files given on commandline
+    or from STDIN. 
+    """
+
     args, files=getopt.getopt(sys.argv[1:], "hf:o:"+options)
     dargs=dict(args)
 

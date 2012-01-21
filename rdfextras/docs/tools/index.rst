@@ -6,8 +6,6 @@
 Tools and utilities
 ===================
 
-Documentation opened.
-
 Contents:
 
 .. toctree::
@@ -20,7 +18,7 @@ Contents:
     FixTypeViews
     MySQLStoreInfo
     rdfpipe
-    termutils
+
 
 
 

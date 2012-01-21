@@ -1,35 +1,35 @@
-.. _rdfextras_tools_termutils: RDFExtras tools termutils
+.. _rdfextras_utils_termutils: RDFExtras utils termutils
 
 |today|
 
 
 ==================================
-:mod:`~rdfextras.tools.termutils`
+:mod:`~rdfextras.utils.termutils`
 ==================================
-.. currentmodule:: rdfextras.tools.termutils
+.. currentmodule:: rdfextras.utils.termutils
 
-.. automodule:: rdfextras.tools.termutils
+.. automodule:: rdfextras.utils.termutils
 
-:func:`~rdfextras.tools.termutils.normalizeGraph`
+:func:`~rdfextras.utils.termutils.normalizeGraph`
 --------------------------------------------------
 .. autofunction:: normalizeGraph
 
-:func:`~rdfextras.tools.termutils.term2Letter`
+:func:`~rdfextras.utils.termutils.term2Letter`
 -----------------------------------------------
 .. autofunction:: term2Letter
 
-:func:`~rdfextras.tools.termutils.constructGraph`
+:func:`~rdfextras.utils.termutils.constructGraph`
 --------------------------------------------------
 .. autofunction:: constructGraph
 
-:func:`~rdfextras.tools.termutils.triplePattern2termCombinations`
+:func:`~rdfextras.utils.termutils.triplePattern2termCombinations`
 ------------------------------------------------------------------
 .. autofunction:: triplePattern2termCombinations
 
-:func:`~rdfextras.tools.termutils.type2TermCombination`
+:func:`~rdfextras.utils.termutils.type2TermCombination`
 --------------------------------------------------------
 .. autofunction:: type2TermCombination
 
-:func:`~rdfextras.tools.termutils.statement2TermCombination`
+:func:`~rdfextras.utils.termutils.statement2TermCombination`
 -------------------------------------------------------------
 .. autofunction:: statement2TermCombination
