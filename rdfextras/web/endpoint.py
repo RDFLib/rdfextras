@@ -77,7 +77,7 @@ def get(graph_):
     endpoint.config["graph"]=graph_
     return endpoint
 
-if __name__=='__main__':
+def main(): 
     import rdflib
 
     rdflib.plugin.register('sparql', rdflib.query.Processor,
@@ -103,7 +103,17 @@ if __name__=='__main__':
                            'rdfextras.sparql.results.jsonresults','JSONResultSerializer')
 
 
-    import bookdb
-    g=bookdb.bookdb
+    import sys
+    if len(sys.argv)>1:
+        gr=rdflib.Graph()
+        for f in sys.argv[1:]:
+            sys.stderr.write("Loading %s\n"%f)
+            gr.load(f, format=format_from_filename(f))
+    else:
+        import bookdb
+        gr=bookdb.bookdb
     
     serve(g, True)
+
+if __name__=='__main__':
+    main()

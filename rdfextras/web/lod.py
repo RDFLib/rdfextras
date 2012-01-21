@@ -411,7 +411,7 @@ def format_from_filename(f):
     return 'xml'
     
 
-if __name__=='__main__':
+def main(): 
     import rdflib
 
     rdflib.plugin.register('sparql', rdflib.query.Processor,
@@ -436,7 +436,7 @@ if __name__=='__main__':
     rdflib.plugin.register('json', rdflib.query.ResultSerializer, 
                            'rdfextras.sparql.results.jsonresults','JSONResultSerializer')
     
-    import sys, codecs
+    import sys
     if len(sys.argv)>1:
         gr=rdflib.Graph()
         for f in sys.argv[1:]:
@@ -447,3 +447,6 @@ if __name__=='__main__':
         gr=bookdb.bookdb
     
     serve(gr, True)
+
+if __name__=='__main__':
+    main()

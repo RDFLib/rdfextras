@@ -51,6 +51,8 @@ else:
                 'csv2rdf = rdfextras.tools.csv2rdf:main',
                 'rdf2dot = rdfextras.tools.rdf2dot:main',
                 'rdfs2dot = rdfextras.tools.rdfs2dot:main',
+                'sparqlendpointapp = rdfextras.web.endpoint:main',
+                'rdflodapp = rdfextras.web.lod:main',                
             ],
             'nose.plugins': [
                 'EARLPlugin = rdfextras.tools.EARLPlugin:EARLPlugin',
