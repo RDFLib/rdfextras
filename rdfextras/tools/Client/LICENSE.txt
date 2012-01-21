@@ -1,5 +1,0 @@
-SPARQL is released under the W3C® SOFTWARE NOTICE AND LICENSE. 
-
-See http://href="http//www.w3.org/Consortium/Legal/2002/copyright-software-20021231%22
-
-for further details
