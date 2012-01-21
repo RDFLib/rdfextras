@@ -67,8 +67,12 @@ else:
         #test_suite = 'nose.collector',
         #namespace_packages = ['rdfextras'], # TODO: really needed?
         install_requires = install_requires,
-        tests_require = tests_require
-    )
-
+        tests_require = tests_require,
+        extras_require = { 
+            "WebApp": ["flask","mimeparse"],
+            "SPARQLStore": ["SPARQLWrapper"],
+            }
+     )
+    
 setup(**config)
 

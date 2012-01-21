@@ -23,6 +23,7 @@ Dependencies:
 
  * RDFLib>=3.2.0
  * For SPARQL: pyparsing
+ * For SPARQL Store: SPARQLWrapper
 
  * For the Web-apps: Flask, http://flask.pocoo.org/
   * (which in turn requires Jinja2 and Werkzeug)
