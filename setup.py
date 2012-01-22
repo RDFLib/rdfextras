@@ -1,6 +1,45 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from rdfextras import __version__
+import sys
+import re
+
+def setup_python3():
+    # Taken from "distribute" setup.py
+    from distutils.filelist import FileList
+    from distutils import dir_util, file_util, util, log
+    from os.path import join
+  
+    tmp_src = join("build", "src")
+    log.set_verbosity(1)
+    fl = FileList()
+    for line in open("MANIFEST.in"):
+        if not line.strip():
+            continue
+        fl.process_template_line(line)
+    dir_util.create_tree(tmp_src, fl.files)
+    outfiles_2to3 = []
+    for f in fl.files:
+        outf, copied = file_util.copy_file(f, join(tmp_src, f), update=1)
+        if copied and outf.endswith(".py"):
+            outfiles_2to3.append(outf)
+  
+    util.run_2to3(outfiles_2to3)
+  
+    # arrange setup to use the copy
+    sys.path.insert(0, tmp_src)
+
+    return tmp_src
+
+# Find version. We have to do this because we can't import it in Python 3 until
+# its been automatically converted in the setup process.
+def find_version(filename):
+    _version_re = re.compile(r'__version__ = "(.*)"')
+    for line in open(filename):
+        version_match = _version_re.match(line)
+        if version_match:
+            return version_match.group(1)
+
+__version__ = find_version('rdfextras/__init__.py')
 
 config = dict(
     name = 'rdfextras',
@@ -28,56 +67,62 @@ config = dict(
                 'rdfextras.store',
                 'rdfextras.store.FOPLRelationalModel',
                 'rdfextras.utils',
-		'rdfextras.web',],
+                'rdfextras.web',],
     package_dir = { 'rdfextras.web': 'rdfextras/web' },
-    package_data={ 'rdfextras.web': [
-            'templates/*.html',
-            'static/*',
-]}
-
+    package_data = { 'rdfextras.web': ['templates/*.html','static/*',]}
 )
+
+if sys.version_info[0] >= 3:
+    from setuptools import setup
+    config.update({'use_2to3': True})
+    config.update({'src_root': setup_python3()})
+else:
+    try:
+        from setuptools import setup
+        config.update({'test_suite' : "nose.collector"})
+    except ImportError:
+        from distutils.core import setup
+
 
 install_requires = [
     'rdflib >= 3.2.0',
     'pyparsing'
 ]
-tests_require = install_requires + \
-                ['flask', 'mimeparse', 'jinja2']
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-else:
-    config.update(
-        entry_points = {
-            'console_scripts': [
-                'rdfpipe = rdfextras.tools.rdfpipe:main',
-                'csv2rdf = rdfextras.tools.csv2rdf:main',
-                'rdf2dot = rdfextras.tools.rdf2dot:main',
-                'rdfs2dot = rdfextras.tools.rdfs2dot:main',
-                'sparqlendpointapp = rdfextras.web.endpoint:main',
-                'rdflodapp = rdfextras.web.lod:main',                
-            ],
-            'nose.plugins': [
-                'EARLPlugin = rdfextras.tools.EARLPlugin:EARLPlugin',
-            ],
-            'rdf.plugins.parser': [
-                'rdf-json = rdfextras.parsers.rdfjson:RdfJsonParser',
-            ],
-            'rdf.plugins.serializer': [
-                'rdf-json = rdfextras.serializers.rdfjson:RdfJsonSerializer',
-            ],
-        },
-        #test_suite = 'nose.collector',
-        #namespace_packages = ['rdfextras'], # TODO: really needed?
-        install_requires = install_requires,
-        tests_require = tests_require,
-        extras_require = { 
-            "WebApp": ["flask","mimeparse"],
-            "SPARQLStore": ["SPARQLWrapper"],
-            }
-     )
+tests_require = install_requires + \
+                ['flask', 'mimeparse']
+
+extras_require = { 
+    "WebApp": ["flask","mimeparse"],
+    "SPARQLStore": ["SPARQLWrapper"],
+    }
+
+
+config.update(
+    entry_points = {
+        'console_scripts': [
+            'rdfpipe = rdfextras.tools.rdfpipe:main',
+            'csv2rdf = rdfextras.tools.csv2rdf:main',
+            'rdf2dot = rdfextras.tools.rdf2dot:main',
+            'rdfs2dot = rdfextras.tools.rdfs2dot:main',
+            'sparqlendpointapp = rdfextras.web.endpoint:main',
+            'rdflodapp = rdfextras.web.lod:main',                
+        ],
+        'nose.plugins': [
+            'EARLPlugin = rdfextras.tools.EARLPlugin:EARLPlugin',
+        ],
+        'rdf.plugins.parser': [
+            'rdf-json = rdfextras.parsers.rdfjson:RdfJsonParser',
+        ],
+        'rdf.plugins.serializer': [
+            'rdf-json = rdfextras.serializers.rdfjson:RdfJsonSerializer',
+        ],
+    },
+    #namespace_packages = ['rdfextras'], # TODO: really needed?
+    install_requires = install_requires,
+    tests_require = tests_require,
+    extras_require = extras_require 
+)
     
 setup(**config)
 
