@@ -135,22 +135,17 @@ operators can be defined.
 
 """
 
-plugin.register('sparql2sql', query.Processor,
-    # 'rdfextras.sparql2sql.bison.Processor', 
-    'rdfextras.sparql2sql.processor', 'Processor')
-
 plugin.register('sparql', query.Processor,
-    # 'rdfextras.sparql2sql.bison.Processor', 
-    'rdfextras.sparql2sql.processor', 'Processor')
+    'rdfextras.sparql.processor', 'Processor')
 
 plugin.register('sparql', query.Result,
-    'rdfextras.sparql2sql.QueryResult', 'SPARQLQueryResult')
+    'rdfextras.sparql.query', 'SPARQLQueryResult')
 
 plugin.register('xml', query.ResultSerializer, 
-    'rdfextras.sparql2sql.QueryResult','SPARQLQueryResult')
+    'rdfextras.sparql.query','SPARQLQueryResult')
 
 plugin.register('json', query.ResultSerializer, 
-    'rdfextras.sparql2sql.QueryResult','SPARQLQueryResult')
+    'rdfextras.sparql.query','SPARQLQueryResult')
 
 
 # definition of an Infix operator class
