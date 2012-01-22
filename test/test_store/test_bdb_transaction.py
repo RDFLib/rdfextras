@@ -191,6 +191,10 @@ class TestBDBTransactions(unittest.TestCase):
         read_t.join()
     
     def testAddUserTransaction(self):
+        import sys
+        if sys.version_info[:2] == '2.4':
+            from nose import SkipTest
+            raise SkipTest("Problematic under Python2.4")
         workers = 2
         triples = 2000
         
