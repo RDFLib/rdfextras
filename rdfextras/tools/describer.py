@@ -1,4 +1,8 @@
-"""
+import sys
+if sys.version_info[:2] == (2, 4):
+    __doc__ = """"""
+else:
+    __doc__ = """
 A Describer is a stateful utility for creating RDF statements in a
 semi-declarative manner. It has methods for creating literal values, rel and
 rev resource relations (somewhat resembling RDFa).
@@ -95,8 +99,12 @@ Full example in the ``to_rdf`` method below::
     True
 
 """
+import sys
+if sys.version_info[:2] == (2,4):
+    pass
+elif sys.version_info[:2] < (2, 6):
+    from __future__ import with_statement
 
-from __future__ import with_statement # if Python < 2.6
 from contextlib import contextmanager
 from rdflib.graph import Graph
 from rdflib.namespace import RDF
@@ -157,8 +165,12 @@ class Describer(object):
         self.graph.add((self._current(), p, v))
 
     def rel(self, p, o=None, **kws):
-        """
-        Set an object for the given property. Will convert the given object
+        import sys
+        if sys.version_info[:2] == (2, 4):
+            __doc__ =""
+        else:
+            __doc__=\
+        """Set an object for the given property. Will convert the given object
         into an ``URIRef`` if it's not an ``Identifier``. If none is given, a
         new ``BNode`` is used.
 
@@ -183,6 +195,7 @@ class Describer(object):
             rdflib.term.Literal(u'More')
 
         """
+
         kws.setdefault('base', self.base)
         p = cast_identifier(p)
         o = cast_identifier(o, **kws)
@@ -190,6 +203,11 @@ class Describer(object):
         return self._subject_stack(o)
 
     def rev(self, p, s=None, **kws):
+        import sys
+        if sys.version_info[:2] == (2, 4):
+            __doc__ =""
+        else:
+            __doc__=\
         """
         Same as ``rel``, but uses current subject as *object* of the relation.
         The given resource is still used as subject in the returned context

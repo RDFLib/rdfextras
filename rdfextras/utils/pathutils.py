@@ -23,7 +23,13 @@ def uri_leaf(uri):
     for char in ('#', '/', ':'):
         if uri.endswith(char):
             break
-        base, sep, leaf = uri.rpartition(char)
+        # base, sep, leaf = uri.rpartition(char)
+        if char in uri:
+            sep = char
+            leaf = uri.rsplit(char)[-1]
+        else:
+            sep = ''
+            leaf = uri
         if sep and leaf:
             return leaf
 

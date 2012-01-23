@@ -14,9 +14,10 @@ from urllib import pathname2url
 from rdflib import URIRef
 from rdflib.store import Store
 from rdflib.store import VALID_STORE
-
-from kyotocabinet import DB
-
+try:
+    from kyotocabinet import DB
+except ImportError:
+    raise Exception("kyotocabinet is required but cannot be found")
 logging.basicConfig(level=logging.ERROR,format="%(message)s")
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.ERROR)

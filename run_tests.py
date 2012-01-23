@@ -42,16 +42,16 @@ See <http://nedbatchelder.com/code/modules/coverage.html> for details.
 
 NOSE_ARGS = [
         '--where=./',
-        '--with-doctest',
-        '--doctest-extension=.doctest',
-        '--doctest-tests',
+        #'--with-doctest',
+        #'--doctest-extension=.doctest',
+        #'--doctest-tests',
         #'--with-coverage',
         #'--enable-cover',
         #'--enable-audit',
         #'--extra-include=rdfextras',
         #'--source-folder=rdfextras',
-        # '--trim-errors',
-        # '--with-EARL',
+        #'--trim-errors',
+        #'--with-EARL',
         #'--with-xunit',
     ]
 
@@ -62,7 +62,7 @@ COVERAGE_EXTRA_ARGS = [
         '--cover-html-dir=coverage',
     ]
 
-DEFAULT_ATTRS = ['!known_issue', '!performancetest'] # ['!known_issue', '!sparql']
+DEFAULT_ATTRS = ['!known_issue', '!performancetest', '!storetest'] # ['!known_issue', '!sparql']
 
 DEFAULT_DIRS = ['test', 'rdfextras']
 
@@ -96,6 +96,6 @@ if __name__ == '__main__':
         argv += DEFAULT_DIRS # since nose doesn't look here by default..
 
 
-    finalArgs = argv + NOSE_ARGS
+    finalArgs = NOSE_ARGS + argv
     print "Running nose with:", " ".join(finalArgs[1:])
     nose.run_exit(argv=finalArgs)

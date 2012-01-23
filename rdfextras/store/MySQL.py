@@ -6,8 +6,10 @@ except ImportError:
     warnings.warn("MySQLdb is not installed")
     __test__=False
 
-from hashlib import sha1
-
+try:
+    from hashlib import sha1
+except ImportError:
+    from sha import sha as sha1
 from rdflib import BNode
 from rdflib import Literal
 from rdflib import URIRef
@@ -867,8 +869,7 @@ class SQL(Store):
     def log_statement(self, statement):
         if self.debug:
             self.timestamp.delta()
-            print >> sys.stderr, statement
-            
+            logger.debug(statement)
             try:
                 self.statement_log.write(statement + "\n")
             except Exception:
@@ -1674,7 +1675,8 @@ class MySQL(SQL):
                         [t.viewUnionSelectExpression(relations_only)
                         for t in tables])))
             if self.debug:
-                print >> sys.stderr, "## Creating View ##\n",query
+                logger.debug("## Creating View ##")
+                logger.debug(query)
             self.executeSQL(cursor, query)
     
 

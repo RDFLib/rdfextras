@@ -51,6 +51,8 @@ from rdfextras.sparql.graph import BasicGraphPattern
 from rdfextras.sparql.evaluate import CONSTRUCT_NOT_SUPPORTED
 from rdfextras.sparql.evaluate import convertTerm
 from rdfextras.sparql.evaluate import createSPARQLPConstraint
+import logging
+log = logging.getLogger(__name__)
 #A variable to determine whether we obey SPARQL definition of RDF dataset
 #which does not allow matching of default graphs (or any graph with a BNode for a name)
 #"An RDF Dataset comprises one graph, 
@@ -119,7 +121,7 @@ def ReduceToAlgebra(left,right):
     if not isinstance(right,AlgebraExpression):
         if isinstance(right,ParsedGroupGraphPattern):
             right = reduce(ReduceToAlgebra,right,None)
-            print right;raise
+            log.debug(right)
         assert isinstance(right,GraphPattern),type(right)
         #Parsed Graph Pattern
         if right.triples:
@@ -362,11 +364,11 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
         for x in expr.fetchTerminalExpression():
             query.prolog.rightMostBGPs.add(x)
         if query.prolog.DEBUG:
-            print "Setting up for an eager limit evaluation (size: %s)"%query.prolog.eagerLimit
+            log.debug("Setting up for an eager limit evaluation (size: %s)"%query.prolog.eagerLimit)
     if DEBUG:
-        print "## Full SPARQL Algebra expression ##"
-        print expr
-        print "###################################"
+        log.debug("## Full SPARQL Algebra expression ##")
+        log.debug(expr)
+        log.debug("###################################")
 
     if isinstance(expr,BasicGraphPattern):
         retval = None
@@ -383,9 +385,9 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
     else:
         assert isinstance(expr,AlgebraExpression), repr(expr)
         if DEBUG:
-            print "## Full SPARQL Algebra expression ##"
-            print expr
-            print "###################################"
+            log.debug("## Full SPARQL Algebra expression ##")
+            log.debug(expr)
+            log.debug("###################################")
         result = expr.evaluate(tripleStore,passedBindings,query.prolog)
         if isinstance(result,BasicGraphPattern):
             retval = None
@@ -585,7 +587,7 @@ class EmptyGraphPatternExpression(AlgebraExpression):
     def evaluate(self,tripleStore,initialBindings,prolog):
         #raise NotImplementedError("Empty Graph Pattern expressions, not supported")
         if prolog.DEBUG:
-            print "eval(%s,%s,%s)"%(self,initialBindings,tripleStore.graph)
+            log.debug("eval(%s,%s,%s)"%(self,initialBindings,tripleStore.graph))
         empty = sparql_query._SPARQLNode(None,{},[],tripleStore)
         empty.bound = False
         return sparql_query.Query(empty, tripleStore)
@@ -698,7 +700,7 @@ def _ExpandJoin(node,expression,tripleStore,prolog,optionalTree=False):
     """
     if prolog.DEBUG:
         print_tree(node)
-        print "-------------------"
+        log.debug("-------------------")
     #for node in BF_leaf_traversal(node):
     currExpr = expression
     for node in walktree(node):
@@ -706,11 +708,11 @@ def _ExpandJoin(node,expression,tripleStore,prolog,optionalTree=False):
             continue
         assert len(node.children) == 0 
         if prolog.DEBUG:
-            print "Performing Join(%s,..)"%node
+            log.debug("Performing Join(%s,..)"%node)
         if isinstance(currExpr,AlgebraExpression):
             #If an algebra expression evaluate it passing on the leaf bindings
             if prolog.DEBUG:
-                print "passing on bindings to %s\n:%s"%(currExpr,node.bindings.copy())
+                log.debug("passing on bindings to %s\n:%s"%(currExpr,node.bindings.copy()))
             expression = currExpr.evaluate(tripleStore,node.bindings.copy(),prolog)
         else:
             expression = currExpr
@@ -718,15 +720,13 @@ def _ExpandJoin(node,expression,tripleStore,prolog,optionalTree=False):
             tS = tripleStore
             if hasattr(expression,'tripleStore'):
                 if prolog.DEBUG:                    
-                    print "has tripleStore: ",expression.tripleStore
+                    log.debug("has tripleStore: %s " % expression.tripleStore)
                 tS = expression.tripleStore
             if prolog.DEBUG:
-                print "Evaluated left node and traversed to leaf, expanding with ", 
-                expression
-                print node.tripleStore.graph
-                print "expressions bindings: ", 
-                sparql_query._createInitialBindings(expression)
-                print "node bindings: ", node.bindings
+                log.debug("Evaluated left node and traversed to leaf, expanding with %s" % expression)
+                log.debug(node.tripleStore.graph)
+                log.debug("expressions bindings: %s" % sparql_query._createInitialBindings(expression))
+                log.debug("node bindings: %s" % node.bindings)
             exprBindings = sparql_query._createInitialBindings(expression)
             exprBindings.update(node.bindings)
             #An indicator for whether this node has any descendant optional expansions
@@ -740,7 +740,7 @@ def _ExpandJoin(node,expression,tripleStore,prolog,optionalTree=False):
                 top = node
             else:
                 if prolog.DEBUG:
-                    print "descendant optionals: ", descendantOptionals
+                    log.debug("descendant optionals: %s" % descendantOptionals)
                 top = None
             child = None            
             if not node.clash and not descendantOptionals:
@@ -753,11 +753,11 @@ def _ExpandJoin(node,expression,tripleStore,prolog,optionalTree=False):
                                           expr=node.expr)
                 child.topLevelExpand(expression.constraints, prolog)
                 if prolog.DEBUG:
-                    print "Has compatible bindings and no valid optional expansions"
-                    print "Newly bound descendants: "
+                    log.debug("Has compatible bindings and no valid optional expansions")
+                    log.debug("Newly bound descendants: ")
                     for c in sparql_query._fetchBoundLeaves(child):
-                        print "\t",c, c.bound                        
-                        print c.bindings
+                        log.debug("\t%s %s" % (c, c.bound))
+                        log.debug(c.bindings)
         else:
             assert isinstance(expression,sparql_query.Query)
             if not expression.top:
@@ -770,17 +770,17 @@ def _ExpandJoin(node,expression,tripleStore,prolog,optionalTree=False):
             if node.clash == False and child is not None:
                 node.children.append(child)
                 if prolog.DEBUG:
-                    print "Adding %s to %s (a UNION branch)"%(child,node)
+                    log.debug("Adding %s to %s (a UNION branch)"%(child,node))
         else:
             assert isinstance(child,list)
             for newChild in child:
 #                if not newChild.clash:
                 node.children.append(newChild)
                 if prolog.DEBUG:
-                    print "Adding %s to %s"%(child,node)                    
+                    log.debug("Adding %s to %s"%(child,node))                    
         if prolog.DEBUG:
             print_tree(node)
-            print "-------------------" 
+            log.debug("-------------------") 
         for optTree in node.optionalTrees:
             #Join the optional paths as well - those that are bound and valid
             for validLeaf in sparql_query._fetchBoundLeaves(optTree):
@@ -820,7 +820,7 @@ class Join(NonSymmetricBinaryOperator):
             
     def evaluate(self,tripleStore,initialBindings,prolog):
         if prolog.DEBUG:
-            print "eval(%s,%s,%s)"%(self,initialBindings,tripleStore.graph)
+            log.debug("eval(%s,%s,%s)"%(self,initialBindings,tripleStore.graph))
         if isinstance(self.left,AlgebraExpression):
             left = self.left.evaluate(tripleStore,initialBindings,prolog)
         else:
@@ -861,24 +861,24 @@ def _ExpandLeftJoin(node,expression,tripleStore,prolog,optionalTree=False):
     """
     currExpr = expression
     if prolog.DEBUG:
-        print "DFS and LeftJoin expansion of "
+        log.debug("DFS and LeftJoin expansion of ")
         print_tree(node)
-        print "---------------------"
-        print node.bindings
+        log.debug("---------------------")
+        log.debug(node.bindings)
     for node in walktree(node,optProxies=True):
         if node.clash:
             continue
         assert len(node.children) == 0 
         # this is a leaf in the original expansion
         if prolog.DEBUG:
-            print "Performing LeftJoin(%s,..)"%node
+            log.debug("Performing LeftJoin(%s,..)"%node)
         if isinstance(currExpr,AlgebraExpression):
             #If a Graph pattern evaluate it passing on the leaf bindings
             #(possibly as solutions to graph names
             if prolog.DEBUG:
-                print "evaluating B in LeftJoin(A,B)"
-                print "passing on bindings to %s\n:%s"%(currExpr,
-                                                        node.bindings.copy())
+                log.debug("evaluating B in LeftJoin(A,B)")
+                log.debug("passing on bindings to %s\n:%s"%(
+                                    currExpr,node.bindings.copy()))
             expression = currExpr.evaluate(tripleStore,node.bindings.copy(),
                                            prolog)
         else:
@@ -892,8 +892,8 @@ def _ExpandLeftJoin(node,expression,tripleStore,prolog,optionalTree=False):
                                         tripleStore,
                                         expr=expression)
             if prolog.DEBUG:
-                print "evaluating B in LeftJoin(A,B) - a BGP: ", expression
-                print "Passing on bindings ",rightBindings
+                log.debug("evaluating B in LeftJoin(A,B) - a BGP: %s" % expression)
+                log.debug("Passing on bindings %s" % rightBindings)
             optTree.topLevelExpand(expression.constraints, prolog)
             for proxy in sparql_query._fetchBoundLeaves(optTree):
                 #Mark a successful evaluation of LeftJoin (new bindings were added)
@@ -901,7 +901,7 @@ def _ExpandLeftJoin(node,expression,tripleStore,prolog,optionalTree=False):
                 proxy.priorLeftJoin=True
         else:
             if prolog.DEBUG:
-                print "Attaching previously evaluated node: ", expression.top
+                log.debug("Attaching previously evaluated node: %s" % expression.top)
             assert isinstance(expression,sparql_query.Query)
             if not expression.top:
                 #already evaluated a UNION - fetch UNION branches
@@ -910,24 +910,24 @@ def _ExpandLeftJoin(node,expression,tripleStore,prolog,optionalTree=False):
                 #Already been evaluated (non UNION), just attach the SPARQLNode
                 optTree = expression.top
         if prolog.DEBUG:
-            print "Optional tree: ", optTree
+            log.debug("Optional tree: %s" % optTree)
         if isinstance(optTree,sparql_query._SPARQLNode):
             if optTree.clash == False and optTree is not None:
                 node.optionalTrees.append(optTree)
                 if prolog.DEBUG:
-                    print "Adding %s to %s (a UNION branch)"%(optTree,
-                                                              node.optionalTrees)
+                    log.debug("Adding %s to %s (a UNION branch)"%(
+                                optTree, node.optionalTrees))
         else:
             assert isinstance(optTree,list)
             for newChild in optTree:
 #                if not newChild.clash:
                 node.optionalTrees.append(newChild)
                 if prolog.DEBUG:
-                    print "Adding %s to %s"%(newChild,node.optionalTrees)                    
+                    log.debug("Adding %s to %s"%(newChild,node.optionalTrees))                    
         if prolog.DEBUG:
-            print "DFS after LeftJoin expansion "
+            log.debug("DFS after LeftJoin expansion ")
             print_tree(node)
-            print "---------------------"
+            log.debug("---------------------")
        
         
 class LeftJoin(NonSymmetricBinaryOperator):
@@ -956,7 +956,7 @@ class LeftJoin(NonSymmetricBinaryOperator):
 
     def evaluate(self,tripleStore,initialBindings,prolog):
         if prolog.DEBUG:
-            print "eval(%s,%s,%s)"%(self,initialBindings,tripleStore.graph)
+            log.debug("eval(%s,%s,%s)"%(self,initialBindings,tripleStore.graph))
         if isinstance(self.left,AlgebraExpression):
             #print "evaluating A in LeftJoin(A,B) - an expression"
             left = self.left.evaluate(tripleStore,initialBindings,prolog)
@@ -1013,7 +1013,7 @@ class Union(AlgebraExpression):
 
     def evaluate(self,tripleStore,initialBindings,prolog):
         if prolog.DEBUG:
-            print "eval(%s,%s,%s)"%(self,initialBindings,tripleStore.graph)
+            log.debug("eval(%s,%s,%s)"%(self,initialBindings,tripleStore.graph))
         if isinstance(self.left,AlgebraExpression):
             left = self.left.evaluate(tripleStore,initialBindings,prolog)
         else:
@@ -1098,21 +1098,20 @@ class GraphExpression(AlgebraExpression):
            named graphs in the dataset for part of the query ...
         """
         if prolog.DEBUG:
-            print "eval(%s,%s,%s)"%(self,initialBindings,tripleStore.graph)
+            log.debug("eval(%s,%s,%s)"%(self,initialBindings,tripleStore.graph))
         if isinstance(self.iriOrVar,Variable):
             #A variable: 
             if self.iriOrVar in initialBindings:
                 #assert initialBindings[self.iriOrVar], "Empty binding for GRAPH variable!"
                 if prolog.DEBUG:
-                    print "Passing on unified graph name: ", 
-                    initialBindings[self.iriOrVar]
+                    log.debug("Passing on unified graph name: %s" % initialBindings[self.iriOrVar])
                 tripleStore = graph.SPARQLGraph(
                                             Graph(tripleStore.store,
                                                   initialBindings[self.iriOrVar])
                                             ,dSCompliance=DAWG_DATASET_COMPLIANCE)
             else: 
                 if prolog.DEBUG:
-                    print "Setting up BGP to return additional bindings for %s"%self.iriOrVar
+                    log.debug("Setting up BGP to return additional bindings for %s"%self.iriOrVar)
                 tripleStore = graph.SPARQLGraph(tripleStore.graph,
                                                       graphVariable = self.iriOrVar,
                                                       dSCompliance=DAWG_DATASET_COMPLIANCE)

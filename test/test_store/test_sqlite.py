@@ -6,6 +6,7 @@ import test_context
 import test_graph
 from nose.exc import SkipTest
 import tempfile
+
 class SQLiteGraphTestCase(test_graph.GraphTestCase):
     storetest = True
     def setUp(self):
@@ -32,3 +33,5 @@ class SQLiteContextTestCase(test_context.ContextTestCase):
     def testLenInMultipleContexts(self):
         raise SkipTest("Known issue.")
     
+SQLiteGraphTestCase.storetest = True
+SQLiteContextTestCase.storetest = True

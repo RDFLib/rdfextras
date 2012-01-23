@@ -71,9 +71,9 @@ class MySQLStoreTests(unittest.TestCase):
                 self.path = mkstemp(prefix='test',dir='/tmp')
             else:
                 self.path = mkdtemp(prefix='test',dir='/tmp')
-	        self.graph.store.identifier = self.identifier
-	    # Remove the db detritus that remains after a test run
-	    # has been interrupted with ^C.
+            self.graph.store.identifier = self.identifier
+        # Remove the db detritus that remains after a test run
+        # has been interrupted with ^C.
         self.graph.destroy(self.path)
         self.graph.open(self.path, create=self.create)
 
@@ -154,6 +154,11 @@ class MySQLStoreTests(unittest.TestCase):
         except:
             # g.store.destroy(configString)
             raise
+
+
+MySQLGraphTestCase.storetest = True
+MySQLContextTestCase.storetest = True
+MySQLStoreTests.storetest = True
 
 # To enable profiling data, use nose's built-in hookup with hotshot:
 # nosetests --with-profile --profile-stats-file stats.pf test/test_store/test_mysql

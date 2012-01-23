@@ -5,7 +5,10 @@ Utility functions associated with RDF terms:
 - escaping literals for SQL persistence
 
 """
-from hashlib import md5
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 from rdflib.term import Literal
 from rdfextras.store.REGEXMatching import REGEXTerm
 from rdflib.graph import Graph

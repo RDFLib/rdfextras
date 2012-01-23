@@ -68,10 +68,10 @@ test_generator.sparql = True
 #=======================================================================
 
 
-if __name__ == '__main__':
-    from sys import argv
-    name, sparql, expected = TEST_DATA[int(argv[1])]
-    res = graph.query(sparql)
-    assert_equal(name, sparql, list(res), expected)
+# if __name__ == '__main__':
+#     from sys import argv
+#     name, sparql, expected = TEST_DATA[int(argv[1])]
+#     res = graph.query(sparql)
+#     assert_equal(name, sparql, list(res), expected)
 
 

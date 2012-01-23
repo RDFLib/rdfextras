@@ -265,7 +265,7 @@ def manchesterSyntax(thing,store,boolean=None,transientList=False):
         return '( not %s )'%(manchesterSyntax(compl[0],store))
     else:
         for boolProp,col in store.query("SELECT ?p ?bool WHERE { ?class a owl:Class; ?p ?bool . ?bool rdf:first ?foo }",
-                                         processor="sparql2sql",
+                                         processor="sparql",
                                          initBindings={Variable("?class"):thing},
                                          initNs=nsBinds):
             if not isinstance(thing,URIRef):                

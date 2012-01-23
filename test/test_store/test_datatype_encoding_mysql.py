@@ -33,9 +33,10 @@ def test_dType_encoding():
     store.close()
 
 test_dType_encoding.non_core = True
+test_dType_encoding.storetest = True
 test_dType_encoding.mysql = True
 
 
-if __name__ == '__main__':
-    test_dType_encoding()
+# if __name__ == '__main__':
+#     test_dType_encoding()
 

@@ -10,6 +10,8 @@ from rdfextras.store.MySQL import SQL, MySQL, PostgreSQL
 from rdfextras.store.FOPLRelationalModel.QuadSlot import genQuadSlots
 from rdfextras.store.FOPLRelationalModel.QuadSlot import normalizeNode
 from Ft.Lib import Uri
+import logging
+log = logging.getLogger(__name__)
 
 Any = None
 VALUES_EXPR     = re.compile('.*VALUES (\(.*\))')
@@ -204,8 +206,8 @@ class Loader(SQL):
     def dumpRDF(self, suffix):
         for table in self.tables:
             table.delimited_file.close()
-        print >> sys.stderr, 'Recent hits:', self.recent_hits
-        print >> sys.stderr, 'Recent misses:', self.recent_misses
+        print 'Recent hits: %s' % self.recent_hits
+        print 'Recent misses: %s' % self.recent_misses
     
     def makeLoadStatement(self, fileName, tableName):
         return self.loadStatement % (fileName, tableName)
@@ -370,7 +372,7 @@ class MySQLLoader(Loader, MySQL):
             group by subject, object, context
         """ % (self.aboxAssertions,
                      str(normalizeNode(RDF.type, self.useSignedInts)))
-        print >> sys.stderr, sql
+        log.debug(sql)
         cursor.execute(sql)
     
     def loadLiteralProperties(self, indexFirst=False):
@@ -386,7 +388,7 @@ class MySQLLoader(Loader, MySQL):
             where object_term = 'L'
             group by subject, predicate, object, context
         """ % (self.literalProperties,)
-        print >> sys.stderr, sql
+        log.debug(sql)
         cursor.execute(sql)
     
     def loadRelations(self, indexFirst=False):
@@ -403,7 +405,7 @@ class MySQLLoader(Loader, MySQL):
             group by subject, predicate, object, context
         """ % (self.binaryRelations,
                      str(normalizeNode(RDF.type, self.useSignedInts)))
-        print >> sys.stderr, sql
+        log.debug(sql)
         cursor.execute(sql)
     
     def loadLiterals(self, indexFirst=False):
@@ -415,7 +417,7 @@ class MySQLLoader(Loader, MySQL):
             insert into %s select id, lexical from lexical
             where term_type = 'L' group by id
         """ % (self.valueHash,)
-        print >> sys.stderr, sql
+        log.debug(sql)
         cursor.execute(sql)
     
     def loadIdentifiers(self, indexFirst=False):
@@ -427,7 +429,7 @@ class MySQLLoader(Loader, MySQL):
             insert into %s select id, term_type, lexical from lexical
             where term_type != 'L' group by id
         """ % (self.idHash,)
-        print >> sys.stderr, sql
+        log.debug(sql)
         cursor.execute(sql)
     
 
@@ -577,8 +579,8 @@ class PostgreSQLLoader(Loader, PostgreSQL):
     def dumpRDF(self, suffix):
         self.triplesFile.close()
         self.lexicalFile.close()
-        print >> sys.stderr, 'Recent hits:', self.recent_hits
-        print >> sys.stderr, 'Recent misses:', self.recent_misses
+        print 'Recent hits: %s' % self.recent_hits
+        print 'Recent misses: %s' % self.recent_misses
     
 
 def timing(config, tableid, dumpfile):
@@ -766,7 +768,7 @@ def main():
             pass
         else:
             if options.delete:
-                print(store.open())
+                log.debug(store.open())
                 # @@FIXME: incorrect code
                 # cursor = store._db.cursor()
                 store.destroy()

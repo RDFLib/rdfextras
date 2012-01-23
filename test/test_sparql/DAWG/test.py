@@ -19,7 +19,10 @@ from cStringIO import StringIO
 import unittest
 from nose.exc import SkipTest
 from glob import glob
-from string import maketrans
+try:
+    from string import maketrans
+except ImportError:
+    maketrans = str.translate
 
 plugin.register('sparql', rdflib.query.Processor,
                     'rdfextras.sparql.processor', 'Processor')
@@ -347,9 +350,13 @@ def generictest(testFile):
                                      result.serialize(format="n3"))
                 else:
                     # result = [r[0] for r in result if isinstance(r, (tuple, list))]
+                    def stab(r):
+                        if isinstance(r, (tuple, list)):
+                            return frozenset(r)
+                        else:
+                            return r
                     results = set(
-                        [frozenset(r) if isinstance(r, (tuple, list)) else r 
-                                                         for r in result])
+                        [stab(r) for r in result])
                     assert set(bindings).difference(results) == set([]) or set(bindings) == results, \
                             "### Test Failed: ###\n\nB:\n%s\n\nR:\n%s\n\n" % \
                                     (set(bindings), results)

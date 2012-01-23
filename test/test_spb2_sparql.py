@@ -47,8 +47,13 @@ class TestSimpleQueries(unittest.TestCase):
                 result = g.query(q,processor='sparql')
                 t2 = time.time()
                 if not result.result:
+                    def stab(result):
+                        if result.askAnswer[0]:
+                            return [True]
+                        else:
+                            []
                     if result.askAnswer:
-                        result.result = [True] if result.askAnswer[0] else []
+                        result.result = stab(result)
                     else:
                         result.result = []
                 print("Q%s\t%s\t%fs" % (testFile[9:-7], len(result.result), t2-t1))

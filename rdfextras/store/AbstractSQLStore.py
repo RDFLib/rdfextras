@@ -1,6 +1,9 @@
 from rdflib.term import BNode, URIRef, Literal
 from rdflib.namespace import RDF
-from hashlib import sha1
+try:
+    from hashlib import sha1
+except ImportError:
+    from sha import sha as sha1
 from rdfextras.utils.termutils import REVERSE_TERM_COMBINATIONS
 from rdfextras.utils.termutils import TERM_INSTANTIATION_DICT
 from rdfextras.utils.termutils import constructGraph
@@ -440,7 +443,7 @@ class AbstractSQLStore(Store, SQLGenerator):
         self.identifier = identifier and identifier or 'hardcoded'
         #Use only the first 10 bytes of the digest
         self._internedId = INTERNED_PREFIX + \
-                                sha1(self.identifier).hexdigest()[:10]
+                                sha1(self.identifier.encode('utf8')).hexdigest()[:10]
         
         # This parameter controls how exlusively the literal table is searched
         # If true, the Literal partition is searched *exclusively* if the 

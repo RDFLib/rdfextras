@@ -87,7 +87,8 @@ install_requires = [
 ]
 
 tests_require = install_requires + \
-                ['flask', 'mimeparse']
+                []
+                # ['flask', 'mimeparse']
 
 extras_require = { 
     "WebApp": ["flask","mimeparse"],

@@ -409,10 +409,10 @@ class GraphPattern :
                 if st in bindings :
                     return bindings[st]
                 else :
-					if isinstance(self,GraphPattern2) : # @@FIXME undefined
-						return st
-					else :
-						return None
+                    if isinstance(self,GraphPattern2) : # @@FIXME undefined
+                        return st
+                    else :
+                        return None
             elif isinstance(st,BNode) :
                 for c in self.bnodes :
                     if self.bnodes[c] == st :
@@ -465,7 +465,7 @@ class GraphPattern :
         """
         return len(self.patterns) == 0
 
-		
+        
 class BasicGraphPattern(GraphPattern) :
     """
     One justified, problem with the current definition of 
@@ -487,7 +487,7 @@ class BasicGraphPattern(GraphPattern) :
         """
         GraphPattern.__init__(self,patterns)
         self.prolog = prolog
-	
+    
     def canonicalTerm(self,term):
         if isinstance(term,URIRef):
             if self.prolog is not None:
@@ -570,7 +570,7 @@ class BasicGraphPattern(GraphPattern) :
 
     def fetchTerminalExpression(self):
         yield self
-		
+        
 if __name__ == '__main__' :
     v1 = Variable("a")
     g = BasicGraphPattern([("a","?b",24),("?r","?c",12345),(v1,"?c",3333)])

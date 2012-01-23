@@ -1,5 +1,9 @@
 import unittest
-from pydot import Dot
+try:
+  from pydot import Dot
+except ImportError:
+  from nose import SkipTest
+  raise SkipTest('pydot required but not installed')
 from StringIO import StringIO
 from rdflib import util
 from rdflib.graph import Graph

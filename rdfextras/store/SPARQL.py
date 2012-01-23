@@ -28,7 +28,10 @@ try:
 except ImportError:
     raise Exception("SPARQLWrapper not found! SPARQL Store will not work. Install with 'easy_install SPARQLWrapper'")
 
-import xml.etree.ElementTree
+try:
+    from xml import etree
+except ImportError:
+    import elementtree as etree
 
 from rdfextras.store.REGEXMatching import NATIVE_REGEX
 
@@ -43,7 +46,7 @@ import urlparse
 BNODE_IDENT_PATTERN = re.compile('(?P<label>_\:[^\s]+)')
 SPARQL_NS        = Namespace('http://www.w3.org/2005/sparql-results#')
 sparqlNsBindings = {u'sparql':SPARQL_NS}
-xml.etree.ElementTree._namespace_map["sparql"]=SPARQL_NS
+etree.ElementTree._namespace_map["sparql"]=SPARQL_NS
 
 def TraverseSPARQLResultDOM(doc,asDictionary=False):
     """
@@ -66,7 +69,16 @@ def TraverseSPARQLResultDOM(doc,asDictionary=False):
     # Handle ElementTree warning
     variablematch = '/{http://www.w3.org/2005/sparql-results#}head/{http://www.w3.org/2005/sparql-results#}variable'
     resultmatch = '/{http://www.w3.org/2005/sparql-results#}results/{http://www.w3.org/2005/sparql-results#}result'
-    with warnings.catch_warnings(record=True) as w:
+    # with warnings.catch_warnings(record=True) as w:
+    #     warnings.simplefilter("always")
+    #     matched_variables = doc.findall(variablematch)
+    #     if len(w) == 1:
+    #         variablematch = '.' + variablematch
+    #         resultmatch = '.' + resultmatch
+    #         # Could be wrong result, re-do from start
+    #         matched_variables = doc.findall(variablematch)
+
+    for w in  (warnings.catch_warnings(record=True)):
         warnings.simplefilter("always")
         matched_variables = doc.findall(variablematch)
         if len(w) == 1:
@@ -88,7 +100,12 @@ def TraverseSPARQLResultDOM(doc,asDictionary=False):
         if asDictionary:
             yield currBind,vars
         else:
-            yield values[0] if len(values)==1 else tuple(values),vars
+            def stab(values):
+                if len(values)==1:
+                    return values[0]
+                else:
+                    return tuple(values)
+            yield stab(values), vars
 
 def localName(qname): 
     # wtf - elementtree cant do this for me
@@ -128,14 +145,22 @@ class SPARQLResult(QueryResult):
     graph : as an RDFLib Graph - for CONSTRUCT and DESCRIBE queries
     """
     def __init__(self,result):
-        self.result    = xml.etree.ElementTree.parse(result)
+        self.result    = etree.ElementTree.parse(result)
         self.noAnswers = 0
         self.askAnswer = None
 
     def _parseResults(self):
         # Handle ElementTree warning, see LOC#51 (above)
         booleanmatch = '/{http://www.w3.org/2005/sparql-results#}boolean'
-        with warnings.catch_warnings(record=True) as w:
+        # with warnings.catch_warnings(record=True) as w:
+        #     warnings.simplefilter("always")
+        #     matched_results = self.result.findall(booleanmatch)
+        #     if len(w) == 1:
+        #         # Could be wrong result, re-do from start
+        #         booleanmatch = '.' + booleanmatch
+        #         matched_results = self.askAnswer=self.result.findall(booleanmatch)
+        #     return matched_results
+        for w in (warnings.catch_warnings(record=True)):
             warnings.simplefilter("always")
             matched_results = self.result.findall(booleanmatch)
             if len(w) == 1:
@@ -284,7 +309,7 @@ class SPARQLStore(SPARQLWrapper,Store):
 
         self.setQuery(query)
         
-        doc = xml.etree.ElementTree.parse(SPARQLWrapper.query(self).response)
+        doc = etree.ElementTree.parse(SPARQLWrapper.query(self).response)
         #xml.etree.ElementTree.dump(doc)
         for rt,vars in TraverseSPARQLResultDOM(doc,asDictionary=True):
             
@@ -312,7 +337,7 @@ class SPARQLStore(SPARQLWrapper,Store):
 
             self.setQuery(q)
         
-            doc = xml.etree.ElementTree.parse(SPARQLWrapper.query(self).response)
+            doc = etree.ElementTree.parse(SPARQLWrapper.query(self).response)
             rt,vars=iter(TraverseSPARQLResultDOM(doc,asDictionary=True)).next()
             return int(rt.get(Variable("c")))
 

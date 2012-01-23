@@ -274,12 +274,10 @@ def mapToOperator(expr,prolog,combinationArg=None,constraint=False):
             return """operators.EBV(%r)%s"""%(lit,combinationInvokation)
         else:
             return repr(lit)
-    elif isinstance(expr,Literal):
-        return repr(expr)
-    elif isinstance(expr,URIRef):
+    elif isinstance(expr,(Literal, URIRef)):
         import warnings
         warnings.warn("There is the possibility of __repr__ being deprecated in python3K",DeprecationWarning,stacklevel=3)        
-        return repr(expr)    
+        return repr(expr)
     elif isinstance(expr,QName):
         if expr[:2] == '_:':
             return repr(BNode(expr[2:]))
