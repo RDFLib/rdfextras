@@ -49,14 +49,14 @@ __all__ = ['JsonLDParser', 'to_rdf']
 
 class JsonLDParser(Parser):
     """
-    @@ TODO: add docstring describing usage
+    @@ TODO: add docstring describing args and returned value type
     """
     def __init__(self):
         super(JsonLDParser, self).__init__()
 
     def parse(self, source, sink, **kwargs):
         """
-        @@ TODO: add docstring describing usage
+        @@ TODO: add docstring describing args and returned value type
         """
         encoding = kwargs.get('encoding') or 'utf-8'
         if encoding not in ('utf-8', 'utf-16'):
@@ -74,7 +74,7 @@ class JsonLDParser(Parser):
 
 def to_rdf(tree, graph, base=None, context_data=None):
     """
-    @@ TODO: add docstring describing usage
+    @@ TODO: add docstring describing args and returned value type
     """
     context = Context()
     context.load(context_data or tree.get(CONTEXT_KEY) or {}, base)
