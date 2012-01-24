@@ -47,6 +47,7 @@ from rdflib.namespace import RDF, XSD
 from rdfextras.ldcontext import Context, ID_KEY, LIST_KEY, SET_KEY
 from rdfextras.ldcontext import json
 
+__all__ = ['JsonLDSerializer', 'to_tree']
 
 PLAIN_LITERAL_TYPES = set([XSD.integer, XSD.float, XSD.double, XSD.decimal,
         XSD.boolean, XSD.string])
@@ -57,6 +58,9 @@ class JsonLDSerializer(Serializer):
         super(JsonLDSerializer, self).__init__(store)
 
     def serialize(self, stream, base=None, encoding=None, **kwargs):
+        """
+        @@ TODO: add docstring describing usage
+        """
         encoding = encoding or 'utf-8'
         if encoding not in ('utf-8', 'utf-16'):
             warnings.warn("JSON should be encoded as unicode. " +
@@ -76,6 +80,9 @@ class JsonLDSerializer(Serializer):
 
 
 def to_tree(graph, context_data=None, base=None, generate_compact=True):
+    """
+    @@ TODO: add docstring describing usage
+    """
 
     tree = {}
 

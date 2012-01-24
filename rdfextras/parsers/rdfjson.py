@@ -25,6 +25,8 @@ See:
 
 """
 
+__all__ = ['RdfJsonParser']
+
 import logging
 try:
     import json

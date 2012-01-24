@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
+from rdflib.py3compat import format_doctest_out as uformat
+uformat("""
 This serialiser will read in an JSON-LD formatted document and create an RDF
 Graph. See:
 
@@ -28,10 +29,10 @@ Example usage::
     >>> g = Graph().parse(data=test_json, format='json-ld')
     >>> list(g) == [(URIRef('http://example.org/about'),
     ...     URIRef('http://purl.org/dc/terms/title'),
-    ...     Literal(u"Someone's Homepage", lang=u'en'))]
+    ...     Literal(%(u)s"Someone's Homepage", lang=%(u)s'en'))]
     True
 
-"""
+""")
 # NOTE: This code reads the entire JSON object into memory before parsing, but
 # we should consider streaming the input to deal with arbitrarily large graphs.
 
@@ -42,14 +43,21 @@ from rdflib.namespace import RDF, XSD
 from rdflib.term import URIRef, BNode, Literal
 
 from rdfextras.ldcontext import Context, Term, CONTEXT_KEY, ID_KEY, LIST_KEY
-from rdfextras.ldcontext import json, source_to_json
+from rdfextras.ldcontext import source_to_json
 
+__all__ = ['JsonLDParser', 'to_rdf']
 
 class JsonLDParser(Parser):
+    """
+    @@ TODO: add docstring describing usage
+    """
     def __init__(self):
         super(JsonLDParser, self).__init__()
 
     def parse(self, source, sink, **kwargs):
+        """
+        @@ TODO: add docstring describing usage
+        """
         encoding = kwargs.get('encoding') or 'utf-8'
         if encoding not in ('utf-8', 'utf-16'):
             warnings.warn("JSON should be encoded as unicode. " +
@@ -65,6 +73,9 @@ class JsonLDParser(Parser):
 
 
 def to_rdf(tree, graph, base=None, context_data=None):
+    """
+    @@ TODO: add docstring describing usage
+    """
     context = Context()
     context.load(context_data or tree.get(CONTEXT_KEY) or {}, base)
 
