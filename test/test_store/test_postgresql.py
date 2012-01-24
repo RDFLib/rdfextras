@@ -5,7 +5,6 @@ except ImportError:
     raise SkipTest("psycopg2 not installed")
 
 import sys
-sys.path.append('..')
 from nose.exc import SkipTest
 from tempfile import mkdtemp
 from tempfile import mkstemp
@@ -30,7 +29,9 @@ import unittest
 # mysqlconfigString="user=rdflib,password=seekrit,host=localhost,db=test"
 # postgresqlconfigString="user=user,password=password,host=host,db=dbname"
 # mysqluri="mysql://user:password@host/database"
+sys.path.append('../..')
 from configstrings import postgresqlconfigString as configString
+sys.path.pop()
 
 plugin.register('PostgreSQL', store.Store,
                 'rdfextras.store.PostgreSQL', 

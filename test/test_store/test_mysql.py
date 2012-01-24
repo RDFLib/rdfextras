@@ -24,13 +24,14 @@ from rdflib.graph import QuotedGraph
 from rdflib import plugin
 from rdflib import store
 from rdfextras.store.REGEXMatching import REGEXTerm
-sys.path.append('..')
 # ../configstrings.py holds deployment-specific db params, e.g.
 # mysqlconfigString="user=rdflib,password=seekrit,host=localhost,db=test"
 # postgresqlconfigString="user=user,password=password,host=host,db=dbname"
 # mysqluri="mysql://user:password@host/database"
 
+sys.path.append('../..')
 from configstrings import mysqlconfigString as configString
+sys.path.pop()
 
 plugin.register('MySQL', store.Store,
                 'rdfextras.store.MySQL', 

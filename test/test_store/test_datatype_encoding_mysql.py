@@ -3,8 +3,9 @@ from rdflib import URIRef, BNode, Literal, Graph
 from rdflib.store import Store
 from rdfextras.store.FOPLRelationalModel.QuadSlot import normalizeValue
 import sys
-sys.path.append('..')
+sys.path.append('../..')
 from configstrings import mysqlconfigString as configString
+sys.path.pop()
 
 def test_dType_encoding():
     storetest = True
