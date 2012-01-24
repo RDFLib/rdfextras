@@ -12,43 +12,32 @@ We define eval(D(G), graph pattern) as the evaluation of a graph pattern with re
 to a dataset D having active graph G. The active graph is initially the default graph.
 """
 import unittest
-import os
-import sys
 from StringIO import StringIO
 from rdflib.graph import ConjunctiveGraph
 from rdflib.graph import Graph
 from rdflib.graph import ReadOnlyGraphAggregate
 from rdflib import plugin
-from rdflib.term import BNode
-from rdflib.term import Literal
 from rdflib.term import URIRef
 from rdflib.term import Variable
-from rdflib.util import first
 from rdflib.store import Store 
 from rdfextras.sparql.components import AskQuery
 from rdfextras.sparql.components import DescribeQuery
 from rdfextras.sparql.components import Prolog
-from rdfextras.sparql.components import Query
 from rdfextras.sparql.components import SelectQuery
 from rdfextras.sparql.components import NamedGraph
-from rdfextras.sparql.components import RemoteGraph
 from rdfextras.sparql.components import ASCENDING_ORDER
 from rdfextras.sparql import DESCRIBE
 from rdfextras.sparql import graph
-from rdfextras.sparql import operators
 from rdfextras.sparql import SPARQLError
 from rdfextras.sparql import query as sparql_query
 from rdfextras.sparql.evaluate import _variablesToArray
 from rdfextras.sparql.evaluate import unRollTripleItems
-from rdfextras.sparql.components import BlockOfTriples
 from rdfextras.sparql.components import GraphPattern
 from rdfextras.sparql.components import ParsedAlternativeGraphPattern
-from rdfextras.sparql.components import ParsedConstrainedTriples
 from rdfextras.sparql.components import ParsedGraphGraphPattern
 from rdfextras.sparql.components import ParsedGroupGraphPattern
 from rdfextras.sparql.components import ParsedOptionalGraphPattern
 from rdfextras.sparql.graph import BasicGraphPattern
-from rdfextras.sparql.evaluate import CONSTRUCT_NOT_SUPPORTED
 from rdfextras.sparql.evaluate import convertTerm
 from rdfextras.sparql.evaluate import createSPARQLPConstraint
 import logging
