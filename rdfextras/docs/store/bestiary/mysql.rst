@@ -6,6 +6,8 @@
 MySQL :: an implementation of the FOPL Relational Model
 =======================================================
 
+.. warning:: At the time of writing, there are no reliable Python 3 MySQL drivers. In essence, this store can only be used under Python 2.
+
 MySQL implementation of FOPL Relational Model as an rdflib Store.
 
 The MySQL store's relational schema incorporates hashes of terms for efficient

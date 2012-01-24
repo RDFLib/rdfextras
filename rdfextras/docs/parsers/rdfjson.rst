@@ -217,7 +217,7 @@ Modules
 
 .. automodule:: rdfextras.parsers.rdfjson
 
-.. autoclass:: RDFJsonParser
+.. autoclass:: RdfJsonParser
    :members: parse
 
 

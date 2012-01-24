@@ -27,18 +27,7 @@ Pure-Python "no-SQL" SPARQL implementation
    sparql/index
 
 
-Pure-Python "SPARQL-to-SQL" implementation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   The bison-parsing SPARQL2SQL implementation contributed by Chimezie Ogbuji
-   et. al. has been moved to a separate branch of development 
-   :mod:`rdfextras.sparql2sql` where unit tests and DAWG tests have similarly 
-   been added.
-
-.. toctree::
-   :maxdepth: 3
-   
-   sparql2sql/index
-
+(The bison-parsing SPARQL2SQL implementation contributed by Chimezie Ogbuji et. al. has been moved to a separate archival branch.)
 
 Stores
 ++++++
@@ -64,6 +53,31 @@ Stores
    :maxdepth: 3
    
    store/index
+
+Parsers/Serializers
++++++++++++++++++++
+
+Additional format-specific parsers and serializers, easing the task of reading 
+and writing non-RDF formats into and out of RDF.
+
+.. toctree::
+   :maxdepth: 3
+   
+JSONLD
+------
+.. toctree::
+   :maxdepth: 3
+
+   parsers/jsonld
+   serializers/jsonld
+
+RDF/JSON
+--------
+.. toctree::
+   :maxdepth: 3
+
+   parsers/rdfjson
+   serializers/rdfjson
 
 
 Tools

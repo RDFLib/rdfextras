@@ -1,3 +1,5 @@
+.. _anatomyofsleepycat: Anatomy of Sleepycat btree store
+
 ================================================================
 Anatomy of the RDFLib Sleepycat key-value non-nested btree Store
 ================================================================

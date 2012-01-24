@@ -97,6 +97,7 @@ A bestiary of RDFLib Stores
    bestiary/nodepickler
    bestiary/postgresql
    bestiary/regexmatching
+   bestiary/sleepycat
    bestiary/sparql
    bestiary/sqlite
    bestiary/zodb

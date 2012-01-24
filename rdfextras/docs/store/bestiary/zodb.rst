@@ -6,6 +6,8 @@
 ZODB :: ZOPE Object Database persistence for RDFLib IOMemory Store
 ==================================================================
 
+.. warning:: The ZOPE Object Database has not been ported to Python 3 so this store can only be used under Python 2.
+
 ZOPE Object Database implementation of :class:`rdflib.store.Store`.
 
 The boilerplate ZODB/ZEO handling has been wrapped up in a utility class, 
