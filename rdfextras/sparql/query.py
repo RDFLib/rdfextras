@@ -4,9 +4,8 @@ try:
 except NameError:
     from sets import Set as set
 
-import types, sys
-from pprint import pprint
-from rdflib.term import URIRef, BNode, Literal, Variable, Identifier
+import types
+from rdflib.term import URIRef, BNode, Variable, Identifier
 from rdflib.graph import Graph, ConjunctiveGraph, ReadOnlyGraphAggregate
 from rdflib.util import check_subject, list2set
 from rdfextras.sparql import SPARQLError
@@ -846,7 +845,7 @@ def queryObject(graph, patterns, optionalPatterns=[], initialBindings = None) :
 
     retval = None
     if not initialBindings:
-        initialBinding = {}
+        initialBindings = {}
     for pattern in finalPatterns :
         # Check whether the query strings in the optional clauses are fine. If a problem occurs,
         # an exception is raised by the function
