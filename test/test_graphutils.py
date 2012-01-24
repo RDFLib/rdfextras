@@ -5,7 +5,7 @@ except ImportError:
   from nose import SkipTest
   raise SkipTest('pydot required but not installed')
 from StringIO import StringIO
-from rdflib import util
+from rdfextras.utils import graphutils
 from rdflib.graph import Graph
 
 n3source = """\
@@ -51,7 +51,7 @@ class TestUtilN3toDot(unittest.TestCase):
         self.dot = Dot()
 
     def test_util_graph_to_dot(self):
-        res = util.graph_to_dot(self.graph, self.dot)
+        res = graphutils.graph_to_dot(self.graph, self.dot)
         res = self.dot.to_string()
         self.assert_('swap/Primer#Person' in res, res)
 
