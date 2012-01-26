@@ -226,7 +226,7 @@ man_pages = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-	'py': ('http://docs.python.org/3.2', None),
-    'rdflib': ('http://readthedocs.org/docs/rdflib', None),
+	  'py': ('http://docs.python.org/3.2', None),
+    'rdflib': ('http://rdflib.readthedocs.org/en/latest/', None),
     'sphinx': ('http://sphinx.pocoo.org', None)
 					   }
