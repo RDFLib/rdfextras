@@ -38,8 +38,9 @@ _darcs/*
 .log
 .dct
 .psql
-rdfextras/docs/_*
-rdfextras/docs/rawdocs*
+docs/_*
+docs/draft/*
+docs/rawdocs*
 rdfextras.egg-info/*
 ez_setup/*
 Icon*
@@ -49,3 +50,6 @@ test/data
 test/data-r2
 */DAWG/data
 */DAWG/data-r2
+.pylint
+rdfextras/FuXi/*
+rdfextras/sparql2sql/*
