@@ -4,10 +4,7 @@ import unittest
 
 import rdflib
 from rdflib import Literal
-rdflib.plugin.register('sparql', rdflib.query.Processor,
-                       'rdfextras.sparql.processor', 'Processor')
-rdflib.plugin.register('sparql', rdflib.query.Result,
-                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 
 test_data = """

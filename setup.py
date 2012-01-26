@@ -111,10 +111,39 @@ config.update(
         ],
         'rdf.plugins.parser': [
             'rdf-json = rdfextras.parsers.rdfjson:RdfJsonParser',
+            'json-ld = rdfextras.parsers.jsonld:JsonLDParser'
         ],
         'rdf.plugins.serializer': [
             'rdf-json = rdfextras.serializers.rdfjson:RdfJsonSerializer',
+            'json-ld = rdfextras.serializers.jsonld:JsonLDSerializer',
+            'html = rdfextras.sparql.results.htmlresults:HTMLSerializer',
         ],
+        'rdf.plugins.queryprocessor': [
+            'sparql = rdfextras.sparql.processor:Processor',
+        ],
+        'rdf.plugins.queryresult': [
+            'sparql = rdfextras.sparql.query:SPARQLQueryResult',
+        ],
+        'rdf.plugins.resultserializer': [
+            'html = rdfextras.sparql.results.htmlresults:HTMLResultSerializer',
+            'xml = rdfextras.sparql.results.xmlresults:XMLResultSerializer',
+            'json = rdfextras.sparql.results.jsonresults:JSONResultSerializer',
+        ],
+        'rdf.plugins.resultparser': [
+            'xml = rdfextras.sparql.results.xmlresults:XMLResultParser',
+            'json = rdfextras.sparql.results.jsonresults:JSONResultParser',
+        ],
+        'rdf.plugins.store': [
+            'BerkeleyDB = rdfextras.store.BerkeleyDB:BerkeleyDB',
+            'BDBOptimized = rdfextras.store.BDBOptimized:BDBOptimized',
+            'MySQL = rdfextras.store.MySQL:MySQL',
+            'PostgreSQL = rdfextras.store.PostgreSQL:PostgreSQL',
+            'SPARQL = rdfextras.store.SPARQL:SPARQLStore',
+            'SQLite = rdfextras.store.SQLite:SQLite',
+            'ZODB = rdfextras.store.ZODB:ZODBGraph',
+            'KyotoCabinet = rdfextras.store.KyotoCabinet:KyotoCabinet',
+        ],
+
     },
     #namespace_packages = ['rdfextras'], # TODO: really needed?
     install_requires = install_requires,

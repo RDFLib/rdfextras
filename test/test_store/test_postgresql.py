@@ -33,9 +33,6 @@ sys.path.append('../..')
 from configstrings import postgresqlconfigString as configString
 sys.path.pop()
 
-plugin.register('PostgreSQL', store.Store,
-                'rdfextras.store.PostgreSQL', 
-                'PostgreSQL')
 
 class PostgreSQLGraphTestCase(test_graph.GraphTestCase):
     store_name = "PostgreSQL"

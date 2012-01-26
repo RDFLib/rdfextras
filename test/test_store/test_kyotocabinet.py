@@ -15,9 +15,6 @@ storename = "KyotoCabinet"
 storetest = True
 configString = tempfile.mktemp(prefix='test',dir='/tmp')
 
-plugin.register(storename, store.Store,
-                'rdfextras.store.KyotoCabinet', 
-                'KyotoCabinet')
 
 class KyotoCabinetGraphTestCase(test_graph.GraphTestCase):
     store_name = storename

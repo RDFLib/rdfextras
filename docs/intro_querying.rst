@@ -9,17 +9,15 @@ SPARQL is no longer shipped with Core rdflib - instead it is now a part of
 `rdfextras <http://code.google.com/p/rdfextras/>`_ a Google code project 
 (http://code.google.com/p/rdfextras/):
 
-Assuming you have rdfextras installed, you can use Sparql with rdflib 3.0 by
-adding these lines somewhere at the top of your program:
+Assuming you have rdfextras installed with setuptools (highly recommended), 
+you can use Sparql with rdflib 3.X out of the box. 
+If you only have distutils, you have to add these lines somewhere at the top of your program:
 
 .. sourcecode:: python
 
-    import rdflib
+    import rdfextras
+    rdfextras.registerplugins()
 
-    rdflib.plugin.register('sparql', rdflib.query.Processor,
-                           'rdfextras.sparql.processor', 'Processor')
-    rdflib.plugin.register('sparql', rdflib.query.Result,
-                           'rdfextras.sparql.query', 'SPARQLQueryResult')
 
 Create an rdflib Graph
 ======================

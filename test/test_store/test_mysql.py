@@ -33,9 +33,6 @@ sys.path.append('../..')
 from configstrings import mysqlconfigString as configString
 sys.path.pop()
 
-plugin.register('MySQL', store.Store,
-                'rdfextras.store.MySQL', 
-                'MySQL')
 
 class MySQLGraphTestCase(test_graph.GraphTestCase):
     store_name = "MySQL"

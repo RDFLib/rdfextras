@@ -99,30 +99,6 @@ def get(graph_):
 
 def main(): 
     import rdflib
-
-    rdflib.plugin.register('sparql', rdflib.query.Processor,
-                           'rdfextras.sparql.processor', 'Processor')
-    rdflib.plugin.register('sparql', rdflib.query.Result,
-                           'rdfextras.sparql.query', 'SPARQLQueryResult')
-
-    rdflib.plugin.register('xml', rdflib.query.ResultParser, 
-                           'rdfextras.sparql.results.xmlresults','XMLResultParser')
-    rdflib.plugin.register('xml', rdflib.query.ResultSerializer, 
-                           'rdfextras.sparql.results.xmlresults','XMLResultSerializer')
-
-    rdflib.plugin.register('html', rdflib.query.ResultSerializer, 
-                           'rdfextras.sparql.results.htmlresults','HTMLResultSerializer')
-
-    rdflib.plugin.register('html', rdflib.serializer.Serializer, 
-                           'rdfextras.sparql.results.htmlresults','HTMLSerializer')
-
-    
-    rdflib.plugin.register('json', rdflib.query.ResultParser, 
-                           'rdfextras.sparql.results.jsonresults','JSONResultParser')
-    rdflib.plugin.register('json', rdflib.query.ResultSerializer, 
-                           'rdfextras.sparql.results.jsonresults','JSONResultSerializer')
-
-
     import sys
     if len(sys.argv)>1:
         gr=rdflib.Graph()

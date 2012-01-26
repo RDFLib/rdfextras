@@ -29,12 +29,9 @@ Example usage:
     >>> from rdflib import Graph, plugin
     >>> from rdflib.serializer import Serializer
     >>> from StringIO import StringIO
-    >>> plugin.register("rdf-json", Serializer, 
-    ...     "rdfextras.serializers.rdfjson", "RdfJsonSerializer")
-    ...
-    >>> plugin.register("rdf-json-pretty", Serializer,
-    ...     "rdfextras.serializers.rdfjson", "PrettyRdfJsonSerializer")
-    ...
+    >>> from rdfextras import registerplugins
+    >>> registerplugins()
+
     >>> test = '''
     ... <http://example.org/about> 
     ...     <http://purl.org/dc/elements/1.1/title> 
@@ -109,9 +106,8 @@ class RdfJsonSerializer(Serializer):
     .. sourcecode:: python
         from rdflib import Graph, plugin
         from rdflib.serializer import Serializer
-
-        plugin.register("rdf-json", Serializer, 
-                "rdfextras.serializers.rdfjson", "RdfJsonSerializer")
+        import rdfextras
+        rdfextras.registerplugins()
 
         g = Graph()
         g.parse("test.rdf")
@@ -222,9 +218,8 @@ class PrettyRdfJsonSerializer(RdfJsonSerializer):
     .. sourcecode:: python
         from rdflib import Graph, plugin
         from rdflib.serializer import Serializer
-
-        plugin.register("rdf-json-pretty", Serializer, 
-            "rdfextras.serializers.rdfjson", "PrettyRdfJsonSerializer")
+        from rdfextras import registerplugins
+        registerplugins() # reqd if no setuptools
 
         g = Graph()
         g.parse("test.rdf")

@@ -14,8 +14,6 @@ from rdfextras.utils.termutils import PREDICATE
 from rdfextras.utils.termutils import OBJECT
 from rdfextras.utils.termutils import CONTEXT
 
-plugin.register('MySQL', rdflib.store.Store,
-                        'rdfextras.store.MySQL', 'MySQL')
 
 import os.path
 import cPickle

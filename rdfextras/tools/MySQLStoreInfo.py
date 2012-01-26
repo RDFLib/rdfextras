@@ -7,9 +7,6 @@ from rdflib.store import Store
 store_id='STOREIDENTIFIER'
 connection_string='user=DBUSER,password=DBPASSWORD,db=DBNAME,host=HOSTNAME'
 
-plugin.register('MySQL', rdflib.store.Store,
-                        'rdfextras.store.MySQL', 'MySQL')
-
 def main():
     store = plugin.get('MySQL',Store)(store_id)
     store.open(connection_string,create=False)

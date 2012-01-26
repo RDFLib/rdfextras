@@ -6,10 +6,6 @@ from glob import glob
 import rdflib
 from rdflib.graph import Graph
 
-rdflib.plugin.register('sparql', rdflib.query.Processor,
-                       'rdfextras.sparql.processor', 'Processor')
-rdflib.plugin.register('sparql', rdflib.query.Result,
-                       'rdfextras.sparql.query', 'SPARQLQueryResult')
 
 log = logging.getLogger(__name__)
 DEBUG = False

@@ -8,8 +8,8 @@ Example usage::
 
     >>> from rdflib import Graph, plugin
     >>> from rdflib.serializer import Serializer
-    >>> plugin.register('json-ld', Serializer,
-    ...     'rdfextras.serializers.jsonld', 'JsonLDSerializer')
+    >>> import rdfextras
+    >>> rdfextras.registerplugins()
 
     >>> testrdf = '''
     ... @prefix dc: <http://purl.org/dc/terms/> .

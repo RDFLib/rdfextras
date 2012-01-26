@@ -3,10 +3,6 @@ from StringIO import StringIO
 from rdflib.graph import ConjunctiveGraph
 import rdflib
 
-rdflib.plugin.register('sparql', rdflib.query.Processor,
-                       'rdfextras.sparql.processor', 'Processor')
-rdflib.plugin.register('sparql', rdflib.query.Result,
-                       'rdfextras.sparql.query', 'SPARQLQueryResult')
 
 testgraph1 = """\
 <rdf:RDF  xmlns:ex="http://temp.example.org/terms/"

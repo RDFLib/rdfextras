@@ -55,9 +55,9 @@ class RdfJsonParser(Parser):
 
         >>> from rdflib import Graph, plugin
         >>> from rdflib.parser import Parser
-        >>> plugin.register("rdf-json", Parser, 
-        ...    "rdfextras.parsers.rdfjson", "RdfJsonParser")
-        ...
+        >>> import rdfextras
+        >>> rdfextras.registerplugins()
+
         >>> g = Graph()
         >>> testrdfjson = '''{
         ...   "http://example.org/about" : 

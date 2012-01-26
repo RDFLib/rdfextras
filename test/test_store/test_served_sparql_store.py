@@ -5,15 +5,6 @@ import rdfextras
 import rdfextras.web.endpoint
 import rdfextras.store.SPARQL
 
-rdflib.plugin.register('sparql', rdflib.query.Processor,
-                       'rdfextras.sparql.processor', 'Processor')
-rdflib.plugin.register('sparql', rdflib.query.Result,
-                       'rdfextras.sparql.query', 'SPARQLQueryResult')
-rdflib.plugin.register('xml', rdflib.query.ResultParser, 
-                           'rdfextras.sparql.results.xmlresults','XMLResultParser')
-rdflib.plugin.register('xml', rdflib.query.ResultSerializer, 
-                           'rdfextras.sparql.results.xmlresults','XMLResultSerializer')
-
 
 class TestSPARQLStore(unittest.TestCase): 
 
@@ -21,7 +12,7 @@ class TestSPARQLStore(unittest.TestCase):
         g=rdflib.Graph()
 
         data="""<http://example.org/book/book1> <http://purl.org/dc/elements/1.1/title> "SPARQL Tutorial" .
-<http://example.org/book/b\xc3\xb6\xc3\xb6k8> <http://purl.org/dc/elements/1.1/title> "M\xc3\xb6se bite can be very nasty."@se .
+<http://example.org/book/b\xc3\xb6\xc3\xb6k8> <http://purl.org/dc/elements/1.1/title> "Moose bite can be very n\xc3\xb6sty."@se .
  
 """
 

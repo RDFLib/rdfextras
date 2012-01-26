@@ -3,10 +3,7 @@ from rdflib.namespace import Namespace, RDF, XSD
 from rdflib.term import BNode, Literal
 
 import rdflib
-rdflib.plugin.register('sparql', rdflib.query.Processor,
-                       'rdfextras.sparql.processor', 'Processor')
-rdflib.plugin.register('sparql', rdflib.query.Result,
-                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 
 DC = Namespace(u"http://purl.org/dc/elements/1.1/")

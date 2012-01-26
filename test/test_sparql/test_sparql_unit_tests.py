@@ -10,8 +10,6 @@ import unittest #, getpass
 
 global singleGraph
 
-rdflib.plugin.register('sparql', rdflib.query.Result,
-                    'rdfextras.sparql.query', 'SPARQLQueryResult')
 
 class Option(object):
     def __init__(self):

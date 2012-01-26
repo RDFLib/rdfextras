@@ -7,10 +7,7 @@ from rdflib import Graph
 import unittest,sys
 
 import rdflib
-rdflib.plugin.register('sparql', rdflib.query.Processor,
-                       'rdfextras.sparql.processor', 'Processor')
-rdflib.plugin.register('sparql', rdflib.query.Result,
-                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 """
 This test is actually completely broken 
