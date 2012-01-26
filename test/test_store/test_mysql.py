@@ -1,8 +1,11 @@
 try:
-    import MySQLdb
+    import PyMySQL as MySQLdb
 except ImportError:
-    from nose.exc import SkipTest
-    raise SkipTest("MySQLdb not installed")
+    try:
+        import MySQLdb
+    except ImportError:
+        from nose.exc import SkipTest
+        raise SkipTest("MySQLdb not installed")
 
 import sys
 import test_graph

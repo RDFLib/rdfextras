@@ -1,3 +1,11 @@
+try:
+    import PyMySQL as MySQLdb
+except ImportError:
+    try:
+        import MySQLdb
+    except ImportError:
+        from nose.exc import SkipTest
+        raise SkipTest("MySQLdb not installed")
 from rdflib import plugin
 from rdflib import URIRef, BNode, Literal, Graph
 from rdflib.store import Store
@@ -9,8 +17,8 @@ sys.path.pop()
 
 def test_dType_encoding():
     storetest = True
-    correct=normalizeValue('http://www.w3.org/2001/XMLSchema#integer', 'U')
-    wrong=normalizeValue('http://www.w3.org/2001/XMLSchema#integer', 'L')
+    correct = normalizeValue('http://www.w3.org/2001/XMLSchema#integer', 'U')
+    wrong = normalizeValue('http://www.w3.org/2001/XMLSchema#integer', 'L')
     
     store = plugin.get('MySQL',Store)()
     store.destroy(configString)
@@ -20,8 +28,7 @@ def test_dType_encoding():
     cursor=db.cursor()
     cursor.execute(
     "select * from %s where data_type = '%s'"%
-        (store.literalProperties,
-         wrong))
+        (store.literalProperties, wrong))
     assert not cursor.fetchone(),"Datatype encoding bug!"
     for suffix,(relations_only,tables) in store.viewCreationDict.items():
         query='create view %s%s as %s'%(store._internedId,
