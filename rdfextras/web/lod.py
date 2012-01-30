@@ -412,25 +412,20 @@ def get(graph, types='auto',image_patterns=["\.[png|jpg|gif]$"],
     
     return lod
 
-def format_from_filename(f):
-    if f.endswith('n3'): return 'n3'
-    if f.endswith('nt'): return 'nt'
-    return 'xml'
     
 
-def main(): 
+def _main(g, out, opts): 
     import rdflib    
     import sys
-    if len(sys.argv)>1:
-        gr=rdflib.Graph()
-        for f in sys.argv[1:]:
-            sys.stderr.write("Loading %s\n"%f)
-            gr.load(f, format=format_from_filename(f))
-    else:
+    if len(g)==0:
         import bookdb
-        gr=bookdb.bookdb
+        g=bookdb.bookdb
     
-    serve(gr, True)
+    serve(g, True)
+
+def main(): 
+    from rdfextras.utils.cmdlineutils import main as cmdmain
+    cmdmain(_main)
 
 if __name__=='__main__':
     main()

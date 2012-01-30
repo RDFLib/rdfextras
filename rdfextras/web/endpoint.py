@@ -97,19 +97,19 @@ def get(graph_):
     endpoint.config["graph"]=graph_
     return endpoint
 
-def main(): 
-    import rdflib
+
+def _main(g, out, opts): 
+    import rdflib    
     import sys
-    if len(sys.argv)>1:
-        gr=rdflib.Graph()
-        for f in sys.argv[1:]:
-            sys.stderr.write("Loading %s\n"%f)
-            gr.load(f, format=format_from_filename(f))
-    else:
+    if len(g)==0:
         import bookdb
-        gr=bookdb.bookdb
+        g=bookdb.bookdb
     
     serve(g, True)
+
+def main(): 
+    from rdfextras.utils.cmdlineutils import main as cmdmain
+    cmdmain(_main)
 
 if __name__=='__main__':
     main()
