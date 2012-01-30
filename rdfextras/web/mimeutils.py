@@ -15,8 +15,9 @@ N3_MIME="text/n3"
 TURTLE_MIME="text/turtle"
 RDFXML_MIME="application/rdf+xml"
 NTRIPLES_MIME="text/plain"
+JSONLD_MIME="application/json"
 
-FORMAT_MIMETYPE={ "rdf": RDFXML_MIME, "n3": N3_MIME, "nt": NTRIPLES_MIME, "turtle": TURTLE_MIME}
+FORMAT_MIMETYPE={ "rdf": RDFXML_MIME, "n3": N3_MIME, "nt": NTRIPLES_MIME, "turtle": TURTLE_MIME, "json-ld": JSONLD_MIME }
 MIMETYPE_FORMAT=dict(map(reversed,FORMAT_MIMETYPE.items()))
 
 def mime_to_format(mimetype): 
@@ -26,6 +27,7 @@ def mime_to_format(mimetype):
     
 def format_to_mime(format): 
     if format=='ttl': format='turtle'
+    if format=='json': format='json-ld'
     if format in FORMAT_MIMETYPE:
         return format, FORMAT_MIMETYPE[format]
     return "xml", RDFXML_MIME
