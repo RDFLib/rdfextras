@@ -29,7 +29,7 @@ Example usage::
         "@id": "http://example.org/about",
         "dc:title": {
             "@language": "en",
-            "@literal": "Someone's Homepage"
+            "@value": "Someone's Homepage"
         }
     }
 
