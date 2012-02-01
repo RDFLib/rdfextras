@@ -289,7 +289,7 @@ def page(label, type_=None):
         "picked":picked }
     p="lodpage.html"
         
-    if r==rdflib.RDFS.Class: 
+    if r==rdflib.RDFS.Class or r==rdflib.OWL.Class: 
         # page for all classes
         roots=graphutils.find_roots(g.graph, rdflib.RDFS.subClassOf, set(lod.config["types"]))
         params["classes"]=[graphutils.get_tree(g.graph, x, rdflib.RDFS.subClassOf, resolve) for x in roots]
@@ -300,9 +300,13 @@ def page(label, type_=None):
             if x[1]["url"]==rdflib.RDF.type:
                 inprops.remove(x)
 
-    elif rdflib.RDFS.Class in g.graph.objects(r,rdflib.RDF.type): 
+    elif (r, rdflib.RDF.type, rdflib.RDFS.Class) in g.graph or (r, rdflib.RDF.type, rdflib.OWL.Class) in g.graph:
         # page for a single class
+        
         params["classes"]=[graphutils.get_tree(g.graph, r, rdflib.RDFS.subClassOf, resolve)]
+        superClass=g.graph.value(r,rdflib.RDFS.subClassOf)
+        if superClass: 
+            params["classes"]=[(resolve(superClass), params["classes"])]
             
         params["instances"]=[]
         # show subclasses/instances only once

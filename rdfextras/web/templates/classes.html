@@ -7,7 +7,11 @@
 
 <ul>
 {% for node,children in classes recursive %}
+{% if resource==node.realurl %}
+<li><a href="{{node.url}}"><strong>{{node.label}}</strong></a>
+{% else %}
 <li><a href="{{node.url}}">{{node.label}}</a>
+{% endif %}
 {% if children %}
 <ul>
 {{ loop(children) }}
