@@ -50,12 +50,12 @@ is-a
 </thead>
 {% for v,p in inprops %}
 <tr class="{{ loop.cycle('odd', 'even') }}">
+	<td><a href='{{v.url}}'>{{v.label}}</a></td>
 	{% if p.url %}
   <td><a href='{{p.url}}'>{{p.label}}</a></td>
 	{% else %}
 	<td>{{p.label}}
 	{% endif %}
-	<td><a href='{{v.url}}'>{{v.label}}</a></td>
 </tr>
 {% endfor %}
 </table>
