@@ -1,3 +1,20 @@
+"""
+This is a Flask web-app for a simple Linked Open Data Web-app
+it also includes a SPARQL 1.0 Endpoint
+
+The application can be started from commandline:
+
+  python -m rdfextras.web.lod <RDF-file>
+
+and the file will be served from http://localhost:5000
+
+You can also start the server from your application by calling the :py:func:`serve` method
+or get the application object yourself by called :py:func:`get` function
+
+The application creates local URIs based on the type of resources 
+and servers content-negotiated HTML or serialised RDF from these.
+
+"""
 import re
 import rdflib
 import warnings
@@ -57,17 +74,20 @@ def resolve(r):
 
     return {url, realurl, label}
     """
+
+    if r==None:
+        return { 'url': None, 'realurl': None, 'label': None }
     if isinstance(r, rdflib.Literal): 
         return { 'url': None, 'realurl': None, 'label': get_label(r), 'lang': r.language }
         
     localurl=None
-    if lod.config["types"]==[None]: 
+    if lod.config["types"]=={None: None}:
         if (r, rdflib.RDF.type, None) in g.graph:
-            localurl=url_for("resource", label=urllib2.unquote(localname(r)))
+            localurl=url_for("resource", label=lod.config["resources"][None][r])
     else:
         for t in g.graph.objects(r,rdflib.RDF.type):
             if t in lod.config["types"]: 
-                localurl=url_for("resource", type_=lod.config["types"][t], label=urllib2.unquote(localname(r)))
+                localurl=url_for("resource", type_=lod.config["types"][t], label=lod.config["resources"][t][r])
                 break
     url=r
     if localurl: url=localurl
@@ -119,6 +139,9 @@ def reverse_types(types):
             warnings.warn(u"Multiple types for label '%s': (%s) rewriting to '%s_'"%(l,rtypes[l], l))           
             l+="_"
         rtypes[l]=t
+    types.clear()
+    for l,t in rtypes.iteritems():
+        types[t]=l
     return rtypes
 
             
@@ -145,6 +168,10 @@ def reverse_resources(resources):
                 
             rresources[t][l]=r
 
+        resources[t].clear()
+        for l,r in rresources[t].iteritems():
+            resources[t][r]=l
+
     return rresources
 
 
@@ -170,7 +197,8 @@ def download(format_):
     return serialize(g.graph, format_)
 
 @lod.route("/rdfgraph/<type_>/<rdf:label>.<format_>")
-def rdfgraph(label, type_, format_): 
+@lod.route("/rdfgraph/<rdf:label>.<format_>")
+def rdfgraph(label, format_,type_=None): 
     r=get_resource(label, type_)
     if isinstance(r,tuple): # 404
         return r
@@ -399,7 +427,7 @@ def get(graph, types='auto',image_patterns=["\.[png|jpg|gif]$"],
     if types=='auto':
         lod.config["types"]=detect_types(graph)
     elif types==None: 
-        lod.config["types"]=[None]
+        lod.config["types"]={None:None}
     else: 
         lod.config["types"]=types
 
@@ -420,12 +448,20 @@ def _main(g, out, opts):
     if len(g)==0:
         import bookdb
         g=bookdb.bookdb
-    
-    serve(g, True)
+
+    opts=dict(opts)
+    debug='-d' in opts
+    types='auto'
+    if '-t' in opts: 
+        types=[rdflib.URIRef(x) for x in opts['-t'].split(',')]
+    if '-n' in opts:
+        types=None
+ 
+    get(g, types=types).run(debug=debug)
 
 def main(): 
     from rdfextras.utils.cmdlineutils import main as cmdmain
-    cmdmain(_main)
+    cmdmain(_main, options='t:nd')
 
 if __name__=='__main__':
     main()
