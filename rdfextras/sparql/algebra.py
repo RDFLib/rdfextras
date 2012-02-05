@@ -1298,10 +1298,10 @@ class TestSPARQLAlgebra(unittest.TestCase):
 #                            "Unexpected ?mbox binding :\n %s" % ppd)
 
     def testExpressions(self):
-        from rdfextras.sparql.processor import Parse
+        from rdfextras.sparql.parser import parse
         global prolog
         for inExpr,outExpr in ExprTests:
-            p = Parse(inExpr)
+            p = parse(inExpr)
             prolog = p.prolog
             p = p.query.whereClause.parsedGraphPattern.graphPatterns
             if prolog is None:
@@ -1312,9 +1312,9 @@ class TestSPARQLAlgebra(unittest.TestCase):
             self.assertEquals(repr(reduce(ReduceToAlgebra,p,None)),outExpr)
 
     def testSimpleGraphPattern(self):
-        from rdfextras.sparql.processor import Parse
+        from rdfextras.sparql.parser import parse
         global prolog
-        p = Parse("BASE <http://example.com/> SELECT ?ptrec WHERE { GRAPH ?ptrec { ?data :foo 'bar'. } }")
+        p = parse("BASE <http://example.com/> SELECT ?ptrec WHERE { GRAPH ?ptrec { ?data :foo 'bar'. } }")
         prolog = p.prolog
         p = p.query.whereClause.parsedGraphPattern.graphPatterns
         if prolog is None:
@@ -1341,3 +1341,21 @@ class TestSPARQLAlgebra(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+# from rdfextras.sparql.algebra import ReduceGraphPattern
+# from rdfextras.sparql.algebra import ReduceToAlgebra
+# from rdfextras.sparql.algebra import RenderSPARQLAlgebra
+# from rdfextras.sparql.algebra import LoadGraph
+# from rdfextras.sparql.algebra import TopEvaluate
+# from rdfextras.sparql.algebra import fetchUnionBranchesRoots
+# from rdfextras.sparql.algebra import fetchChildren
+# from rdfextras.sparql.algebra import walktree
+# from rdfextras.sparql.algebra import print_tree
+# from rdfextras.sparql.algebra import AlgebraExpression
+# from rdfextras.sparql.algebra import EmptyGraphPatternExpression
+# from rdfextras.sparql.algebra import NonSymmetricBinaryOperator
+# from rdfextras.sparql.algebra import Join
+# from rdfextras.sparql.algebra import LeftJoin
+# from rdfextras.sparql.algebra import Union
+# from rdfextras.sparql.algebra import GraphExpression
+
