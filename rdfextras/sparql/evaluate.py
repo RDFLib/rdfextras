@@ -337,14 +337,14 @@ def createSPARQLPConstraint(filter,prolog):
     else:
         const = True
     if isinstance(reducedFilter,ParsedConditionalAndExpressionList):
-        combinationLambda = 'lambda(i): %s'%(' or '.join(
+        combinationLambda = 'lambda i: %s'%(' or '.join(
             ['%s'%mapToOperator(expr,prolog,combinationArg='i',constraint=const) \
                         for expr in reducedFilter]))
         if prolog.DEBUG:
             print "sparql-p operator(s): %s"%combinationLambda
         return eval(combinationLambda)
     elif isinstance(reducedFilter,ParsedRelationalExpressionList):
-        combinationLambda = 'lambda(i): %s'%(' and '.join(
+        combinationLambda = 'lambda i: %s'%(' and '.join(
             ['%s'%mapToOperator(expr,prolog,combinationArg='i',constraint=const) \
                          for expr in reducedFilter]))
         if prolog.DEBUG:
@@ -356,7 +356,7 @@ def createSPARQLPConstraint(filter,prolog):
             print "sparql-p operator(s): %s"%rt
         return eval(rt)
     elif isinstance(reducedFilter,(ParsedAdditiveExpressionList,UnaryOperator,FunctionCall)):
-        rt='lambda(i): %s'%(
+        rt='lambda i: %s'%(
             mapToOperator(reducedFilter,prolog,combinationArg='i',constraint=const))
         if prolog.DEBUG:
             print "sparql-p operator(s): %s"%rt
