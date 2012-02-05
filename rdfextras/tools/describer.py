@@ -101,11 +101,11 @@ Full example in the ``to_rdf`` method below::
 """
 import sys
 if sys.version_info[:2] == (2,4):
-    pass
+    from contextlib import contextmanager
 elif sys.version_info[:2] < (2, 6):
+    from contextlib import contextmanager # bizarre but necessary for 2to3 syntax sanity
     from __future__ import with_statement
 
-from contextlib import contextmanager
 from rdflib.graph import Graph
 from rdflib.namespace import RDF
 from rdflib.namespace import RDFS
