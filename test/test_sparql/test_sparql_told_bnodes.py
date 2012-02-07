@@ -62,7 +62,7 @@ store="IOMemory"
 debug=False
 
 if __name__ == '__main__':
-    import doctest, sys
+    # import doctest, sys
     from optparse import OptionParser
     usage = '''usage: %prog [options]'''
     op = OptionParser(usage=usage)
