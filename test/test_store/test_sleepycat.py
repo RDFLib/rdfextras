@@ -53,5 +53,10 @@ class SleepycatStoreTestCase(test_context.ContextTestCase):
     
     def testStatement(self):
         pass
-    
-testN3Store("Sleepycat", "/var/tmp/test")
+
+testdir = "/var/tmp/test"
+testN3Store("Sleepycat", testdir)
+import os
+for f in os.listdir(testdir):
+    os.unlink(testdir+'/'+f)
+os.rmdir(testdir)
