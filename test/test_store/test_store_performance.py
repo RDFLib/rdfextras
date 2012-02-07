@@ -7,8 +7,6 @@ from random import random
 from tempfile import mkdtemp
 from tempfile import mkstemp
 from rdflib import Graph
-from rdflib import plugin
-from rdflib import store
 from rdflib import URIRef
 
 def random_uri():
@@ -72,7 +70,7 @@ class StoreTestCase(unittest.TestCase):
                     os.remove(self.path)
     
     def testTime(self):
-        number = 1
+        # number = 1
         print('"%s": [' % self.store)
         for i in ['500triples', '1ktriples', '2ktriples', 
                   '3ktriples', '5ktriples', '10ktriples',
@@ -81,6 +79,7 @@ class StoreTestCase(unittest.TestCase):
             res = self._testInput(inputloc)
             print("%s," % res.strip())
         print("],")
+    
     def _testInput(self, inputloc):
         number = 1
         store = self.graph
@@ -95,13 +94,6 @@ class StoreTestCase(unittest.TestCase):
         t1 = time()
         return "%.3g " % (t1 - t0)
 
-class KyotoCabinetStoreTestCase(StoreTestCase):
-    store = "KyotoCabinet"
-    def setUp(self):
-        self.store = "KyotoCabinet"
-        self.path = '/tmp/test'
-        StoreTestCase.setUp(self)
-
 class SleepycatStoreTestCase(StoreTestCase):
     store = "Sleepycat"
     def setUp(self):
@@ -109,51 +101,6 @@ class SleepycatStoreTestCase(StoreTestCase):
         self.path = '/tmp/test'
         StoreTestCase.setUp(self)
 
-class BDBOptimizedStoreTestCase(StoreTestCase):
-    store = "BDBOptimized"
-    def setUp(self):
-        print("Setting up BDBOptimized")
-        self.store = "BDBOptimized"
-        self.path = '/tmp/test'
-        StoreTestCase.setUp(self)
-
-class BerkeleyDBStoreTestCase(StoreTestCase):
-    store = "BerkeleyDB"
-    def setUp(self):
-        print("Setting up BerkeleyDB")
-        self.store = "BerkeleyDB"
-        self.path = '/tmp/bdbtest'
-        StoreTestCase.setUp(self)
-
-class SQLiteStoreTestCase(StoreTestCase):
-    store = "SQLite"
-    def setUp(self):
-        self.store = "SQLite"
-        self.path = "/tmp/sqlitetest"
-        StoreTestCase.setUp(self)
-
-class ZODBStoreTestCase(StoreTestCase):
-    non_standard_dep = True
-    store = "ZODBGraph"
-    def setUp(self):
-        self.store = "ZODBGraph"
-        self.path = '/tmp/zodbtest'
-        StoreTestCase.setUp(self)
-
-class MySQLTestCase(StoreTestCase):
-    non_standard_dep = True
-    store = "MySQL"
-    def setUp(self):
-        self.store = "MySQL"
-        self.path = 'user=gjh,password=n0rthw1nd,host=localhost,db=test"'
-        StoreTestCase.setUp(self)
-
-class PostgreSQLStoreTestCase(StoreTestCase):
-    store = "PostgreSQL"
-    def setUp(self):
-        self.store = "PostgreSQL"
-        self.path = 'user=gjh,password=n0rthw1nd,host=localhost,db=test"'
-        StoreTestCase.setUp(self)
 
 if __name__ == '__main__':
     unittest.main()

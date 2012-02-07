@@ -6,7 +6,6 @@ import textwrap
 from time import time
 from random import random
 from tempfile import mkdtemp
-from tempfile import mkstemp
 from rdflib import Graph
 from rdflib import Namespace
 from rdflib import URIRef
@@ -40,30 +39,8 @@ class StoreTestCase(unittest.TestCase):
         gc.collect()
         gc.disable()
         
-        # self.graph = Graph(store=self.store_name)
-        # if not self.path:
-        #     a_tmp_dir = mkdtemp(prefix='rdfextras_test',dir='/tmp')
-        #     print("Persisting in %s" % a_tmp_dir)
-        #     self.path = self.path or a_tmp_dir
-        # self.graph.open(self.path)
-        
         self.graph = Graph(store=self.store)
-        if self.store == "MySQL":
-            from test_mysql import configString
-            from rdfextras.store.MySQL import MySQL
-            path=configString
-            MySQL().destroy(path)
-        elif self.store == "PostgreSQL":
-            from test_postgresql import configString
-            from rdfextras.store.PostgreSQL import PostgreSQL
-            path=configString
-            PostgreSQL().destroy(path)
-        elif not self.path and self.store == "SQLite":
-            path = mkstemp(dir="/tmp", prefix="test", suffix='.sqlite')[1]
-        elif not self.path and self.store in ["sqlobject", "SQLAlchemy", "Elixir"]:
-            path = mkstemp(dir="/tmp", prefix="test", suffix='.db')[1]
-            path = 'sqlite://'+path
-        elif not self.path:
+        if not self.path:
             path = mkdtemp()
         else:
             path = self.path
@@ -101,10 +78,6 @@ class StoreTestCase(unittest.TestCase):
         for i in itertools.repeat(None, number):
             res += self._testQuery()
         print("std query: %s" % res)
-        # res = ""
-        # for i in itertools.repeat(None, number):
-        #     res += self._testRandom()
-        # print("random # of triples: %s" % res)
     
     def _testRandom(self):
         number = len(self.input)
@@ -166,8 +139,6 @@ class StoreTestCase(unittest.TestCase):
         t1 = time()
         return "%.3g " % (t1 - t0)
 
-
-
 try:
     class SleepycatStoreTestCase(StoreTestCase):
         def setUp(self):
@@ -176,24 +147,6 @@ try:
             StoreTestCase.setUp(self)
 except ImportError, e:
     print("Can not test Sleepycat store:", e)
-
-try:
-    class BDBOptimizedStoreTestCase(StoreTestCase):
-        def setUp(self):
-            self.store = "BDBOptimized"
-            self.path = '/var/tmp/bdbotest'
-            StoreTestCase.setUp(self)
-except ImportError, e:
-    print("Can not test BDBOptimized store:", e)
-
-try:
-    class BerkeleyDBStoreTestCase(StoreTestCase):
-        def setUp(self):
-            self.store = "BerkeleyDB"
-            self.path = '/var/tmp/bdbtest'
-            StoreTestCase.setUp(self)
-except ImportError, e:
-    print("Can not test BerkeleyDB store:", e)
 
 if __name__ == '__main__':
     unittest.main()
