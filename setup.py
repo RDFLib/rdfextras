@@ -109,12 +109,6 @@ config.update(
         'nose.plugins': [
             'EARLPlugin = rdfextras.tools.EARLPlugin:EARLPlugin',
         ],
-        'rdf.plugins.parser': [
-            'rdf-json = rdfextras.parsers.rdfjson:RdfJsonParser',
-        ],
-        'rdf.plugins.serializer': [
-            'rdf-json = rdfextras.serializers.rdfjson:RdfJsonSerializer',
-        ],
     },
     #namespace_packages = ['rdfextras'], # TODO: really needed?
     install_requires = install_requires,
