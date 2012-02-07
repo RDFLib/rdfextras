@@ -12,7 +12,8 @@ about to the referenced resource for the context scope (for use with the
 ``with`` statement).
 
 Full example in the ``to_rdf`` method below::
-
+    
+    >>> from __future__ import with_statement
     >>> import datetime
     >>> from rdflib.graph import Graph
     >>> from rdflib.namespace import Namespace, RDFS
@@ -99,16 +100,9 @@ Full example in the ``to_rdf`` method below::
     True
 
 """
-import sys
-if sys.version_info[:2] == (2,4):
-    from contextlib import contextmanager
-elif sys.version_info[:2] < (2, 6):
-    from contextlib import contextmanager # bizarre but necessary for 2to3 syntax sanity
-    from __future__ import with_statement
-
+from contextlib import contextmanager
 from rdflib.graph import Graph
 from rdflib.namespace import RDF
-from rdflib.namespace import RDFS
 from rdflib.term import BNode
 from rdflib.term import Identifier
 from rdflib.term import Literal
@@ -179,6 +173,7 @@ class Describer(object):
 
         Usage::
 
+            >>> from __future__ import with_statement
             >>> from rdflib import URIRef
             >>> from rdflib.namespace import RDF, RDFS
             >>> d = Describer(about="/", base="http://example.org/")
@@ -215,6 +210,7 @@ class Describer(object):
 
         Usage::
 
+            >>> from __future__ import with_statement
             >>> from rdflib import URIRef
             >>> from rdflib.namespace import RDF, RDFS
             >>> d = Describer(about="http://example.org/")
