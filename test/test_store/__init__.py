@@ -4,6 +4,9 @@ from rdflib import query
 #from .test_context import ContextTestCase
 #from .test_graph import GraphTestCase
 
+import sys # sop to Hudson
+sys.path.insert(0, '/var/lib/tomcat6/webapps/hudson/jobs/rdfextras')
+
 plugin.register(
         'sparql', query.Processor,
         'rdfextras.sparql.processor', 'Processor')
@@ -21,28 +24,8 @@ plugin.register(
         'rdfextras.store.BDBOptimized', 'BDBOptimized')
 
 plugin.register(
-        'MySQL', store.Store,
-        'rdfextras.store.MySQL', 'MySQL')
-
-plugin.register(
-        'PostgreSQL', store.Store,
-        'rdfextras.store.PostgreSQL', 'PostgreSQL')
-
-plugin.register(
         'SPARQL', store.Store,
         'rdfextras.store.SPARQL', 'SPARQLStore')
-
-plugin.register(
-        'SQLite', store.Store,
-        'rdfextras.store.SQLite', 'SQLite')
-
-plugin.register(
-        'ZODB', store.Store,
-        'rdfextras.store.ZODB', 'ZODBGraph')
-
-plugin.register(
-        'KyotoCabinet', store.Store,
-        'rdfextras.store.KyotoCabinet', 'KyotoCabinet')
 
 # SQLObject schemes
 # scheme://[user[:password]@]host[:port]/database[?parameters]

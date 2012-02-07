@@ -1,7 +1,7 @@
 from rdflib import URIRef, RDF, ConjunctiveGraph
 
 from rdflib.parser import StringInputSource
-
+from rdflib.py3compat import b
 
 import rdflib
 rdflib.plugin.register('sparql', rdflib.query.Processor,
@@ -13,17 +13,17 @@ rdflib.plugin.register('sparql', rdflib.query.Result,
 def testSPARQLNotEquals():
     NS = u"http://example.org/"
     graph = ConjunctiveGraph()
-    graph.parse(StringInputSource("""
+    graph.parse(StringInputSource(b("""
        @prefix    : <http://example.org/> .
        @prefix rdf: <%s> .
        :foo rdf:value 1.
-       :bar rdf:value 2.""" % RDF.uri), format="n3")
-    rt = graph.query("""SELECT ?node 
-                        WHERE {
-                                ?node rdf:value ?val.
-                                FILTER (?val != 1)
-                               }""",
-                           initNs={'rdf': RDF.uri},
+       :bar rdf:value 2.""") % RDF.uri), format="n3")
+    rt = graph.query(b("""SELECT ?node 
+                            WHERE {
+                                    ?node rdf:value ?val.
+                                    FILTER (?val != 1)
+                                   }"""),
+                           initNs={b('rdf'): RDF.uri},
                            DEBUG=False)
     for row in rt:        
         item = row[0]

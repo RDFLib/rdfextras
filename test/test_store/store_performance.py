@@ -156,33 +156,6 @@ try:
 except ImportError, e:
     print("Can not test BerkeleyDB store:", e)
 
-try:
-    from rdfextras.store.PostgreSQL import PostgreSQL
-    class PostgreSQLStoreTestCase(StoreTestCase):
-        store = "PostgreSQL"
-except ImportError, e:
-    print("Can not test PostgreSQL store:", e)
-
-
-try:
-    class SQLiteStoreTestCase(StoreTestCase):
-        def setUp(self):
-            self.store = "SQLite"
-            self.path = "/tmp/test"
-            StoreTestCase.setUp(self)
-except ImportError, e:
-    print("Can not test SQLite store:", e)
-
-try:
-    # If we can import persistent then test ZODB store
-    class ZODBStoreTestCase(StoreTestCase):
-        non_standard_dep = True
-        def setUp(self):
-            self.store = "ZODB"
-            self.path = '/tmp/test'
-            StoreTestCase.setUp(self)
-except ImportError, e:
-    print("Can not test ZODB store:", e)
 # 
 # try:
 #     import RDF

@@ -169,15 +169,6 @@ class StoreTestCase(unittest.TestCase):
 
 
 try:
-    class KyotoCabinetStoreTestCase(StoreTestCase):
-        def setUp(self):
-            self.store = "KyotoCabinet"
-            self.path = "/var/tmp/kctest"
-            StoreTestCase.setUp(self)
-except ImportError, e:
-    print("Can not test KyotoCabinet store:", e)
-
-try:
     class SleepycatStoreTestCase(StoreTestCase):
         def setUp(self):
             self.store = "Sleepycat"
@@ -203,39 +194,6 @@ try:
             StoreTestCase.setUp(self)
 except ImportError, e:
     print("Can not test BerkeleyDB store:", e)
-
-try:
-    class PostgreSQLStoreTestCase(StoreTestCase):
-        store = "PostgreSQL"
-except ImportError, e:
-    print("Can not test PostgreSQL store:", e)
-
-try:
-    class SQLiteStoreTestCase(StoreTestCase):
-        def setUp(self):
-            self.store = "SQLite"
-            self.path = "/var/tmp/sqlitetest"
-            StoreTestCase.setUp(self)
-except ImportError, e:
-    print("Can not test SQLite store:", e)
-
-try:
-    class ZODBStoreTestCase(StoreTestCase):
-        non_standard_dep = True
-        def setUp(self):
-            self.store = "ZODBGraph"
-            self.path = '/var/tmp/zodbtest'
-            StoreTestCase.setUp(self)
-except ImportError, e:
-    print("Can not test ZODB store:", e)
-
-try:
-    class MySQLTestCase(StoreTestCase):
-        non_standard_dep = True
-        store = "MySQL"
-except ImportError, e:
-    print("Can not test MySQL store:", e)
-
 
 if __name__ == '__main__':
     unittest.main()
