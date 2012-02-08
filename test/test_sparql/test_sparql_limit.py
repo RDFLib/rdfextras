@@ -67,7 +67,7 @@ class TestLimit(unittest.TestCase):
            graph.parse(StringIO(test_data2), format="n3")
            results = list(graph.query(test_query2,DEBUG=True))
            print graph.query(test_query2).serialize(format='xml')
-           self.assertEqual(len(results) == 1)
+           self.assertEqual(len(results), 1)
            for title,price in results:    
                self.assertTrue(title in [Literal("Java Tutorial"),
                                          Literal("COBOL Tutorial")])    
