@@ -198,7 +198,7 @@ def refer_component(component, initial_args=None, projection=None, **kwargs):
         def apply(results):
             if DEBUG:
                 log.debug(component)
-                debug(results)
+                log.debug(results)
             return component(*results.asList(), **kwargs)
     else:
         def apply(results):
