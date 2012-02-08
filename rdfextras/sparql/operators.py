@@ -31,13 +31,17 @@ from rdflib.namespace import Namespace, XSD
 from rdfextras.sparql.graph import _createResource
 from rdfextras.sparql import _questChar, Debug
 
+# We replace str with a custom function below. This messes things up after
+# 2to3 conversion, which replaces basestring with str. At some point, we should
+# clean this up properly - i.e. don't override the builtin str.
+str_ = basestring
 
 ##
 # Boolean test whether this is a a query string or not
 # @param v the value to be checked
 # @return True if it is a query string
 def queryString(v) :
-    return isinstance(v,basestring) and len(v) != 0 and v[0] == _questChar
+    return isinstance(v,str_) and len(v) != 0 and v[0] == _questChar
 
 ##
 # Return the value in a literal, making on the fly conversion on datatype (using the datatypes that are implemented)
