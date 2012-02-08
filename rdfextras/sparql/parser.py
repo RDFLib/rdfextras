@@ -132,16 +132,16 @@ if DEBUG:
 def composition(callables):
     def composed(arg):
         result = arg
-        for callable in callables:
-            result = callable(result)
+        for func in callables:
+            result = func(result)
         return result
     return composed
 
 def composition2(callables):
     def composed(*args):
         result = args
-        for callable in callables:
-            result = [callable(*result)]
+        for func in callables:
+            result = [func(*result)]
         return result[0]
     return composed
 
