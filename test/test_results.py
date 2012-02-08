@@ -18,7 +18,7 @@ class TestSparqlResultsFormats(unittest.TestCase):
         r=rdflib.query.Result.parse(StringIO(s), format=format)
         s=r.serialize(format=format)
         #print s
-        r2=rdflib.query.Result.parse(StringIO(s.encode('utf-8')), format=format)
+        r2=rdflib.query.Result.parse(StringIO(s.decode('utf-8')), format=format)
         self.assertEqual(r,r2)
 
     

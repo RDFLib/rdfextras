@@ -107,13 +107,15 @@ class TestSparqlJsonResults(unittest.TestCase):
 
     def _query_result_contains(self, query, correct):
         results = self.graph.query(query)
-        result_json = json.loads(results.serialize(format='json'))
+        result_json = json.loads(results.serialize(format='json').decode('utf-8'))
 
         msg = "Expected:\n %s \n- to contain:\n%s" % (result_json, correct)
-        self.failUnless(result_json["head"]==correct["head"], msg)
+        self.assertEqual(result_json["head"], correct["head"], msg)
 
-        result_bindings = sorted(result_json["results"]["bindings"])
-        correct_bindings = sorted(correct["results"]["bindings"])
+        # Sort by repr - rather a hack, but currently the best way I can think
+        # of to ensure the results are in the same order.
+        result_bindings = sorted(result_json["results"]["bindings"], key=repr)
+        correct_bindings = sorted(correct["results"]["bindings"], key=repr)
         msg = "Expected:\n %s \n- to contain:\n%s" % (result_bindings, correct_bindings)
         self.failUnless(result_bindings==correct_bindings, msg)
 

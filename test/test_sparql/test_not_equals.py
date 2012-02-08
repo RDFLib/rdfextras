@@ -17,13 +17,13 @@ def testSPARQLNotEquals():
        @prefix    : <http://example.org/> .
        @prefix rdf: <%s> .
        :foo rdf:value 1.
-       :bar rdf:value 2.""") % RDF.uri), format="n3")
-    rt = graph.query(b("""SELECT ?node 
+       :bar rdf:value 2.""" % RDF.uri)), format="n3")
+    rt = graph.query("""SELECT ?node 
                             WHERE {
                                     ?node rdf:value ?val.
                                     FILTER (?val != 1)
-                                   }"""),
-                           initNs={b('rdf'): RDF.uri},
+                                   }""",
+                           initNs={'rdf': RDF.uri},
                            DEBUG=False)
     for row in rt:        
         item = row[0]

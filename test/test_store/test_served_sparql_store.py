@@ -2,7 +2,11 @@ import unittest
 import threading
 import rdflib
 import rdfextras
-import rdfextras.web.endpoint
+try:
+    import rdfextras.web.endpoint
+    webserver = True
+except:
+    webserver = False
 import rdfextras.store.SPARQL
 
 rdflib.plugin.register('sparql', rdflib.query.Processor,
@@ -16,8 +20,11 @@ rdflib.plugin.register('xml', rdflib.query.ResultSerializer,
 
 
 class TestSPARQLStore(unittest.TestCase): 
-
-    def testSPARQLStore(self): 
+    def testSPARQLStore(self):
+        # The mechanisms to properly skip tests are only in Python 2.7/3.1
+        if not webserver:
+            return "Skipped test - web server not available."
+        
         g=rdflib.Graph()
 
         data="""<http://example.org/book/book1> <http://purl.org/dc/elements/1.1/title> "SPARQL Tutorial" .

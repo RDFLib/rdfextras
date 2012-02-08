@@ -6,7 +6,7 @@ from rdflib import URIRef
 from rdflib.store import NodePickler
 
 
-canned_result = """\
+canned_result = u"""\
 <?xml version="1.0" encoding="UTF-8"?>
 <rdf:RDF
    xmlns:ns1="http://example.org/foo#"
@@ -16,7 +16,7 @@ canned_result = """\
     <ns1:bar2 rdf:resource="http://example.org/foo#bar3"/>
   </rdf:Description>
 </rdf:RDF>
-"""
+""".encode('utf-8')
 
 class UtilTestCase(unittest.TestCase):
     storetest = True
@@ -34,7 +34,7 @@ class UtilTestCase(unittest.TestCase):
         g.add((URIRef("http://example.org/foo#bar1"),
                URIRef("http://example.org/foo#bar2"),
                URIRef("http://example.org/foo#bar3")))
-        assert g.serialize() == canned_result
+        self.assertEqual(g.serialize(), canned_result)
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')
