@@ -12,6 +12,12 @@ from rdfextras.sparql import SPARQLError
 from rdfextras.sparql.graph import SPARQLGraph
 from rdfextras.sparql.graph import GraphPattern
 
+try:
+    # Used in Python 2.7 and 3.x for cmp_to_key
+    import functools
+except ImportError:
+    functools = None
+
 class SessionBNode(BNode):
     """
     Special 'session' BNodes.  I.e., BNodes at the query side which refer to 
@@ -994,7 +1000,12 @@ class Query :
                                 elif val1 < val2 : return 1
                 return 0
         # get the full Binding sorted
-        fullBinding.sort(_sortBinding)
+        try:
+            keyfunc = functools.cmp_to_key(_sortBinding)
+            fullBinding.sort(key=keyfunc)
+        except AttributeError:
+            # Python < 2.7
+            fullBinding.sort(cmp=_sortBinding)
         
         # remember: _processResult turns the expansion results (an array of dictionaries)
         # into an array of tuples in the right, original order
