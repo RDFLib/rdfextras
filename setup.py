@@ -106,9 +106,6 @@ config.update(
             'sparqlendpointapp = rdfextras.web.endpoint:main',
             'rdflodapp = rdfextras.web.lod:main',                
         ],
-        'nose.plugins': [
-            'EARLPlugin = rdfextras.tools.EARLPlugin:EARLPlugin',
-        ],
     },
     #namespace_packages = ['rdfextras'], # TODO: really needed?
     install_requires = install_requires,

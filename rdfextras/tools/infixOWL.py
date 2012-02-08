@@ -39,11 +39,11 @@ We can then access the rdfs:subClassOf relationships
 
 This can also be used against already populated graphs:
 
-#>>> owlGraph = Graph().parse(OWL_NS)
-#>>> namespace_manager.bind('owl', OWL_NS, override=False)
-#>>> owlGraph.namespace_manager = namespace_manager
-#>>> list(Class(OWL_NS.Class,graph=owlGraph).subClassOf)
-#[Class: rdfs:Class ]
+>>> owlGraph = Graph().parse(OWL_NS)
+>>> namespace_manager.bind('owl', OWL_NS, override=False)
+>>> owlGraph.namespace_manager = namespace_manager
+>>> list(Class(OWL_NS.Class,graph=owlGraph).subClassOf)
+[Class: rdfs:Class ]
 
 Operators are also available.  For instance we can add ex:Opera to the extension
 of the ex:CreativeWork class via the '+=' operator
@@ -52,7 +52,7 @@ of the ex:CreativeWork class via the '+=' operator
 Class: ex:Opera SubClassOf: ex:MusicalWork
 >>> b = Class(exNs.CreativeWork,graph=g)
 >>> b += a
->>> print list(a.subClassOf) # doctest +SKIP
+>>> list(a.subClassOf) #doctest: +SKIP
 [Class: ex:CreativeWork , Class: ex:MusicalWork ]
 
 And we can then remove it from the extension as well

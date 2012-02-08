@@ -5,7 +5,6 @@ import itertools
 from time import time
 from random import random
 from tempfile import mkdtemp
-from tempfile import mkstemp
 from rdflib import Graph
 from rdflib import URIRef
 
@@ -29,22 +28,7 @@ class StoreTestCase(unittest.TestCase):
         gc.disable()
         
         self.graph = Graph(store=self.store)
-        if self.store == "MySQL":
-            from test_mysql import configString
-            from rdfextras.store.MySQL import MySQL
-            path=configString
-            MySQL().destroy(path)
-        elif self.store == "PostgreSQL":
-            from test_postgresql import configString
-            from rdfextras.store.PostgreSQL import PostgreSQL
-            path=configString
-            PostgreSQL().destroy(path)
-        elif not self.path and self.store == "SQLite":
-            path = mkstemp(dir="/tmp", prefix="test", suffix='.sqlite')[1]
-        elif not self.path and self.store in ["sqlobject", "SQLAlchemy", "Elixir"]:
-            path = mkstemp(dir="/tmp", prefix="test", suffix='.db')[1]
-            path = 'sqlite://'+path
-        elif not self.path:
+        if not self.path:
             path = mkdtemp()
         else:
             path = self.path
