@@ -28,15 +28,10 @@ try:
 except ImportError:
     raise Exception("SPARQLWrapper not found! SPARQL Store will not work. Install with 'easy_install SPARQLWrapper'")
 
-# try:
-#     from xml import etree
-# except ImportError:
-#     import elementtree as etree
-
 try:
-    from xml.etree import ElementTree
+    from xml import etree
 except ImportError:
-    from elementtree import ElementTree
+    import elementtree as etree
 
 from rdfextras.store.REGEXMatching import NATIVE_REGEX
 
@@ -51,7 +46,7 @@ import urlparse
 BNODE_IDENT_PATTERN = re.compile('(?P<label>_\:[^\s]+)')
 SPARQL_NS        = Namespace('http://www.w3.org/2005/sparql-results#')
 sparqlNsBindings = {u'sparql':SPARQL_NS}
-ElementTree._namespace_map["sparql"]=SPARQL_NS
+etree.ElementTree._namespace_map["sparql"]=SPARQL_NS
 
 def TraverseSPARQLResultDOM(doc,asDictionary=False):
     """
@@ -143,7 +138,7 @@ class SPARQLResult(QueryResult):
     graph : as an RDFLib Graph - for CONSTRUCT and DESCRIBE queries
     """
     def __init__(self,result):
-        self.result    = ElementTree.parse(result)
+        self.result    = etree.ElementTree.parse(result)
         self.noAnswers = 0
         self.askAnswer = None
 
@@ -308,7 +303,7 @@ class SPARQLStore(SPARQLWrapper,Store):
 
         self.setQuery(query)
         
-        doc = ElementTree.parse(SPARQLWrapper.query(self).response)
+        doc = etree.ElementTree.parse(SPARQLWrapper.query(self).response)
         #xml.etree.ElementTree.dump(doc)
         for rt,vars in TraverseSPARQLResultDOM(doc,asDictionary=True):
             
@@ -336,7 +331,7 @@ class SPARQLStore(SPARQLWrapper,Store):
 
             self.setQuery(q)
         
-            doc = ElementTree.parse(SPARQLWrapper.query(self).response)
+            doc = etree.ElementTree.parse(SPARQLWrapper.query(self).response)
             rt,vars=iter(TraverseSPARQLResultDOM(doc,asDictionary=True)).next()
             return int(rt.get(Variable("c")))
 
