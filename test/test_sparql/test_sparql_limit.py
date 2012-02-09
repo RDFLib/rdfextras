@@ -60,16 +60,16 @@ class TestLimit(unittest.TestCase):
         graph.parse(StringIO(test_data), format="n3")
         results = graph.query(test_query,DEBUG=True)
         print len(results)
-        self.failUnless(len(results) == 2)
+        self.assertEqual(len(results), 2)
         
     def testLimit2(self):
            graph = ConjunctiveGraph(plugin.get('IOMemory',Store)())
            graph.parse(StringIO(test_data2), format="n3")
            results = list(graph.query(test_query2,DEBUG=True))
            print graph.query(test_query2).serialize(format='xml')
-           self.failUnless(len(results) == 1)
+           self.assertEqual(len(results), 1)
            for title,price in results:    
-               self.failUnless(title in [Literal("Java Tutorial"),
+               self.assertTrue(title in [Literal("Java Tutorial"),
                                          Literal("COBOL Tutorial")])    
 
 if __name__ == "__main__":
