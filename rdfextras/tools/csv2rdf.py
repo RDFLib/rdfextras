@@ -102,7 +102,7 @@ def prefixuri(x, prefix, class_=None):
 # meta-language for config
 
 class NodeMaker(object):
-    def domain(self):
+    def range(self):
         return rdflib.RDFS.Literal
     def __call__(self,x):
         return rdflib.Literal(x)
@@ -113,7 +113,7 @@ class NodeUri(NodeMaker):
         self.class_=rdflib.URIRef(class_)
     def __call__(self, x):
         return prefixuri(x, self.prefix, self.class_)
-    def domain(self):
+    def range(self):
         return self.class_ or rdflib.RDF.Resource
 
 class NodeLiteral(NodeMaker):
@@ -126,7 +126,7 @@ class NodeFloat(NodeLiteral):
         if callable(self.f): 
             return rdflib.Literal(float(self.f(x)))
         raise Exception("Function passed to float is not callable")        
-    def domain(self): return rdflib.XSD.float
+    def range(self): return rdflib.XSD.double
 
 class NodeInt(NodeLiteral):
     def __call__(self,x): 
@@ -135,7 +135,7 @@ class NodeInt(NodeLiteral):
         if callable(self.f): 
             return rdflib.Literal(int(self.f(x)))
         raise Exception("Function passed to int is not callable")        
-    def domain(self): return rdflib.XSD.int
+    def range(self): return rdflib.XSD.int
 
 class NodeReplace(NodeMaker):
     def __init__(self,a,b):
@@ -147,7 +147,7 @@ class NodeReplace(NodeMaker):
 class NodeDate(NodeLiteral):
     def __call__(self, x):
         return rdflib.Literal(datetime.datetime.strptime(x,self.f))
-    def domain(self): return rdflib.XSD.dateTime
+    def range(self): return rdflib.XSD.dateTime
 
 class NodeSplit(NodeMaker):
     def __init__(self,sep,f):
@@ -157,10 +157,10 @@ class NodeSplit(NodeMaker):
         if not self.f: f=rdflib.Literal
         if not callable(self.f): raise Exception("Function passed to split is not callable!")
         return [self.f(y.strip()) for y in x.split(self.sep) if y.strip()!=""]
-    def domain(self):
+    def range(self):
         if self.f and isinstance(self.f, NodeMaker):
-            return self.f.domain()
-        return NodeMaker.domain(self)
+            return self.f.range()
+        return NodeMaker.range(self)
 
 default_node_make=NodeMaker()
 
@@ -267,7 +267,7 @@ class CSV2RDF(object):
                 self.triple(h, RDF.type, RDF.Property)
                 self.triple(h, RDFS.label, rdflib.Literal(toPropertyLabel(l)))
                 self.triple(h, RDFS.domain, self.CLASS)
-                self.triple(h, RDFS.range, self.COLUMNS.get(i,default_node_make).domain())
+                self.triple(h, RDFS.range, self.COLUMNS.get(i,default_node_make).range())
 
         rows=0
         for l in csvreader:
