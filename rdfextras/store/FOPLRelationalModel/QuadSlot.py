@@ -59,7 +59,7 @@ def normalizeValue(value, termType, useSignedInts=False):
         value = u'http://www.w3.org/2002/07/owl#NothingU'
     else:
         value = (isinstance(value, Graph) \
-                        and value.identifier or str(value)) + termType
+                        and value.identifier or str(value.encode('utf-8'))) + termType
     unsigned_hash = int(md5(
                       isinstance(value, unicode) and value.encode('utf-8')
                                                  or value)
