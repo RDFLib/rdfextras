@@ -3,6 +3,7 @@ from rdflib.store import Store
 from rdflib import plugin
 from rdflib.parser import StringInputSource
 from rdflib.graph import Graph
+from rdflib.py3compat import b
 import unittest,sys
 
 import rdflib
@@ -40,12 +41,12 @@ class TestSPARQLAbbreviations(unittest.TestCase):
     def setUp(self):
         NS = u"http://example.org/"
         self.graph = Graph(store)
-        self.graph.parse(StringInputSource("""
+        self.graph.parse(StringInputSource(b("""
            @prefix    : <http://example.org/> .
            @prefix rdf: <%s> .
            @prefix rdfs: <%s> .
            [ :prop :val ].
-           [ a rdfs:Class ]."""%(RDF,RDFS)), format="n3")
+           [ a rdfs:Class ]."""%(RDF,RDFS))), format="n3")
 
     def testTypeAbbreviation(self):
         query = """SELECT ?subj WHERE { ?subj a rdfs:Class }"""

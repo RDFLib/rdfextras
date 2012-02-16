@@ -1,5 +1,6 @@
 import rdflib
 from rdflib.graph import ConjunctiveGraph
+from rdflib.py3compat import b
 from StringIO import StringIO
 import re
 import unittest
@@ -35,15 +36,17 @@ SELECT ?s ?o WHERE { ?s ?p ?o . }
 expected_fragments = [
     #u"""<sparql:sparql xmlns="http://www.w3.org/2005/sparql-results#"><sparql:head>""",
 
-    u"""</sparql:head><sparql:results>""",
+    b("</sparql:head><sparql:results>"),
 
-    u"""<sparql:binding name="s"><sparql:uri>http://example.org/word</sparql:uri></sparql:binding>""",
+    b('<sparql:binding name="s"><sparql:uri>http://example.org/word</sparql:uri></sparql:binding>'),
 
-    u"""<sparql:binding name="o"><sparql:bnode>""",
+    b('<sparql:binding name="o"><sparql:bnode>'),
 
-    u"""<sparql:binding name="o"><sparql:literal datatype="http://www.w3.org/2001/XMLSchema#integer">1</sparql:literal></sparql:binding>""",
+    b('<sparql:binding name="o"><sparql:literal datatype="http://www.w3.org/2001/XMLSchema#integer">1</sparql:literal></sparql:binding>'),
 
-    u"""<sparql:result><sparql:binding name="s"><sparql:uri>http://example.org/word</sparql:uri></sparql:binding><sparql:binding name="o"><sparql:literal xml:lang="en">Word</sparql:literal></sparql:binding></sparql:result>"""
+    b('<sparql:result><sparql:binding name="s"><sparql:uri>http://example.org/word</sparql:uri>'
+      '</sparql:binding><sparql:binding name="o"><sparql:literal xml:lang="en">Word</sparql:literal>'
+      '</sparql:binding></sparql:result>')
 ]
 
 
@@ -73,8 +76,8 @@ class TestSparqlXmlResults(unittest.TestCase):
             self.failUnless(frag in result_xml)
 
 
-def normalize(s, exp=re.compile(r'\s+', re.MULTILINE)):
-    return exp.sub(' ', s)
+def normalize(s, exp=re.compile(b(r'\s+'), re.MULTILINE)):
+    return exp.sub(b(' '), s)
 
 
 if __name__ == "__main__":

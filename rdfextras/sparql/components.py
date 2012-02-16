@@ -695,6 +695,12 @@ class PropertyValue(object):
     def __eq__(self, other):
         return (self.property == other.property and
                 self.objects == other.objects)
+    
+    def __hash__(self):
+        h = hash(self.property)  
+        for o in self.objects:
+            h ^= hash(o)
+        return h
 
 class ParsedConstrainedTriples(object):
     """
