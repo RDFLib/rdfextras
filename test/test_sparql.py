@@ -6,10 +6,6 @@ from rdflib import term
 import rdflib.compare
 from rdflib.graph import Graph
 
-rdflib.plugin.register('sparql', rdflib.query.Processor,
-                       'rdfextras.sparql.processor', 'Processor')
-rdflib.plugin.register('sparql', rdflib.query.Result,
-                       'rdfextras.sparql.query', 'SPARQLQueryResult')
 
 
 class FakeBlankNode(object):

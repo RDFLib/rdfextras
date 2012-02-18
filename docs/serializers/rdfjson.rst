@@ -18,8 +18,8 @@ Graph, serialize the graph.
     from rdflib import Graph, plugin
     from rdflib.parser import Parser
 
-    plugin.register("rdfjson", Serializer,
-       "rdfextras.serializers.rdfjson", "RdfJsonSerializer")
+    import rdfextras
+    rdfextras.registerplugins()
     
     data_source = \
         "https://raw.github.com/bradleypallen/json_ld_processor/" + \

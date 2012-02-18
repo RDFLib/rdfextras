@@ -30,15 +30,15 @@ Read a JSON-LD formatted document into RDF. Described on the `JSON-LD <http://js
 Using the plug-in JSONLD parser with rdflib
 ---------------------------------------------
 
-Usage with rdflib is straightforward: register the plugin, identify a source 
+Usage with rdflib is straightforward: if required register the plugin, identify a source 
 of JSON-LD, pass the source to the parser, manipulate the resulting graph.
 
 .. code-block:: python
 
-    >>> from rdflib import Graph, plugin, URIRef, Literal
+    >>> from rdflib import Graph, URIRef, Literal
     >>> from rdflib.parser import Parser
-    >>> plugin.register('json-ld', Parser,
-    ...     'rdfextras.parsers.jsonld', 'JsonLDParser')
+    >>> import rdfextras
+    >>> rdfextras.registerplugins() # if no setuptools
     >>> test_json = '''
     ... {
     ...     "@context": {

@@ -97,43 +97,19 @@ def get(graph_):
     endpoint.config["graph"]=graph_
     return endpoint
 
-def main(): 
-    import rdflib
 
-    rdflib.plugin.register('sparql', rdflib.query.Processor,
-                           'rdfextras.sparql.processor', 'Processor')
-    rdflib.plugin.register('sparql', rdflib.query.Result,
-                           'rdfextras.sparql.query', 'SPARQLQueryResult')
-
-    rdflib.plugin.register('xml', rdflib.query.ResultParser, 
-                           'rdfextras.sparql.results.xmlresults','XMLResultParser')
-    rdflib.plugin.register('xml', rdflib.query.ResultSerializer, 
-                           'rdfextras.sparql.results.xmlresults','XMLResultSerializer')
-
-    rdflib.plugin.register('html', rdflib.query.ResultSerializer, 
-                           'rdfextras.sparql.results.htmlresults','HTMLResultSerializer')
-
-    rdflib.plugin.register('html', rdflib.serializer.Serializer, 
-                           'rdfextras.sparql.results.htmlresults','HTMLSerializer')
-
-    
-    rdflib.plugin.register('json', rdflib.query.ResultParser, 
-                           'rdfextras.sparql.results.jsonresults','JSONResultParser')
-    rdflib.plugin.register('json', rdflib.query.ResultSerializer, 
-                           'rdfextras.sparql.results.jsonresults','JSONResultSerializer')
-
-
+def _main(g, out, opts): 
+    import rdflib    
     import sys
-    if len(sys.argv)>1:
-        gr=rdflib.Graph()
-        for f in sys.argv[1:]:
-            sys.stderr.write("Loading %s\n"%f)
-            gr.load(f, format=format_from_filename(f))
-    else:
+    if len(g)==0:
         import bookdb
-        gr=bookdb.bookdb
+        g=bookdb.bookdb
     
     serve(g, True)
+
+def main(): 
+    from rdfextras.utils.cmdlineutils import main as cmdmain
+    cmdmain(_main)
 
 if __name__=='__main__':
     main()

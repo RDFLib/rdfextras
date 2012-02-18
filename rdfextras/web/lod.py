@@ -1,3 +1,20 @@
+"""
+This is a Flask web-app for a simple Linked Open Data Web-app
+it also includes a SPARQL 1.0 Endpoint
+
+The application can be started from commandline:
+
+  python -m rdfextras.web.lod <RDF-file>
+
+and the file will be served from http://localhost:5000
+
+You can also start the server from your application by calling the :py:func:`serve` method
+or get the application object yourself by called :py:func:`get` function
+
+The application creates local URIs based on the type of resources 
+and servers content-negotiated HTML or serialised RDF from these.
+
+"""
 import re
 import rdflib
 import warnings
@@ -57,17 +74,20 @@ def resolve(r):
 
     return {url, realurl, label}
     """
+
+    if r==None:
+        return { 'url': None, 'realurl': None, 'label': None }
     if isinstance(r, rdflib.Literal): 
         return { 'url': None, 'realurl': None, 'label': get_label(r), 'lang': r.language }
         
     localurl=None
-    if lod.config["types"]==[None]: 
+    if lod.config["types"]=={None: None}:
         if (r, rdflib.RDF.type, None) in g.graph:
-            localurl=url_for("resource", label=urllib2.unquote(localname(r)))
+            localurl=url_for("resource", label=lod.config["resources"][None][r])
     else:
         for t in g.graph.objects(r,rdflib.RDF.type):
             if t in lod.config["types"]: 
-                localurl=url_for("resource", type_=lod.config["types"][t], label=urllib2.unquote(localname(r)))
+                localurl=url_for("resource", type_=lod.config["types"][t], label=lod.config["resources"][t][r])
                 break
     url=r
     if localurl: url=localurl
@@ -119,6 +139,9 @@ def reverse_types(types):
             warnings.warn(u"Multiple types for label '%s': (%s) rewriting to '%s_'"%(l,rtypes[l], l))           
             l+="_"
         rtypes[l]=t
+    types.clear()
+    for l,t in rtypes.iteritems():
+        types[t]=l
     return rtypes
 
             
@@ -145,6 +168,10 @@ def reverse_resources(resources):
                 
             rresources[t][l]=r
 
+        resources[t].clear()
+        for l,r in rresources[t].iteritems():
+            resources[t][r]=l
+
     return rresources
 
 
@@ -170,7 +197,8 @@ def download(format_):
     return serialize(g.graph, format_)
 
 @lod.route("/rdfgraph/<type_>/<rdf:label>.<format_>")
-def rdfgraph(label, type_, format_): 
+@lod.route("/rdfgraph/<rdf:label>.<format_>")
+def rdfgraph(label, format_,type_=None): 
     r=get_resource(label, type_)
     if isinstance(r,tuple): # 404
         return r
@@ -261,7 +289,7 @@ def page(label, type_=None):
         "picked":picked }
     p="lodpage.html"
         
-    if r==rdflib.RDFS.Class: 
+    if r==rdflib.RDFS.Class or r==rdflib.OWL.Class: 
         # page for all classes
         roots=graphutils.find_roots(g.graph, rdflib.RDFS.subClassOf, set(lod.config["types"]))
         params["classes"]=[graphutils.get_tree(g.graph, x, rdflib.RDFS.subClassOf, resolve) for x in roots]
@@ -272,9 +300,13 @@ def page(label, type_=None):
             if x[1]["url"]==rdflib.RDF.type:
                 inprops.remove(x)
 
-    elif rdflib.RDFS.Class in g.graph.objects(r,rdflib.RDF.type): 
+    elif (r, rdflib.RDF.type, rdflib.RDFS.Class) in g.graph or (r, rdflib.RDF.type, rdflib.OWL.Class) in g.graph:
         # page for a single class
+        
         params["classes"]=[graphutils.get_tree(g.graph, r, rdflib.RDFS.subClassOf, resolve)]
+        superClass=g.graph.value(r,rdflib.RDFS.subClassOf)
+        if superClass: 
+            params["classes"]=[(resolve(superClass), params["classes"])]
             
         params["instances"]=[]
         # show subclasses/instances only once
@@ -399,7 +431,7 @@ def get(graph, types='auto',image_patterns=["\.[png|jpg|gif]$"],
     if types=='auto':
         lod.config["types"]=detect_types(graph)
     elif types==None: 
-        lod.config["types"]=[None]
+        lod.config["types"]={None:None}
     else: 
         lod.config["types"]=types
 
@@ -412,48 +444,28 @@ def get(graph, types='auto',image_patterns=["\.[png|jpg|gif]$"],
     
     return lod
 
-def format_from_filename(f):
-    if f.endswith('n3'): return 'n3'
-    if f.endswith('nt'): return 'nt'
-    return 'xml'
     
+
+def _main(g, out, opts): 
+    import rdflib    
+    import sys
+    if len(g)==0:
+        import bookdb
+        g=bookdb.bookdb
+
+    opts=dict(opts)
+    debug='-d' in opts
+    types='auto'
+    if '-t' in opts: 
+        types=[rdflib.URIRef(x) for x in opts['-t'].split(',')]
+    if '-n' in opts:
+        types=None
+ 
+    get(g, types=types).run(debug=debug)
 
 def main(): 
-    import rdflib
-
-    rdflib.plugin.register('sparql', rdflib.query.Processor,
-                           'rdfextras.sparql.processor', 'Processor')
-    rdflib.plugin.register('sparql', rdflib.query.Result,
-                           'rdfextras.sparql.query', 'SPARQLQueryResult')
-
-    rdflib.plugin.register('xml', rdflib.query.ResultParser, 
-                           'rdfextras.sparql.results.xmlresults','XMLResultParser')
-    rdflib.plugin.register('xml', rdflib.query.ResultSerializer, 
-                           'rdfextras.sparql.results.xmlresults','XMLResultSerializer')
-
-    rdflib.plugin.register('html', rdflib.query.ResultSerializer, 
-                           'rdfextras.sparql.results.htmlresults','HTMLResultSerializer')
-
-    rdflib.plugin.register('html', rdflib.serializer.Serializer, 
-                           'rdfextras.sparql.results.htmlresults','HTMLSerializer')
-
-    
-    rdflib.plugin.register('json', rdflib.query.ResultParser, 
-                           'rdfextras.sparql.results.jsonresults','JSONResultParser')
-    rdflib.plugin.register('json', rdflib.query.ResultSerializer, 
-                           'rdfextras.sparql.results.jsonresults','JSONResultSerializer')
-    
-    import sys
-    if len(sys.argv)>1:
-        gr=rdflib.Graph()
-        for f in sys.argv[1:]:
-            sys.stderr.write("Loading %s\n"%f)
-            gr.load(f, format=format_from_filename(f))
-    else:
-        import bookdb
-        gr=bookdb.bookdb
-    
-    serve(gr, True)
+    from rdfextras.utils.cmdlineutils import main as cmdmain
+    cmdmain(_main, options='t:nd')
 
 if __name__=='__main__':
     main()

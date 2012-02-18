@@ -71,6 +71,11 @@ def toProperty(label):
     label=label.split(" ")
     return "".join([label[0].lower()]+[x.capitalize() for x in label[1:]])
 
+def toPropertyLabel(label):
+    if not label[1:2].isupper():
+        return label[0:1].lower()+label[1:]
+    return label
+
 def index(l, i): 
     """return a set of indexes from a list
     >>> index([1,2,3],(0,2))
@@ -95,40 +100,93 @@ def prefixuri(x, prefix, class_=None):
     return r
 
 # meta-language for config
+
+class NodeMaker(object):
+    def range(self):
+        return rdflib.RDFS.Literal
+    def __call__(self,x):
+        return rdflib.Literal(x)
+
+class NodeUri(NodeMaker):
+    def __init__(self, prefix, class_):
+        self.prefix=prefix
+        self.class_=rdflib.URIRef(class_)
+    def __call__(self, x):
+        return prefixuri(x, self.prefix, self.class_)
+    def range(self):
+        return self.class_ or rdflib.RDF.Resource
+
+class NodeLiteral(NodeMaker):
+    def __init__(self,f=None): self.f=f
+
+class NodeFloat(NodeLiteral):
+    def __call__(self,x): 
+        if not self.f: 
+            return rdflib.Literal(float(x))
+        if callable(self.f): 
+            return rdflib.Literal(float(self.f(x)))
+        raise Exception("Function passed to float is not callable")        
+    def range(self): return rdflib.XSD.double
+
+class NodeInt(NodeLiteral):
+    def __call__(self,x): 
+        if not self.f: 
+            return rdflib.Literal(int(x))
+        if callable(self.f): 
+            return rdflib.Literal(int(self.f(x)))
+        raise Exception("Function passed to int is not callable")        
+    def range(self): return rdflib.XSD.int
+
+class NodeReplace(NodeMaker):
+    def __init__(self,a,b):
+        self.a=a
+        self.b=b
+    def __call__(self, x):
+        return x.replace(self.a,self.b)
+
+class NodeDate(NodeLiteral):
+    def __call__(self, x):
+        return rdflib.Literal(datetime.datetime.strptime(x,self.f))
+    def range(self): return rdflib.XSD.dateTime
+
+class NodeSplit(NodeMaker):
+    def __init__(self,sep,f):
+        self.sep=sep
+        self.f=f
+    def __call__(self,x):
+        if not self.f: f=rdflib.Literal
+        if not callable(self.f): raise Exception("Function passed to split is not callable!")
+        return [self.f(y.strip()) for y in x.split(self.sep) if y.strip()!=""]
+    def range(self):
+        if self.f and isinstance(self.f, NodeMaker):
+            return self.f.range()
+        return NodeMaker.range(self)
+
+default_node_make=NodeMaker()
+
 def _config_ignore(**args): 
     return "ignore"
 
 def _config_uri(prefix=None, class_=None): 
-    return lambda x: prefixuri(x, prefix, class_)
+    return NodeUri(prefix, class_)
 
 def _config_literal(): 
-    return rdflib.Literal
+    return NodeLiteral
 
 def _config_float(f=None): 
-    if not f: 
-        return lambda x: rdflib.Literal(float(x))
-    if callable(f): 
-        return lambda x: rdflib.Literal(float(f(x)))
-    raise Exception("Function passed to float is not callable")
-
+    return NodeFloat(f)
 
 def _config_replace(a, b): 
-    return lambda x: x.replace(a,b)
+    return NodeReplace(a,b)
 
 def _config_int(f=None): 
-    if not f: 
-        return lambda x: rdflib.Literal(int(x))
-    if callable(f): 
-        return lambda x: rdflib.Literal(int(f(x)))
-    raise Exception("Function passed to int is not callable")
+    return NodeInt(f)
 
 def _config_date(format_): 
-    return lambda x: rdflib.Literal(datetime.datetime.strptime(x,format_))
+    return NodeDate(format_)
 
 def _config_split(sep=None, f=None):
-    if not f: f=rdflib.Literal
-    if not callable(f): raise Exception("Function passed to split is not callable!")
-    return lambda x: [f(y.strip()) for y in x.split(sep) if y.strip()!=""]
+    return NodeSplit(sep,f)
 
 config_functions={ "ignore": _config_ignore, 
                    "uri": _config_uri, 
@@ -204,11 +262,12 @@ class CSV2RDF(object):
             self.triple(self.CLASS, RDF.type, RDFS.Class)
             for i in range(len(headers)): 
                 h,l=headers[i], header_labels[i]
-                if h=="": continue
+                if h=="" or l=="": continue
+                if self.COLUMNS.get(i)=="ignore": continue
                 self.triple(h, RDF.type, RDF.Property)
-                self.triple(h, RDFS.label, rdflib.Literal(l))
+                self.triple(h, RDFS.label, rdflib.Literal(toPropertyLabel(l)))
                 self.triple(h, RDFS.domain, self.CLASS)
-
+                self.triple(h, RDFS.range, self.COLUMNS.get(i,default_node_make).range())
 
         rows=0
         for l in csvreader:

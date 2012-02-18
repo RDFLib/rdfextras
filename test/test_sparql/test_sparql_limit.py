@@ -5,8 +5,6 @@ from rdflib.store import Store
 from StringIO import StringIO
 import unittest
 
-plugin.register('xml', query.ResultSerializer, 
-                'rdfextras.sparql.results.xmlresults','XMLResultSerializer')
 
 test_data = """ 
 @prefix foaf:       <http://xmlns.com/foaf/0.1/> .

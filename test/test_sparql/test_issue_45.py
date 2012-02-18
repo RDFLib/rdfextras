@@ -7,10 +7,7 @@ from rdfextras.sparql import algebra
 from StringIO import StringIO
 
 import rdflib
-rdflib.plugin.register('sparql', rdflib.query.Processor,
-                       'rdfextras.sparql.processor', 'Processor')
-rdflib.plugin.register('sparql', rdflib.query.Result,
-                       'rdfextras.sparql.query', 'SPARQLQueryResult')
+
 
 class TestSparqlASK(unittest.TestCase):
     def setUp(self):

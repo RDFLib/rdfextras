@@ -2,16 +2,6 @@ import unittest
 import rdflib
 from StringIO import StringIO
 
-rdflib.plugin.register('xml', rdflib.query.ResultParser, 'rdfextras.sparql.results.xmlresults','XMLResultParser')
-rdflib.plugin.register('xml', rdflib.query.ResultSerializer, 'rdfextras.sparql.results.xmlresults','XMLResultSerializer')
-
-rdflib.plugin.register('json', rdflib.query.ResultParser, 'rdfextras.sparql.results.jsonresults','JSONResultParser')
-rdflib.plugin.register('json', rdflib.query.ResultSerializer, 'rdfextras.sparql.results.jsonresults','JSONResultSerializer')
-
-    
-
-    
-
 class TestSparqlResultsFormats(unittest.TestCase): 
 
     def _test(self,s,format):

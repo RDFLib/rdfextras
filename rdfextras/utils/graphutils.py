@@ -34,7 +34,7 @@ def find_roots(graph,prop,roots=None):
             roots.add(y)
     return roots
 
-def get_tree(graph, root, prop, mapper=lambda x:x, done=None ): 
+def get_tree(graph, root, prop, mapper=lambda x:x, done=None, dir='down' ): 
     """
     Return a nested list/tuple structure representing the tree 
     built by the transitive property given, starting from the root given
@@ -47,16 +47,24 @@ def get_tree(graph, root, prop, mapper=lambda x:x, done=None ):
 
     will return the structure for the subClassTree below person.
 
-    Assumes triple of the form (child, prop, parent), i.e. the direction of 
-    RDFS.subClassOf or SKOS.broader 
+    dir='down' assumes triple of the form (child, prop, parent), 
+    i.e. the direction of RDFS.subClassOf or SKOS.broader 
+    Any other dir traverses in the other direction
         
     """
-    
+
     if done==None: done=set()
     if root in done: return
     done.add(root)
     tree=[]
-    for branch in graph.subjects(prop, root): 
-        tree.append( get_tree(graph, branch, prop, mapper, done) ) 
+
+    if dir=='down':
+        branches=graph.subjects(prop,root)
+    else:
+        branches=graph.objects(root,prop)
+
+    for branch in branches: 
+        t=get_tree(graph, branch, prop, mapper, done, dir)
+        if t: tree.append(t)
 
     return ( mapper(root), tree )

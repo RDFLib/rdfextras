@@ -88,8 +88,8 @@ Example usage
     >>> from rdflib import Graph, plugin
     >>> from rdflib.parser import Parser
     >>> from StringIO import StringIO
-    >>> plugin.register("rdf-json", Parser, 
-    ...     "rdfextras.parsers.rdfjson", "RdfJsonParser")
+    >>> import rdfextras
+    >>> rdfextras.registerplugins()
     >>> testrdfjson = '''
     ... {
     ...     "http://example.org/about" : {
@@ -131,8 +131,8 @@ For the example, we will use a remote source, a test in the github repository fo
 
     from rdflib import Graph, plugin
     from rdflib.parser import Parser
-    plugin.register("rdf-json", Parser, 
-       "rdfextras.parsers.rdfjson", "RdfJsonParser")
+    import rdfextras
+    rdfextras.registerplugins()
 
     g = Graph()
     testrdfjson = '''{

@@ -24,10 +24,6 @@ try:
 except ImportError:
     maketrans = str.translate
 
-plugin.register('sparql', rdflib.query.Processor,
-                    'rdfextras.sparql.processor', 'Processor')
-plugin.register('sparql', rdflib.query.Result,
-                    'rdfextras.sparql.query', 'SPARQLQueryResult')
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.WARN)

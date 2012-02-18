@@ -126,6 +126,9 @@ from rdflib.store import Store
 from rdflib.term import Identifier
 from rdflib.util import first
 
+from rdfextras import registerplugins
+registerplugins()
+
 """
 From: http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/384122
 
@@ -134,19 +137,6 @@ infix operator like this. This recipe shows how (almost) arbitrary infix
 operators can be defined.
 
 """
-
-plugin.register('sparql', query.Processor,
-    'rdfextras.sparql.processor', 'Processor')
-
-plugin.register('sparql', query.Result,
-    'rdfextras.sparql.query', 'SPARQLQueryResult')
-
-plugin.register('xml', query.ResultSerializer, 
-    'rdfextras.sparql.query','SPARQLQueryResult')
-
-plugin.register('json', query.ResultSerializer, 
-    'rdfextras.sparql.query','SPARQLQueryResult')
-
 
 # definition of an Infix operator class
 # this recipe also works in jython

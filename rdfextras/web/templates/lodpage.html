@@ -50,12 +50,12 @@ is-a
 </thead>
 {% for v,p in inprops %}
 <tr class="{{ loop.cycle('odd', 'even') }}">
+	<td><a href='{{v.url}}'>{{v.label}}</a></td>
 	{% if p.url %}
   <td><a href='{{p.url}}'>{{p.label}}</a></td>
 	{% else %}
 	<td>{{p.label}}
 	{% endif %}
-	<td><a href='{{v.url}}'>{{v.label}}</a></td>
 </tr>
 {% endfor %}
 </table>
@@ -68,8 +68,8 @@ Download as:
 {% if type_ %}
 <a href="{{url_for('data', type_=type_, label=urilabel, format_='nt') }}">ntriples</a> |
 <a href="{{url_for('data', type_=type_, label=urilabel, format_='turtle') }}">turtle</a> |
-<a href="{{url_for('data', type_=type_, label=urilabel, format_='xml') }}">rdf/xml</a>
-| 
+<a href="{{url_for('data', type_=type_, label=urilabel, format_='xml') }}">rdf/xml</a> | 
+<a href="{{url_for('data', type_=type_, label=urilabel, format_='json') }}">json-ld</a>
 Graph:
 <a href="{{url_for('rdfgraph', type_=type_, label=urilabel, format_='png') }}">png</a> | 
 <a href="{{url_for('rdfgraph', type_=type_, label=urilabel, format_='pdf') }}">pdf</a> | 
@@ -80,7 +80,8 @@ Graph:
 
 <a href="{{url_for('data', label=urilabel, format_='nt') }}">ntriples</a> |
 <a href="{{url_for('data', label=urilabel, format_='n3') }}">n3</a> |
-<a href="{{url_for('data', label=urilabel, format_='xml') }}">rdf/xml</a>
+<a href="{{url_for('data', label=urilabel, format_='xml') }}">rdf/xml</a> |
+<a href="{{url_for('data', label=urilabel, format_='json') }}">json-ld</a>
 | 
 Graph:
 <a href="{{url_for('rdfgraph', label=urilabel, format_='png') }}">png</a> | 

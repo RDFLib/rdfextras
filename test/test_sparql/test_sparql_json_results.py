@@ -3,15 +3,8 @@ from StringIO import StringIO
 import unittest
 
 import rdflib
-rdflib.plugin.register('sparql', rdflib.query.Processor,
-                       'rdfextras.sparql.processor', 'Processor')
-rdflib.plugin.register('sparql', rdflib.query.Result,
-                       'rdfextras.sparql.query', 'SPARQLQueryResult')
 
 
-rdflib.plugin.register('json', rdflib.query.ResultParser, 'rdfextras.sparql.results.jsonresults','JSONResultParser')
-rdflib.plugin.register('json', rdflib.query.ResultSerializer, 'rdfextras.sparql.results.jsonresults','JSONResultSerializer')
-from rdflib.py3compat import b
 
 # json is only available as of python2.6, but simplejson is available 
 # via PyPI for older pythons
