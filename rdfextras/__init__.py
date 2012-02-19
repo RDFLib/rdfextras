@@ -81,19 +81,5 @@ def registerplugins():
     plugin.register('json', ResultParser,
         'rdfextras.sparql.results.jsonresults', 'JSONResultParser')
 
-    plugin.register('BerkeleyDB', Store,
-        'rdfextras.store.BerkeleyDB', 'BerkeleyDB')
-    plugin.register('BDBOptimized', Store,
-        'rdfextras.store.BDBOptimized', 'BDBOptimized')
-    plugin.register('MySQL', Store,
-        'rdfextras.store.MySQL', 'MySQL')
-    plugin.register('PostgreSQL', Store,
-        'rdfextras.store.PostgreSQL', 'PostgreSQL')
     plugin.register('SPARQL', Store,
         'rdfextras.store.SPARQL', 'SPARQLStore')
-    plugin.register('SQLite', Store,
-        'rdfextras.store.SQLite', 'SQLite')
-    plugin.register('ZODB', Store,
-        'rdfextras.store.ZODB', 'ZODBGraph')
-    plugin.register('KyotoCabinet', Store,
-        'rdfextras.store.KyotoCabinet', 'KyotoCabinet')
