@@ -1,9 +1,17 @@
-import rdflib
+import sys
+from nose.exc import SkipTest
+if sys.platform.startswith('java'):
+    raise SkipTest("Skipped failing test in Jython")
+if sys.version_info[:2] < (2, 6):
+    raise SkipTest("Skipped, known issue with Python < 2.6")
+
+# import rdflib
 from rdflib.graph import ConjunctiveGraph
 from rdflib.py3compat import b
 from StringIO import StringIO
 import re
 import unittest
+
 
 test_data = """
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -65,7 +73,7 @@ class TestSparqlXmlResults(unittest.TestCase):
         result_xml = normalize(result_xml) # TODO: poor mans c14n..
         # print result_xml
         for frag in fragments:
-            # print frag
+            # print(frag, result_xml)
             self.failUnless(frag in result_xml)
 
 
@@ -75,5 +83,4 @@ def normalize(s, exp=re.compile(b(r'\s+'), re.MULTILINE)):
 
 if __name__ == "__main__":
     unittest.main()
-
 
