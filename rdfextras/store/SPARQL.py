@@ -21,6 +21,7 @@ __contact__ = 'Ivan Herman, ivan_herman@users.sourceforge.net'
 __date__    = "2011-01-30"
 
 import re
+import sys
 # import warnings
 try:
     from SPARQLWrapper import SPARQLWrapper, XML
@@ -28,10 +29,16 @@ try:
 except ImportError:
     raise Exception("SPARQLWrapper not found! SPARQL Store will not work. Install with 'easy_install SPARQLWrapper'")
 
-try:
-    from xml import etree
-except ImportError:
+if getattr(sys, 'pypy_version_info', None) is not None \
+      or sys.platform.startswith('java') \
+      or sys.version_info[:2] < (2, 6):
     import elementtree as etree
+    from elementtree import ElementTree
+else:
+    try:
+        from xml import etree
+    except ImportError:
+        import elementtree as etree
 
 from rdfextras.store.REGEXMatching import NATIVE_REGEX
 
