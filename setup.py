@@ -106,16 +106,7 @@ config.update(
             'sparqlendpointapp = rdfextras.web.endpoint:main',
             'rdflodapp = rdfextras.web.lod:main',                
         ],
-        'nose.plugins': [
-            'EARLPlugin = rdfextras.tools.EARLPlugin:EARLPlugin',
-        ],
-        'rdf.plugins.parser': [
-            'rdf-json = rdfextras.parsers.rdfjson:RdfJsonParser',
-            'json-ld = rdfextras.parsers.jsonld:JsonLDParser'
-        ],
         'rdf.plugins.serializer': [
-            'rdf-json = rdfextras.serializers.rdfjson:RdfJsonSerializer',
-            'json-ld = rdfextras.serializers.jsonld:JsonLDSerializer',
             'html = rdfextras.sparql.results.htmlresults:HTMLSerializer',
         ],
         'rdf.plugins.queryprocessor': [
@@ -134,14 +125,7 @@ config.update(
             'json = rdfextras.sparql.results.jsonresults:JSONResultParser',
         ],
         'rdf.plugins.store': [
-            'BerkeleyDB = rdfextras.store.BerkeleyDB:BerkeleyDB',
-            'BDBOptimized = rdfextras.store.BDBOptimized:BDBOptimized',
-            'MySQL = rdfextras.store.MySQL:MySQL',
-            'PostgreSQL = rdfextras.store.PostgreSQL:PostgreSQL',
             'SPARQL = rdfextras.store.SPARQL:SPARQLStore',
-            'SQLite = rdfextras.store.SQLite:SQLite',
-            'ZODB = rdfextras.store.ZODB:ZODBGraph',
-            'KyotoCabinet = rdfextras.store.KyotoCabinet:KyotoCabinet',
         ],
 
     },
