@@ -7,26 +7,6 @@ from rdflib import query
 import sys # sop to Hudson
 sys.path.insert(0, '/var/lib/tomcat6/webapps/hudson/jobs/rdfextras')
 
-plugin.register(
-        'sparql', query.Processor,
-        'rdfextras.sparql.processor', 'Processor')
-
-plugin.register(
-        'sparql', query.Result,
-        'rdfextras.sparql.query', 'SPARQLQueryResult')
-
-plugin.register(
-        'BerkeleyDB', store.Store,
-        'rdfextras.store.BerkeleyDB', 'BerkeleyDB')
-
-plugin.register(
-        'BDBOptimized', store.Store,
-        'rdfextras.store.BDBOptimized', 'BDBOptimized')
-
-plugin.register(
-        'SPARQL', store.Store,
-        'rdfextras.store.SPARQL', 'SPARQLStore')
-
 # SQLObject schemes
 # scheme://[user[:password]@]host[:port]/database[?parameters]
 # Scheme is one of: sqlite, mysql, postgres, firebird,
