@@ -1,9 +1,5 @@
-import sys
 from nose.exc import SkipTest
-if sys.platform.startswith('java'):
-    raise SkipTest("Test skipped for Jython")
-if sys.version_info[:2] < (2, 6):
-    raise SkipTest("Test skipped for Python < 2.6")
+raise SkipTest("SPARQL store server test skipped")
 import unittest
 import threading
 import rdflib
@@ -49,8 +45,3 @@ class TestSPARQLStore(unittest.TestCase):
 
         self.assertEqual(list(g2.objects(b2,DCtitle))[0], list(g.objects(b2,DCtitle))[0])
         
-
-
-        
-        
-
