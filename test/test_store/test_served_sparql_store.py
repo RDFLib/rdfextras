@@ -1,3 +1,9 @@
+import sys
+from nose.exc import SkipTest
+if sys.platform.startswith('java'):
+    raise SkipTest("Test skipped for Jython")
+if sys.version_info[:2] < (2, 6):
+    raise SkipTest("Test skipped for Python < 2.6")
 import unittest
 import threading
 import rdflib

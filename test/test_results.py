@@ -1,3 +1,5 @@
+import sys
+from nose.exc import SkipTest
 import unittest
 import rdflib
 from StringIO import StringIO
@@ -12,7 +14,9 @@ class TestSparqlResultsFormats(unittest.TestCase):
         self.assertEqual(r,r2)
 
     
-    def testXML(self): 
+    def testXML(self):
+        if sys.version_info[:2] < (2, 6):
+            raise SkipTest("Skipped, known issue with Python < 2.6")
         xmlres="""<?xml version="1.0"?>
 <sparql xmlns="http://www.w3.org/2005/sparql-results#"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
