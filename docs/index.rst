@@ -104,15 +104,6 @@ Utils
    
    utils/index
 
-Web
-+++++
-
-:mod:`rdfextras.web` contains two web-apps build on the Flask microframework
-
-.. toctree::
-   :maxdepth: 2
-   
-   web/index
 
 
 Introduction to basic tasks in rdflib 

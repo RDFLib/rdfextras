@@ -63,10 +63,7 @@ config = dict(
                 'rdfextras.store',
                 'rdfextras.store.FOPLRelationalModel',
                 'rdfextras.tools',
-                'rdfextras.utils',
-                'rdfextras.web',],
-    package_dir = { 'rdfextras.web': 'rdfextras/web' },
-    package_data = { 'rdfextras.web': ['templates/*.html','static/*',]}
+                'rdfextras.utils']
 )
 
 if sys.version_info[0] >= 3:
@@ -91,7 +88,6 @@ tests_require = install_requires + \
                 # ['flask', 'mimeparse']
 
 extras_require = { 
-    "WebApp": ["flask","mimeparse"],
     "SPARQLStore": ["SPARQLWrapper"],
     }
 
@@ -103,11 +99,6 @@ config.update(
             'csv2rdf = rdfextras.tools.csv2rdf:main',
             'rdf2dot = rdfextras.tools.rdf2dot:main',
             'rdfs2dot = rdfextras.tools.rdfs2dot:main',
-            'sparqlendpointapp = rdfextras.web.endpoint:main',
-            'rdflodapp = rdfextras.web.lod:main',                
-        ],
-        'rdf.plugins.serializer': [
-            'html = rdfextras.sparql.results.htmlresults:HTMLSerializer',
         ],
         'rdf.plugins.queryprocessor': [
             'sparql = rdfextras.sparql.processor:Processor',
@@ -116,7 +107,6 @@ config.update(
             'sparql = rdfextras.sparql.query:SPARQLQueryResult',
         ],
         'rdf.plugins.resultserializer': [
-            'html = rdfextras.sparql.results.htmlresults:HTMLResultSerializer',
             'xml = rdfextras.sparql.results.xmlresults:XMLResultSerializer',
             'json = rdfextras.sparql.results.jsonresults:JSONResultSerializer',
         ],

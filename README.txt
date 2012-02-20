@@ -15,9 +15,6 @@ RDFExtras includes:
    * A SPARQL Store for a graph on top of a remote SPARQL endpoint. Read-only
      access with SPARQL 1.0 or read-write with SPARQL 1.1 support.
  * A set of commandline utilities: rdfpipe, rdf2dot, rdfs2dot, csv2rdf
- * Two web-apps on top of the Flask web-microframework:
-   * a SPARQL endpoint app implementing the SPARQL 1.0 Protocol
-   * a Linked Open Data app for publishing resources as HTML pages
 
 Dependencies: 
 
@@ -25,9 +22,6 @@ Dependencies:
  * For SPARQL: pyparsing
  * For SPARQL Store: SPARQLWrapper
 
- * For the Web-apps: Flask, http://flask.pocoo.org/
-  * (which in turn requires Jinja2 and Werkzeug)
-  * For correct content-negotiation: mimeparse (fallback without conneg)
 
 For more information see: 
  * RDFExtras: http://code.google.com/p/rdfextras/
