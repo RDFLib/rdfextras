@@ -12,3 +12,5 @@ coverage/
 /.gitignore
 __pycache__/
 nosetests.xml
+*.pyc
+*~
