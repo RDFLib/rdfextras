@@ -766,7 +766,7 @@ if DEBUG:
 Query = (Prologue + (SelectQuery | ConstructQuery |
                      DescribeQuery | AskQuery)).setParseAction(
   refer_component(components.Query))
-Query.ignore('#' + restOfLine)
+Query.ignore( Regex( '(^| )#')+ restOfLine)
 if DEBUG:
     Query.setName('Query')
 
