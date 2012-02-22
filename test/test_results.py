@@ -14,6 +14,8 @@ class TestSparqlResultsFormats(unittest.TestCase):
         self.assertEqual(r, r2)
 
     def testXML(self):
+        if sys.version_info[:2] < (2, 6):
+            raise SkipTest("Skipped, known issue with XML namespaces under Python < 2.6")
         xmlres="""<?xml version="1.0"?>
 <sparql xmlns="http://www.w3.org/2005/sparql-results#"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

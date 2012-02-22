@@ -2,8 +2,8 @@ import sys
 from nose.exc import SkipTest
 if sys.platform.startswith('java'):
     raise SkipTest("Skipped failing test in Jython")
-# if sys.version_info[:2] < (2, 6):
-#     raise SkipTest("Skipped, known issue with Python < 2.6")
+if sys.version_info[:2] < (2, 6):
+    raise SkipTest("Skipped, known XML namespace issue with Python < 2.6")
 
 from rdflib.graph import ConjunctiveGraph
 from rdflib.py3compat import b
