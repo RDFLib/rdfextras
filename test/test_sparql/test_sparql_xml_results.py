@@ -2,13 +2,11 @@ import sys
 from nose.exc import SkipTest
 if sys.platform.startswith('java'):
     raise SkipTest("Skipped failing test in Jython")
-if sys.version_info[:2] < (2, 6):
-    raise SkipTest("Skipped, known issue with Python < 2.6")
+# if sys.version_info[:2] < (2, 6):
+#     raise SkipTest("Skipped, known issue with Python < 2.6")
 
-# import rdflib
 from rdflib.graph import ConjunctiveGraph
 from rdflib.py3compat import b
-from StringIO import StringIO
 import re
 import unittest
 
@@ -62,7 +60,7 @@ class TestSparqlXmlResults(unittest.TestCase):
 
     def setUp(self):
         self.graph = ConjunctiveGraph()
-        self.graph.parse(StringIO(test_data), format="n3")
+        self.graph.parse(data=test_data, format="n3")
 
     def testSimple(self):
         self._query_result_contains(query, expected_fragments)

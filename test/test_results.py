@@ -7,16 +7,13 @@ from StringIO import StringIO
 class TestSparqlResultsFormats(unittest.TestCase): 
 
     def _test(self,s,format):
-        r=rdflib.query.Result.parse(StringIO(s), format=format)
-        s=r.serialize(format=format)
+        r = rdflib.query.Result.parse(StringIO(s), format=format)
+        s = r.serialize(format=format)
         #print s
-        r2=rdflib.query.Result.parse(StringIO(s.decode('utf-8')), format=format)
-        self.assertEqual(r,r2)
+        r2 = rdflib.query.Result.parse(StringIO(s.decode('utf-8')), format=format)
+        self.assertEqual(r, r2)
 
-    
     def testXML(self):
-        if sys.version_info[:2] < (2, 6):
-            raise SkipTest("Skipped, known issue with Python < 2.6")
         xmlres="""<?xml version="1.0"?>
 <sparql xmlns="http://www.w3.org/2005/sparql-results#"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

@@ -57,18 +57,15 @@ class TestLimit(unittest.TestCase):
 
     def testLimit(self):
         graph = ConjunctiveGraph(plugin.get('IOMemory',Store)())
-        graph.parse(StringIO(test_data), format="n3")
-        results = graph.query(test_query,DEBUG=True)
+        graph.parse(data=test_data, format="n3")
+        results = graph.query(test_query,DEBUG=False)
         print len(results)
         self.assertEqual(len(results), 2)
         
     def testLimit2(self):
-        if sys.version_info[:2] < (2, 6):
-            raise SkipTest("Skipped, known issue with Python < 2.6")
         graph = ConjunctiveGraph(plugin.get('IOMemory',Store)())
-        graph.parse(StringIO(test_data2), format="n3")
-        results = list(graph.query(test_query2,DEBUG=True))
-        print graph.query(test_query2).serialize(format='xml')
+        graph.parse(data=test_data2, format="n3")
+        results = list(graph.query(test_query2,DEBUG=False))
         self.assertEqual(len(results), 1)
         for title,price in results:    
             self.assertTrue(title in [Literal("Java Tutorial"),
