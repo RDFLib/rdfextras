@@ -150,16 +150,16 @@ def createTerm(termString, termType, store, objLanguage=None, objDatatype=None):
             # rt = Literal(termString, objLanguage, objDatatype)
             # store.literalCache[((termString, objLanguage, objDatatype))] = rt
             if objLanguage and not objDatatype:
-                rt = Literal(termString, objLanguage)
+                rt = Literal(termString, language=objLanguage)
                 store.literalCache[((termString, objLanguage))] = rt
             elif objDatatype and not objLanguage:
-                rt = Literal(termString, objDatatype)
+                rt = Literal(termString, datatype=objDatatype)
                 store.literalCache[((termString, objDatatype))] = rt
             elif not objLanguage and not objDatatype:
                 rt = Literal(termString)
                 store.literalCache[((termString))] = rt
             else:
-                rt = Literal(termString, objDatatype)
+                rt = Literal(termString, datatype=objDatatype)
                 store.literalCache[((termString, objDatatype))] = rt
             return rt
     elif termType == 'F':
