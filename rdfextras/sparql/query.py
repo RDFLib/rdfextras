@@ -1,3 +1,4 @@
+import warnings
 
 try:
     set
@@ -1304,5 +1305,14 @@ class SPARQLQueryResult(Result):
         else: 
             self.graph=qResult
 
+    def _get_selectionF(self):
+        """Method for 'selectionF' property."""
+        warnings.warn("the 'selectionF' attribute is deprecated, "
+                      "please use 'vars' instead.")
+        return self.vars
 
+    selectionF = property(_get_selectionF,
+                        doc="access the 'selectionF' attribute; "
+                            "deprecated and provided only for "
+                            "backwards compatibility")
 
