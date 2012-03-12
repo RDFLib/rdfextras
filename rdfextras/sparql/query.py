@@ -1308,7 +1308,8 @@ class SPARQLQueryResult(Result):
     def _get_selectionF(self):
         """Method for 'selectionF' property."""
         warnings.warn("the 'selectionF' attribute is deprecated, "
-                      "please use 'vars' instead.")
+                      "please use 'vars' instead.",
+                      DeprecationWarning, stacklevel=2)
         return self.vars
 
     selectionF = property(_get_selectionF,
