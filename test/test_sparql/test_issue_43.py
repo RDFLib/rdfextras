@@ -18,6 +18,7 @@ WHERE {
 class TestIssue43(unittest.TestCase):
     debug = False
     sparql = True
+    known_issue = True    
     
     def setUp(self):
         NS = u"http://example.org/"
