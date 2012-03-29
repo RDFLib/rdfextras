@@ -9,6 +9,12 @@ import collections
 
 from rdflib import XSD, RDFS
 
+LABEL_PROPERTIES=[rdflib.RDFS.label, 
+                  rdflib.URIRef("http://purl.org/dc/elements/1.1/title"), 
+                  rdflib.URIRef("http://xmlns.com/foaf/0.1/name"),
+                  rdflib.URIRef("http://www.w3.org/2006/vcard/ns#fn"),
+                  rdflib.URIRef("http://www.w3.org/2006/vcard/ns#org")
+                  ]
 
 XSDTERMS=[ XSD[x] for x in "anyURI", "base64Binary", "boolean", "byte", "date", "dateTime", "decimal", "double", "duration", "float", "gDay", "gMonth", "gMonthDay", "gYear", "gYearMonth", "hexBinary", "ID", "IDREF", "IDREFS", "int", "integer", "language", "long", "Name", "NCName", "negativeInteger", "NMTOKEN", "NMTOKENS", "nonNegativeInteger", "nonPositiveInteger", "normalizedString", "positiveInteger", "QName", "short", "string", "time", "token", "unsignedByte", "unsignedInt", "unsignedLong", "unsignedShort" ]
 
@@ -32,13 +38,14 @@ def rdf2dot(g, stream, opts={}):
 
     def label(x,g): 
 
-        l=g.value(x,RDFS.label)
-        if l==None: 
-            try: 
-                l=g.namespace_manager.compute_qname(x)[2]
-            except: 
-                pass
-        return l
+        for labelProp in LABEL_PROPERTIES:
+            l=g.value(x,labelProp)
+            if l: return l
+
+        try: 
+            return g.namespace_manager.compute_qname(x)[2]
+        except: 
+            return x
 
     def formatliteral(l,g):
         v=cgi.escape(l)
@@ -62,6 +69,7 @@ def rdf2dot(g, stream, opts={}):
 
     for s,p,o in g:
         sn=node(s)
+        if p==rdflib.RDFS.label: continue
         if isinstance(o, (rdflib.URIRef,rdflib.BNode)): 
             on=node(o)
             stream.write(u"\t%s -> %s [ color=%s, label=< <font point-size='10' color='#336633'>%s</font> > ] ;\n"%(sn,on, color(p), qname(p,g)))
