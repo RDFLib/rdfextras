@@ -6,7 +6,7 @@ testgraph = """\
 @prefix    : <http://example.org/> .
 @prefix rdf: <%s> .
 :foo rdf:value 1 .
-:bar rdf:value -2 .""" % RDF
+:bar rdf:value -2 .""" % RDF.uri
 
 testquery = """\
 SELECT ?node 
@@ -29,3 +29,5 @@ class TestIssue11(unittest.TestCase):
         for row in rt:
             assert str(row[0]) == "http://example.org/bar"
 
+if __name__ == '__main__':
+    TestIssue11.testSPARQL_lessthan_filter_using_negative_integer()
