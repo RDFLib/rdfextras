@@ -13,6 +13,8 @@ from rdfextras.sparql import SPARQLError
 from rdflib.util import check_object
 from rdflib.util import check_subject
 
+__all__ = ['SPARQLGraph', 'GraphPattern', 'BasicGraphPattern']
+
 class SPARQLGraph(object):
     """
     A subclass of Graph with a few extra SPARQL bits.
@@ -96,10 +98,8 @@ class SPARQLGraph(object):
         :param Cluster: another sparqlGraph instance; if None, a new
             one will be created. The subgraph will be added to this graph.
 
-        :returns  The triple store containing the cluster
+        :return:  The :class:`~rdfextras.sparql.graph.SPARQLGraph` triple store containing the cluster
 
-        :rtype:   :class:`~rdfextras.sparql.graph.SPARQLGraph`  
-        
         """
         if Cluster == None :
             Cluster = SPARQLGraph()
@@ -138,12 +138,10 @@ class SPARQLGraph(object):
         :param seed: RDFLib Resource
 
         :param Cluster: another sparqlGraph instance; if None, a new
-        one will be created. The subgraph will be added to this graph.
+            one will be created. The subgraph will be added to this graph.
 
-        :returns  The triple store containing the cluster
+        :return: The :class:`~rdfextras.sparql.graph.SPARQLGraph` triple store containing the cluster
 
-        :rtype:   :class:`~rdfextras.sparql.graph.SPARQLGraph`  
-        
         """
         if Cluster == None :
             Cluster = SPARQLGraph()
@@ -160,9 +158,7 @@ class SPARQLGraph(object):
 
         :param seed: RDFLib Resource
 
-        :returns  The triple store containing the cluster
-
-        :rtype:   :class:`~rdfextras.sparql.graph.SPARQLGraph`  
+        :return: The :class:`~rdfextras.sparql.graph.SPARQLGraph` triple store containing the cluster
         
         """
         raise "Am I getting here?"
@@ -409,7 +405,7 @@ class GraphPattern :
                 if st in bindings :
                     return bindings[st]
                 else :
-                    if isinstance(self,GraphPattern2) : # @@FIXME undefined
+                    if isinstance(self,GraphPattern) :
                         return st
                     else :
                         return None
@@ -461,7 +457,8 @@ class GraphPattern :
 
     def isEmpty(self) :
         """Is the pattern empty?
-        :rtype:   Boolean
+
+        :return:   Boolean
         """
         return len(self.patterns) == 0
 

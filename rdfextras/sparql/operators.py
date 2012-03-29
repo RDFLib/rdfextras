@@ -525,15 +525,16 @@ def regex(item,pattern,flag=None):
 
 def EBV(a):
     """
-    *  If the argument is a typed literal with a datatype of xsd:boolean, 
-       the EBV is the value of that argument.
+    * If the argument is a typed literal with a datatype of xsd:boolean, 
+      the EBV is the value of that argument.
     * If the argument is a plain literal or a typed literal with a 
       datatype of xsd:string, the EBV is false if the operand value 
       has zero length; otherwise the EBV is true.
     * If the argument is a numeric type or a typed literal with a datatype 
-     derived from a numeric type, the EBV is false if the operand value is 
-     NaN or is numerically equal to zero; otherwise the EBV is true.
+      derived from a numeric type, the EBV is false if the operand value is 
+      NaN or is numerically equal to zero; otherwise the EBV is true.
     * All other arguments, including unbound arguments, produce a type error.    
+    
     """
     fa = getValue(a)
     def f(bindings) :

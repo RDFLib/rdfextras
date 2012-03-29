@@ -1,52 +1,22 @@
 ### Utilities for evaluating a parsed SPARQL expression using sparql-p
 import rdflib
-from rdfextras.sparql import graph, operators, SPARQLError
-from rdfextras.sparql.operators import getValue
-from rdfextras.sparql.graph import BasicGraphPattern
-#from rdfextras.sparql.Unbound import Unbound
-from rdfextras.sparql.query import _variablesToArray, queryObject, SessionBNode
-from rdflib.graph import ConjunctiveGraph, Graph, BackwardCompatGraph,ReadOnlyGraphAggregate
-from rdflib import plugin
+from rdfextras.sparql import operators
+from rdfextras.sparql.query import SessionBNode
 from rdflib.namespace import RDF
-from rdflib.store import Store
 from rdflib.term import URIRef, Variable, BNode, Literal, Identifier
 from rdflib.term import XSDToPython
-from rdfextras.sparql.components import NamedGraph, RemoteGraph, IRIRef
-from rdfextras.sparql.components import *
-#from GraphPattern import *
-#from Resource import *
-#from Triples import ParsedConstrainedTriples
-#from QName import *
-#from Expression import *
-#from Util import ListRedirect
-#from Operators import *
-#from FunctionLibrary import *
-#from SolutionModifier import ASCENDING_ORDER
-#from Query import AskQuery, SelectQuery
-
-from rdfextras.sparql import _questChar
-
-
-class Unbound :
-    """A class to encapsulate a query variable. This class should be used in conjunction with L{BasicGraphPattern<graphPattern.BasicGraphPattern>}."""
-    def __init__(self,name) :
-        """
-        @param name: the name of the variable (without the '?' character)
-        @type name: unicode or string
-        """
-        if isinstance(name,basestring) :
-            self.name     = _questChar + name
-            self.origName = name
-        else :
-            raise SPARQLError("illegal argument, variable name must be a string or unicode")
-
-    def __repr__(self) :
-        retval  = "?%s" % self.origName
-        return retval
-
-    def __str__(self) :
-        return self.__repr__()
-
+from rdfextras.sparql.components import IRIRef #, NamedGraph, RemoteGraph
+from rdfextras.sparql.components import (
+    LessThanOperator, EqualityOperator, NotEqualOperator,
+    LessThanOrEqualOperator, GreaterThanOperator,
+    GreaterThanOrEqualOperator, LogicalNegation,
+    NumericNegative, QName, QNamePrefix, ParsedString,
+    ParsedDatatypedLiteral, RDFTerm, ParsedCollection,
+    ParsedAdditiveExpressionList, FunctionCall,
+    ParsedConditionalAndExpressionList, ParsedRelationalExpressionList,
+    ParsedConstrainedTriples, ListRedirect, UnaryOperator,
+    BinaryOperator, ParsedREGEXInvocation, BuiltinFunctionCall,
+    FUNCTION_NAMES)
 
 DEBUG = False
 
@@ -71,22 +41,31 @@ CAMEL_CASE_BUILTINS = {
     'isliteral':'operators.isLiteral',
 }
 
-#try:
-#    from Ft.Lib.Uri import UriResolverBase as Resolver
-#except:
 class Resolver:
     supportedSchemas=[None]
     def normalize(self, uriRef, baseUri):
         return baseUri+uriRef
             
 class BNodeRef(BNode):
+    """
+    An explicit reference to a persistent BNode in the data set.
+    This use of the syntax "_:x" to reference a named BNode is
+    technically in violation of the SPARQL spec, but is also
+    very useful.  If an undistinguished variable is desired,
+    then an actual variable can be used as a trivial workaround.
+    
+    Support for these can be disabled by disabling the 
+    'EVAL_OPTION_ALLOW_BNODE_REF' evaulation option.
+    
+    Also known as special 'session' BNodes.  I.e., BNodes at
+    the query side which refer to BNodes in persistence
+    """
     pass
 
 def convertTerm(term,queryProlog):
     """
     Utility function  for converting parsed Triple components into Unbound 
     """
-    #from rdfextras.sparql.sql.RdfSqlBuilder import BNodeRef
     if isinstance(term,Variable):
         if hasattr(queryProlog,'variableBindings') and term in queryProlog.variableBindings:
             #Resolve pre-bound variables at SQL generation time for SPARQL-to-SQL invokations
@@ -97,9 +76,6 @@ def convertTerm(term,queryProlog):
     elif isinstance(term,BNodeRef):
         return term
     elif isinstance(term,BNode):
-        #from rdfextras.sparql.sql.RdfSqlBuilder import RdfSqlBuilder 
-        #if isinstance(queryProlog,RdfSqlBuilder):
-        #    return BNode(term + '_bnode') # ensure namespace doesn't overlap with variables
         return term
     elif isinstance(term,QName):
         #QNames and QName prefixes are the same in the grammar
@@ -251,7 +227,7 @@ def mapToOperator(expr,prolog,combinationArg=None,constraint=False):
                 mapToOperator(expr.left,prolog,combinationArg,constraint=constraint),
                 mapToOperator(expr.right,prolog,combinationArg,constraint=constraint),
                 combinationInvokation)
-    elif isinstance(expr,(Variable,Unbound)):
+    elif isinstance(expr,Variable):
         if constraint:
             return """operators.EBV(rdflib.Variable("%s"))%s"""%(expr.n3(),combinationInvokation)
         else:
@@ -329,9 +305,6 @@ def createSPARQLPConstraint(filter,prolog):
         if isinstance(reducedFilter,UnaryOperator) and\
                       isinstance(reducedFilter.argument,Variable):
             const = True
-#        elif isinstance(reducedFilter,ParsedRelationalExpressionList) and\
-#            False:
-#            pass
         else:
             const = False
     else:

@@ -20,26 +20,26 @@ from rdflib import plugin
 from rdflib.term import URIRef
 from rdflib.term import Variable
 from rdflib.store import Store 
-from rdfextras.sparql.components import AskQuery
-from rdfextras.sparql.components import DescribeQuery
-from rdfextras.sparql.components import Prolog
-from rdfextras.sparql.components import SelectQuery
-from rdfextras.sparql.components import NamedGraph
-from rdfextras.sparql.components import ASCENDING_ORDER
 from rdfextras.sparql import DESCRIBE
 from rdfextras.sparql import graph
 from rdfextras.sparql import SPARQLError
 from rdfextras.sparql import query as sparql_query
-from rdfextras.sparql.evaluate import _variablesToArray
-from rdfextras.sparql.evaluate import unRollTripleItems
+from rdfextras.sparql.components import ASCENDING_ORDER
+from rdfextras.sparql.components import AskQuery
+from rdfextras.sparql.components import DescribeQuery
 from rdfextras.sparql.components import GraphPattern
+from rdfextras.sparql.components import NamedGraph
 from rdfextras.sparql.components import ParsedAlternativeGraphPattern
 from rdfextras.sparql.components import ParsedGraphGraphPattern
 from rdfextras.sparql.components import ParsedGroupGraphPattern
 from rdfextras.sparql.components import ParsedOptionalGraphPattern
-from rdfextras.sparql.graph import BasicGraphPattern
+from rdfextras.sparql.components import Prolog
+from rdfextras.sparql.components import SelectQuery
 from rdfextras.sparql.evaluate import convertTerm
 from rdfextras.sparql.evaluate import createSPARQLPConstraint
+from rdfextras.sparql.evaluate import unRollTripleItems
+from rdfextras.sparql.graph import BasicGraphPattern
+from rdfextras.sparql.query import _variablesToArray
 import logging
 log = logging.getLogger(__name__)
 #A variable to determine whether we obey SPARQL definition of RDF dataset
@@ -921,7 +921,7 @@ def _ExpandLeftJoin(node,expression,tripleStore,prolog,optionalTree=False):
         
 class LeftJoin(NonSymmetricBinaryOperator):
     """
-    .. codeblock:: text
+    .. code-block:: text
 
         Let Ω1 and Ω2 be multisets of solution mappings and F a filter. We define:
         LeftJoin(Ω1, Ω2, expr) = 
@@ -1083,8 +1083,8 @@ class GraphExpression(AlgebraExpression):
 
     def evaluate(self,tripleStore,initialBindings,prolog):
         """
-        .. The GRAPH keyword is used to make the active graph one of all of the 
-           named graphs in the dataset for part of the query ...
+        The GRAPH keyword is used to make the active graph one of all of the 
+        named graphs in the dataset for part of the query.
         """
         if prolog.DEBUG:
             log.debug("eval(%s,%s,%s)"%(self,initialBindings,tripleStore.graph))

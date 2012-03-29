@@ -5,9 +5,11 @@ from rdflib.namespace import Namespace
 
 class ListRedirect(object):
     """
-    A utility class for lists of items joined by an operator.  ListRedirects with length 1
-    are a special case and are considered equivalent to the item instead of a list containing it.
-    The reduce function is used for normalizing ListRedirect to the single item (and calling reduce on it recursively)
+    A utility class for lists of items joined by an operator.  ListRedirects
+    with length 1 are a special case and are considered equivalent to the
+    item instead of a list containing it. The reduce function is used for
+    normalizing ListRedirect to the single item (and calling reduce on it
+    recursively)
     """
     reducable = True
     def __getattr__(self, attr):
@@ -153,7 +155,8 @@ class ParsedDatatypedLiteral(object):
     """
     Placeholder for Datatyped literals
     This is necessary (instead of instantiating Literals directly)
-    when datatypes IRIRefs are QNames (in which case the prefix needs to be resolved at some point)
+    when datatypes IRIRefs are QNames (in which case the prefix needs
+    to be resolved at some point)
     """
     def __init__(self,value,dType):
         self.value = value
@@ -313,15 +316,18 @@ class BlockOfTriples(object):
 
 class GraphPattern(object):
     """
-    Complex graph patterns can be made by combining simpler graph patterns. The ways of creating graph patterns are:
+    Complex graph patterns can be made by combining simpler graph patterns. 
+    The ways of creating graph patterns are:
     * Basic Graph Patterns, where a set of triple patterns must match
-    * Group Graph Pattern, where a set of graph patterns must all match using the same variable substitution
+    * Group Graph Pattern, where a set of graph patterns must all match using
+    the same variable substitution
     * Value constraints, which restrict RDF terms in a solution
     * Optional Graph patterns, where additional patterns may extend the solution
     * Alternative Graph Pattern, where two or more possible patterns are tried
     * Patterns on Named Graphs, where patterns are matched against named graphs
 
     ( GraphPatternNotTriples | Filter ) '.'? TriplesBlock?
+    
     """
     def __init__(self,nonTripleGraphPattern=None,filter=None,triples=None):
         #print "GraphPattern(..)",triples,filter,nonTripleGraphPattern
