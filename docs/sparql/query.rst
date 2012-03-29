@@ -14,12 +14,8 @@
    :members:
 .. autoclass:: Query
    :members:
-.. autoclass:: SPARQLXMLWriter
-   :members:
 .. autoclass:: SPARQLQueryResult
    :members:
 .. autofunction:: isGroundQuad
 .. autofunction:: query
 .. autofunction:: queryObject
-.. autofunction:: retToJSON
-.. autofunction:: bindingJSON

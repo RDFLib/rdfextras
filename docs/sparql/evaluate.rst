@@ -7,8 +7,6 @@
 :mod:`rdfextras.sparql.evaluate` - SPARQL Evaluate
 ====================================================
 .. automodule:: rdfextras.sparql.evaluate
-.. autoclass:: Unbound
-   :members:
 .. autoclass:: Resolver
    :members:
 .. autoclass:: BNodeRef

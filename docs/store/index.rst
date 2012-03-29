@@ -82,26 +82,6 @@ The RDFlib Store API
 
    rdflib_store_api
 
-A bestiary of RDFLib Stores
----------------------------
-.. toctree::
-   :maxdepth: 1
-
-   bestiary/auditablestorage
-   bestiary/backwardchainingstore
-   bestiary/bdboptimized
-   bestiary/berkeleydb
-   bestiary/concurrentstore
-   bestiary/kyotocabinet
-   bestiary/mysql
-   bestiary/nodepickler
-   bestiary/postgresql
-   bestiary/regexmatching
-   bestiary/sleepycat
-   bestiary/sparql
-   bestiary/sqlite
-   bestiary/zodb
-
 Approaches to modelling RDF
 ---------------------------
 

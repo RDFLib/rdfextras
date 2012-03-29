@@ -463,6 +463,51 @@ the following illustration is drawn:
                 self.executeSQL(cursor, query)
 
 
+Modules and contents
+---------------------
+
+.. currentmodule:: rdfextras.store.FOPLRelationalModel
+
+:mod:`~rdfextras.store.FOPLRelationalModel.BinaryRelationPartition`
+-------------------------------------------------------------------
+.. automodule:: rdfextras.store.FOPLRelationalModel.BinaryRelationPartition
+.. autoclass:: BinaryRelationPartition
+   :members:
+.. autoclass:: AssociativeBox
+   :members:
+.. autoclass:: NamedLiteralProperties
+   :members:
+.. autoclass:: NamedBinaryRelations
+   :members:
+.. autofunction:: BinaryRelationPartitionCoverage
+.. autofunction:: PatternResolution
+
+
+:mod:`~rdfextras.store.FOPLRelationalModel.QuadSlot`
+-------------------------------------------------------------------
+.. automodule:: rdfextras.store.FOPLRelationalModel.QuadSlot
+.. autoclass:: QuadSlot
+   :members:
+.. autofunction:: EscapeQuotes
+.. autofunction:: dereferenceQuad
+.. autofunction:: genQuadSlots
+.. autofunction:: normalizeValue
+.. autofunction:: makeSigned
+.. autofunction:: normalizeNode
+
+:mod:`~rdfextras.store.FOPLRelationalModel.RelationalHash`
+-------------------------------------------------------------------
+.. automodule:: rdfextras.store.FOPLRelationalModel.RelationalHash
+.. autoclass:: Table
+   :members:
+.. autoclass:: RelationalHash
+   :members:
+.. autoclass:: IdentifierHash
+   :members:
+.. autoclass:: LiteralHash
+   :members:
+.. autofunction:: GarbageCollectionQUERY
+
 
 |today|
 

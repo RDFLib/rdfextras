@@ -12,11 +12,7 @@ Contents:
     :maxdepth: 2
     
     csv2rdf
-    DatabaseStats
     describer
-    EARLPlugin
-    FixTypeViews
-    MySQLStoreInfo
     rdfpipe
 
 

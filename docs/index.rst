@@ -4,84 +4,64 @@
 RDFExtras: extension modules for use with rdflib 3
 ==================================================
 
-RDFExtras is a collection of packages providing extras based on RDFLib 3. The common denominator is "non-core-rdflib".
+RDFExtras is a collection of packages and plug-ins that provide extra functionality based on RDFLib 3. The common denominator is "non-core-rdflib".
 
-This project is for collecting several packages with distinct uses, such as commandline tools, experimental (or unmaintained) stores and similar. It will be close to RDFLib but the intent is to keep things here a bit more loose.
+The main RDFExtras project acts as a focal point for RDFLib-associated packages and plug-ins with distinct uses, such as SPARQL query processors (numbering one, thus far), commandline tools, serializers/parsers, experimental or unmaintained stores and similar.
 
-These packages are thus to be considered unstable in general. Useful, sometimes near core, but not currently guaranteed to never be renamed/reshuffled/redesigned.
+.. warning:: The rdfextras packages are to be considered unstable in general. Useful, sometimes near core, but not currently guaranteed never to be renamed, refactored, reshuffled or redesigned.
+
+Plug-ins
+========
+The current set of RDFLib and RDFExtras plug-ins includes RDF parsers, serializers, stores and the "sparql-p" SPARQL query processor:
+
+.. image:: /_static/plugins-diagram.jpg
+   :alt: RDFLib plug-in "archtecture"
+   :align: center
+   :width: 720
+   :height: 475
 
 
-SPARQL
-======
-The SPARQL support which was removed from rdflib core is now being developed externally as various plugins. 
+SPARQL query processor
+----------------------
+The pure Python no-sql SPARQL implementation bits that were in the RDFLib development trunk are now in :mod:`rdfextras.sparql`.
 
-Pure-Python "no-SQL" SPARQL implementation
-------------------------------------------
-   The pure Python no-sql SPARQL implementation bits that were in the rdflib development trunk are now in :mod:`rdfextras.sparql`.
-
-   This "default" SPARQL implementation has been developed from the original ``sparql-p`` implementation (by Ivan Herman, Dan Krech and Michel Pelletier) and over time has evolved into a full implementation of the W3C SPARQL Algebra, providing coverage for the full SPARQL grammar including all combinations of ``GRAPH``. The implementation includes unit testing and has been run against the new DAWG testsuite.
+This "default" SPARQL implementation has been developed from the original ``sparql-p`` implementation (by Ivan Herman, Dan Krech and Michel Pelletier) and over time has evolved into a full implementation of the W3C SPARQL Algebra, providing coverage for the full SPARQL grammar including all combinations of ``GRAPH``. The implementation includes unit testing and has been run against the new DAWG testsuite.
 
 .. toctree::
    :maxdepth: 3
    
    sparql/index
 
-
-(The bison-parsing SPARQL2SQL implementation contributed by Chimezie Ogbuji et. al. has been moved to a separate archival branch.)
+(*The bison-parsing SPARQL2SQL implementation contributed by Chimezie Ogbuji et. al. has been moved to a separate archival branch*).
 
 Stores
-++++++
+------
 
-   All of the back-end stores except for :class:`~rdflib.plugins.memory.IOMemory` 
-   and  :class:`~rdflib.plugins.sleepycat.SleepyCat` have been migrated out of 
-   RDFLib core and into the RDFExtras "store" module (:mod:`~rdfextras.store`)
-   in order to form a separate branch of development. It is possible that some of
-   these back-end stores will reappear as core RDFLib plugins.
+A new RDFLib Store plugin has been made added to the RDFExtras package - the 
+:mod:`~rdfextras.store.SPARQL` Store uses Ivan Herman et al.'s SPARQL service 
+wrapper `SPARQLWrapper <http://pypi.python.org/pypi/SPARQLWrapper>`_ to make
+a SPARQL endpoint behave programmatically like a read-only RDFLib store.
 
-   Extensive tests have been added in support of the development effort. 
-   Contributions in this area are especially welcome.
+.. warning:: The SPARQL Store API does *not* support the "initNS" keyword arg.
 
-   A new RDFLib Store plugin has been made added to the RDFExtras package - the 
-   :mod:`~rdfextras.store.SPARQL` Store uses Ivan Herman et al.'s SPARQL service 
-   wrapper `SPARQLWrapper <http://pypi.python.org/pypi/SPARQLWrapper>`_ to make
-   a SPARQL endpoint behave programmatically like a read-only RDFLib store.
 
-   Acknowledging a long-standing requirement, some *ad hoc* documentation has been
-   rustled up to address some of the more egregious lacunae. 
+The other back-end stores (except for :class:`~rdflib.plugins.memory.IOMemory` 
+and  :class:`~rdflib.plugins.sleepycat.SleepyCat`) have been migrated out of 
+RDFLib core and into separate plug-ins.
+
+Extensive tests have been added in support of the development effort. 
+Contributions in this area are especially welcome.
+
+Acknowledging a longstanding requirement, some *ad hoc* documentation has been
+rustled up to address some of the more egregious lacunae. 
 
 .. toctree::
    :maxdepth: 3
    
    store/index
 
-Parsers/Serializers
-+++++++++++++++++++
-
-Additional format-specific parsers and serializers, easing the task of reading 
-and writing non-RDF formats into and out of RDF.
-
-.. toctree::
-   :maxdepth: 3
-   
-JSONLD
-------
-.. toctree::
-   :maxdepth: 3
-
-   parsers/jsonld
-   serializers/jsonld
-
-RDF/JSON
---------
-.. toctree::
-   :maxdepth: 3
-
-   parsers/rdfjson
-   serializers/rdfjson
-
-
 Tools
-+++++
+-----
 
    The rdflib "tools" directory and its small collection of tools have been 
    removed from rdflib core and placed into :mod:`rdfextras.tools`.
@@ -95,7 +75,7 @@ Tools
    tools/index
 
 Utils
-+++++
+-----
 
 :mod:`rdfextras.utils` contains collections of utility functions. 
 
