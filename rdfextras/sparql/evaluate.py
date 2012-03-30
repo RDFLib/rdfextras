@@ -5,6 +5,8 @@ from rdfextras.sparql.query import SessionBNode
 from rdflib.namespace import RDF
 from rdflib.term import URIRef, Variable, BNode, Literal, Identifier
 from rdflib.term import XSDToPython
+from rdfextras.sparql import _questChar
+from rdfextras.sparql import SPARQLError
 from rdfextras.sparql.components import IRIRef #, NamedGraph, RemoteGraph
 from rdfextras.sparql.components import (
     LessThanOperator, EqualityOperator, NotEqualOperator,
@@ -17,6 +19,31 @@ from rdfextras.sparql.components import (
     ParsedConstrainedTriples, ListRedirect, UnaryOperator,
     BinaryOperator, ParsedREGEXInvocation, BuiltinFunctionCall,
     FUNCTION_NAMES)
+
+
+class Unbound:
+    """
+    A class to encapsulate a query variable. This class should be used in
+    conjunction with :class:`rdfextras.sparql.graph.BasicGraphPattern`.
+    """
+    def __init__(self,name):
+        """
+        :param name: the name of the variable (without the '?' character)
+        :type name: unicode or string
+        """
+        if isinstance(name, basestring):
+            self.name = _questChar + name
+            self.origName = name
+        else :
+            raise SPARQLError(
+                "illegal argument, variable name must be a string or unicode")
+
+    def __repr__(self) :
+        retval  = "?%s" % self.origName
+        return retval
+
+    def __str__(self) :
+        return self.__repr__()
 
 DEBUG = False
 
@@ -227,7 +254,7 @@ def mapToOperator(expr,prolog,combinationArg=None,constraint=False):
                 mapToOperator(expr.left,prolog,combinationArg,constraint=constraint),
                 mapToOperator(expr.right,prolog,combinationArg,constraint=constraint),
                 combinationInvokation)
-    elif isinstance(expr,Variable):
+    elif isinstance(expr, (Variable, Unbound)): # the one and only use of Unbound
         if constraint:
             return """operators.EBV(rdflib.Variable("%s"))%s"""%(expr.n3(),combinationInvokation)
         else:
@@ -251,8 +278,9 @@ def mapToOperator(expr,prolog,combinationArg=None,constraint=False):
         else:
             return repr(lit)
     elif isinstance(expr,(Literal, URIRef)):
-        import warnings
-        warnings.warn("There is the possibility of __repr__ being deprecated in python3K",DeprecationWarning,stacklevel=3)        
+        # # Didn't happen
+        # import warnings
+        # warnings.warn("There is the possibility of __repr__ being deprecated in python3K",DeprecationWarning,stacklevel=3)        
         return repr(expr)
     elif isinstance(expr,QName):
         if expr[:2] == '_:':
@@ -279,7 +307,6 @@ def mapToOperator(expr,prolog,combinationArg=None,constraint=False):
             warnings.warn("Use of unregistered extension function: %s"%(fUri),UserWarning,1)
         else:
             raise NotImplemented("Extension Mechanism hook not yet completely hooked up..")
-        #raise Exception("Whats do i do with %s (a %s)?"%(expr,type(expr).__name__))
     else:
         if isinstance(expr,ListRedirect):
             expr = expr.reduce()

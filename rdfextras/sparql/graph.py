@@ -569,8 +569,10 @@ class BasicGraphPattern(GraphPattern) :
         yield self
         
 if __name__ == '__main__' :
+    from rdfextras.sparql.evaluate import Unbound
     v1 = Variable("a")
-    g = BasicGraphPattern([("a","?b",24),("?r","?c",12345),(v1,"?c",3333)])
+    u1 = Unbound("a")
+    g = BasicGraphPattern([("a","?b",24),("?r","?c",12345),(v1,"?c",3333),(u1,"?c",9999)])
     print g
 
 
