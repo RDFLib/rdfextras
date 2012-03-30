@@ -2,59 +2,55 @@
 Using SPARQL to query an rdflib 3 graph
 =======================================
 
-Get the Plugin
-==============
+Get the SPARQL RDFLib plugin
+============================
 
-SPARQL is no longer shipped with Core rdflib - instead it is now a part of
-`rdfextras <http://code.google.com/p/rdfextras/>`_ a Google code project 
-(http://code.google.com/p/rdfextras/):
+SPARQL is no longer shipped with core RDFLib, instead it is now a part of
+`rdfextras <https://github.com/RDFLib/rdfextras/>`_
 
 Assuming you have rdfextras installed with setuptools (highly recommended), 
-you can use Sparql with rdflib 3.X out of the box. 
-If you only have distutils, you have to add these lines somewhere at the top of your program:
+you can use SPARQL with RDFLib 3.X out of the box. 
 
-.. sourcecode:: python
+If you only have distutils, you have to add these lines somewhere at the top
+of your program:
+
+.. code-block:: python
 
     import rdfextras
     rdfextras.registerplugins()
 
-
 Create an rdflib Graph
 ======================
-You might parse some files into a new graph (see above) or open an on-disk rdflib store.
+You might parse some files into a new graph (see above) or open an 
+on-disk rdflib store.
 
-.. sourcecode:: python
+.. code-block:: python
 
     from rdflib.graph import Graph
     g = Graph()
-    g.parse("http://bigasterisk.com/foaf.rdf")
     g.parse("http://www.w3.org/People/Berners-Lee/card.rdf")
-
-LiveJournal produces `FOAF data <http://captsolo.net/info/blog_a.php/2007/10/04/foaf_for_social_network_migration>`_
-for their users, but they seem to use ``foaf:member_name`` for a person's full
-name. For this demo, I made ``foaf:name`` act as a synonym for 
-``foaf:member_name`` (a poor man's one-way 
-`owl:equivalentProperty <http://www.w3.org/TR/owl-ref/#equivalentProperty-def>`_):
-
-.. sourcecode:: python
-
-    from rdflib import Namespace
-    FOAF = Namespace("http://xmlns.com/foaf/0.1/")
-    g.parse("http://danbri.livejournal.com/data/foaf") 
-    [g.add((s, FOAF['name'], n)) for s,_,n in g.triples((None, FOAF['member_name'], None))]
 
 Run a Query
 ===========
 
-.. sourcecode:: python
+.. code-block:: python
 
-    for row in g.query('SELECT ?aname ?bname WHERE { ?a foaf:knows ?b . ?a foaf:name ?aname . ?b foaf:name ?bname . }', 
-                       initNs=dict(foaf=Namespace("http://xmlns.com/foaf/0.1/"))):
+    querystr = """
+    SELECT ?aname ?bname 
+    WHERE { 
+        ?a foaf:knows ?b . 
+        ?a foaf:name ?aname . 
+        ?b foaf:name ?bname . 
+    }"""
+    for row in g.query(
+        querystr, 
+        initNs=dict(foaf=Namespace("http://xmlns.com/foaf/0.1/"))):
+        
         print("%s knows %s" % row)
 
 The results are tuples of values in the same order as your SELECT arguments.
 
-.. sourcecode:: text
+.. code-block:: text
 
     Timothy Berners-Lee knows Edd Dumbill
     Timothy Berners-Lee knows Jennifer Golbeck
@@ -82,7 +78,7 @@ Bindings
 As with conventional SQL queries, it's common to run the same query many
 times with only a few terms changing. rdflib calls this ``initBindings``:
 
-.. sourcecode:: python
+.. code-block:: python
 
     FOAF = Namespace("http://xmlns.com/foaf/0.1/")
     ns = dict(foaf=FOAF)
@@ -95,7 +91,7 @@ times with only a few terms changing. rdflib calls this ``initBindings``:
 
 ``Output``:
 
-.. sourcecode:: python
+.. code-block:: python
 
     (rdflib.Literal('Drew Perttula', language=None, datatype=None),)
 
