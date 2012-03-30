@@ -782,7 +782,7 @@ def query(graph, selection, patterns, optionalPatterns=[], initialBindings = {})
     Good for most of the usage, when no more action (clustering, etc) is required.
 
     :param selection: a list or tuple with the selection criteria,
-        or a single string. Each entry is a string that begins with a"?".
+        or a single string. Each entry is a string that begins with "?".
 
     :param patterns: either a :class:`~rdfextras.sparql.graph.GraphPattern`
         instance or a list of :class:`~rdfextras.sparql.graph.GraphPattern` 
