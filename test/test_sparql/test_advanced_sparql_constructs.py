@@ -70,7 +70,7 @@ class AdvancedTests(unittest.TestCase):
         
     def testNamedGraph(self):
         # I am not sure this is the behaviour we DO want. 
-        # see http://code.google.com/p/rdfextras/issues/detail?id=26
+        # see https://github.com/RDFLib/rdfextras/issues/27
         OWL_NS = Namespace("http://www.w3.org/2002/07/owl#")
         rt =  self.testGraph.query(sparqlQ4)
         self.assertEquals(set(rt),set((x,) for x in [OWL_NS.DatatypeProperty, OWL_NS.ObjectProperty, OWL_NS.OntologyProperty,OWL_NS.Class,OWL_NS.Ontology,OWL_NS.AnnotationProperty,RDF.Property,RDFS.Class]))
