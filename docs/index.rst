@@ -10,8 +10,9 @@ The main RDFExtras project acts as a focal point for RDFLib-associated packages 
 
 .. warning:: The rdfextras packages are to be considered unstable in general. Useful, sometimes near core, but not currently guaranteed never to be renamed, refactored, reshuffled or redesigned.
 
-Plug-ins
-========
+Plug-ins Overview
+=================
+
 The current set of RDFLib and RDFExtras plug-ins includes RDF parsers, serializers, stores and the "sparql-p" SPARQL query processor:
 
 .. image:: /_static/plugins-diagram.jpg
@@ -98,7 +99,7 @@ rdflib wiki articles transcluded here for convenience.
    intro_querying
    intro_mysql_as_triplestore
    intro_transitive_traversal
-
+   working_with
 
 Techniques
 ==========
