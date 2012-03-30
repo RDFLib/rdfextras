@@ -19,10 +19,10 @@ of your program:
     import rdfextras
     rdfextras.registerplugins()
 
-Create an rdflib Graph
+Create an RDFLib Graph
 ======================
-You might parse some files into a new graph (see above) or open an 
-on-disk rdflib store.
+You might parse some files into a new graph or open an on-disk
+RDFLib store.
 
 .. code-block:: python
 
