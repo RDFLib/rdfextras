@@ -42,11 +42,12 @@ from rdfextras.sparql.graph import BasicGraphPattern
 from rdfextras.sparql.query import _variablesToArray
 import logging
 log = logging.getLogger(__name__)
-#A variable to determine whether we obey SPARQL definition of RDF dataset
-#which does not allow matching of default graphs (or any graph with a BNode for a name)
-#"An RDF Dataset comprises one graph, 
-# the default graph, which does not have a name" - 
-#  http://www.w3.org/TR/rdf-sparql-query/#namedAndDefaultGraph
+
+# A variable to determine whether we obey SPARQL definition of RDF dataset
+# which does not allow matching of default graphs (or any graph with a BNode
+# for a name)
+#"An RDF Dataset comprises one graph, the default graph, which does not have
+# a name" -  http://www.w3.org/TR/rdf-sparql-query/#namedAndDefaultGraph
 DAWG_DATASET_COMPLIANCE = False
 
 def ReduceGraphPattern(graphPattern,prolog):
@@ -229,23 +230,24 @@ def ReduceToAlgebra(left,right):
     else:
         return Join(left,right)
 
-def RenderSPARQLAlgebra(parsedSPARQL,nsMappings=None):
-    nsMappings = nsMappings and nsMappings or {} 
-    global prolog
-    prolog = parsedSPARQL.prolog
-    if prolog is not None:
-        prolog.DEBUG = False
-    else:
-        prolog = Prolog(None, [])
-        prolog.DEBUG=False
-    return reduce(ReduceToAlgebra,
-                  parsedSPARQL.query.whereClause.parsedGraphPattern.graphPatterns,None)
+# # Unreferenced anywhere else
+# def RenderSPARQLAlgebra(parsedSPARQL,nsMappings=None):
+#     nsMappings = nsMappings and nsMappings or {} 
+#     global prolog
+#     prolog = parsedSPARQL.prolog
+#     if prolog is not None:
+#         prolog.DEBUG = False
+#     else:
+#         prolog = Prolog(None, [])
+#         prolog.DEBUG=False
+#     return reduce(ReduceToAlgebra,
+#                   parsedSPARQL.query.whereClause.parsedGraphPattern.graphPatterns,None)
 
 def LoadGraph(dtSet,dataSetBase,graph):
-    #An RDF URI dereference, following TAG best practices
-    #Need a hook (4Suite) to bypass urllib's inability
-    #to implement URI RFC verbatim - problematic for descendent 
-    #specifications
+    # An RDF URI dereference, following TAG best practices
+    # Need a hook (4Suite) to bypass urllib's inability
+    # to implement URI RFC verbatim - problematic for descendent 
+    # specifications
     try:
         from Ft.Lib.Uri import UriResolverBase as Resolver
         from Ft.Lib.Uri import GetScheme, OsPathToUri
@@ -266,18 +268,18 @@ def LoadGraph(dtSet,dataSetBase,graph):
         source=Resolver().resolve(str(dtSet), dataSetBase)
     else:
         source = dtSet
-    #GRDDL hook here!
+    # GRDDL hook here!
     try:
-        #Try as RDF/XML first (without resolving)
+        # Try as RDF/XML first (without resolving)
         graph.parse(source)
     except:
         try:
-            #Parse as Notation 3 instead
+            # Parse as Notation 3 instead
             source=Resolver().resolve(str(dtSet), dataSetBase)
             graph.parse(source,format='n3')
         except:
             raise
-            #RDFa?
+            # RDFa?
             graph.parse(dtSet,format='rdfa')
 
 def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False,
@@ -309,11 +311,11 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
                 LoadGraph(dtSet,dataSetBase,newGraph)
                 graphs.append(newGraph)
             else:
-                #"Each FROM clause contains an IRI that indicates a graph to be 
+                # "Each FROM clause contains an IRI that indicates a graph to be 
                 # used to form the default graph. This does not put the graph 
                 # in as a named graph." -- 8.2.1 Specifying the Default Graph
                 if DAWG_DATASET_COMPLIANCE:
-                    #@@ this should indicate a merge into the 'default' graph
+                    # @@TODO: this should indicate a merge into the 'default' graph
                     # per http://www.w3.org/TR/rdf-sparql-query/#unnamedGraph
                     # (8.2.1 Specifying the Default Graph)
                     assert isinstance(dataset,ConjunctiveGraph)
@@ -347,13 +349,14 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
     else:
         offset = 0
 
-    # @todo consider allowing in cases where offset is nonzero
+    # @@TODO: consider allowing in cases where offset is nonzero
     if limit is not None and offset == 0:
         query.prolog.eagerLimit = limit
         for x in expr.fetchTerminalExpression():
             query.prolog.rightMostBGPs.add(x)
         if query.prolog.DEBUG:
-            log.debug("Setting up for an eager limit evaluation (size: %s)"%query.prolog.eagerLimit)
+            log.debug("Setting up for an eager limit evaluation (size: %s)" % \
+                        query.prolog.eagerLimit)
     if DEBUG:
         log.debug("## Full SPARQL Algebra expression ##")
         log.debug(expr)
@@ -367,9 +370,9 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
         top = sparql_query._SPARQLNode(None,bindings,expr.patterns, tripleStore,expr=expr)
         top.topLevelExpand(expr.constraints, query.prolog)
             
-#        for tree in sparql_query._fetchBoundLeaves(top):
-#            print_tree(tree)
-#        print "---------------"
+        # for tree in sparql_query._fetchBoundLeaves(top):
+        #     print_tree(tree)
+        # print "---------------"
         result = sparql_query.Query(top, tripleStore)
     else:
         assert isinstance(expr,AlgebraExpression), repr(expr)
@@ -379,6 +382,7 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
             log.debug("###################################")
         result = expr.evaluate(tripleStore,passedBindings,query.prolog)
         if isinstance(result,BasicGraphPattern):
+            # @@FIXME unused code
             retval = None
             bindings = sparql_query._createInitialBindings(result)
             if passedBindings:
@@ -397,8 +401,9 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
             ExportExpansionNode(result.parent1.top,fname='out1.svg',verbose=True)
             ExportExpansionNode(result.parent2.top,fname='out2.svg',verbose=True)
     if result == None :
-        # generate some proper output for the exception :-)
+        # @@FIXME: generate some proper output for the exception :-)
         msg = "Errors in the patterns, no valid query object generated; "
+        # @@FIXME basicPatterns is undefined
         msg += ("pattern:\n%s\netc..." % basicPatterns[0])
         raise SPARQLError(msg)
 
@@ -430,7 +435,7 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
             else:
                 recursive_expr = reduce(
                   ReduceToAlgebra, recursive_pattern.graphPatterns, None)
-
+            # @@FIXME: unused code
             initial_recursive_bindings = result.top.bindings.copy()
 
             def get_recursive_results(recursive_bindings_update, select):
@@ -506,17 +511,18 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
         else:
             rt=result.top.returnResult(None)
         rtGraph=Graph(namespace_manager=dataset.namespace_manager)
-        for binding in rt:        
+        for binding in rt:
             g=extensionFunctions[DESCRIBE](query.query.describeVars,
                                                binding,
                                                tripleStore.graph)
             return g
     else:
-#        10.2 CONSTRUCT
-#        The CONSTRUCT query form returns a single RDF graph specified by a graph 
-#        template. The result is an RDF graph formed by taking each query solution 
-#        in the solution sequence, substituting for the variables in the graph 
-#        template, and combining the triples into a single RDF graph by set union.
+         # 10.2 CONSTRUCT
+         # The CONSTRUCT query form returns a single RDF graph specified by a
+         # graph template. The result is an RDF graph formed by taking each
+         # query solution in the solution sequence, substituting for the
+         # variables in the graph template, and combining the triples into a
+         # single RDF graph by set union.
         if query.query.solutionModifier.limitClause is not None:
             limit = int(query.query.solutionModifier.limitClause)
         else:
@@ -538,10 +544,10 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
             for s,p,o,func in ReduceGraphPattern(query.query.triples,prolog).patterns:
                 s,p,o=map(lambda x:isinstance(x,Variable) and binding.get(x) or
                                  x,[s,p,o])
-                #If any such instantiation produces a triple containing an unbound
-                #variable or an illegal RDF construct, such as a literal in subject 
-                #or predicate position, then that triple is not included in the 
-                #output RDF graph.
+                # If any such instantiation produces a triple containing an
+                # unbound variable or an illegal RDF construct, such as a
+                # literal in subject or predicate position, then that triple
+                # is not included in the output RDF graph.
                 if not [i for i in [s,p,o] if isinstance(i,Variable)]:
                     rtGraph.add((s,p,o))
         return rtGraph
@@ -574,7 +580,7 @@ class EmptyGraphPatternExpression(AlgebraExpression):
     def __repr__(self):
         return "EmptyGraphPatternExpression(..)"
     def evaluate(self,tripleStore,initialBindings,prolog):
-        #raise NotImplementedError("Empty Graph Pattern expressions, not supported")
+        # raise NotImplementedError("Empty Graph Pattern expressions, not supported")
         if prolog.DEBUG:
             log.debug("eval(%s,%s,%s)"%(self,initialBindings,tripleStore.graph))
         empty = sparql_query._SPARQLNode(None,{},[],tripleStore)
@@ -614,11 +620,12 @@ def walktree(top, depthfirst = True, leavesOnly = True, optProxies=False):
         if not proxies:
             yield top
     children=reduce(lambda x,y:x+y,list(fetchChildren(top)))
-#    if isinstance(top,sparql_query._SPARQLNode) or isinstance(top,sparql_query.Query) and \
-#        top.parent1 is None:
-#        children = top.children
-#    else:
-#        children = top.parent1.children + top.parent2.children 
+    # if isinstance(top,sparql_query._SPARQLNode) \
+    #     or isinstance(top,sparql_query.Query) \
+    #     and  top.parent1 is None:
+    #     children = top.children
+    # else:
+    #     children = top.parent1.children + top.parent2.children 
     for child in children:
         if child.children:
             for newtop in walktree(child, depthfirst,leavesOnly,optProxies):
@@ -645,8 +652,8 @@ def print_tree(node, padding=' '):
     print padding[:-1] + repr(node)
     padding = padding + ' '
     count = 0
-    #_children1=reduce(lambda x,y:x+y,list(fetchChildren(node)))
-    for child in node.children:#_children1:
+    # _children1=reduce(lambda x,y:x+y,list(fetchChildren(node)))
+    for child in node.children:# _children1:
         count += 1
         print padding + '|'
         if child.children:
@@ -690,7 +697,7 @@ def _ExpandJoin(node,expression,tripleStore,prolog,optionalTree=False):
     if prolog.DEBUG:
         print_tree(node)
         log.debug("-------------------")
-    #for node in BF_leaf_traversal(node):
+    # for node in BF_leaf_traversal(node):
     currExpr = expression
     for node in walktree(node):
         if node.clash:
@@ -699,7 +706,7 @@ def _ExpandJoin(node,expression,tripleStore,prolog,optionalTree=False):
         if prolog.DEBUG:
             log.debug("Performing Join(%s,..)"%node)
         if isinstance(currExpr,AlgebraExpression):
-            #If an algebra expression evaluate it passing on the leaf bindings
+            # If an algebra expression, evaluate it passing on the leaf bindings
             if prolog.DEBUG:
                 log.debug("passing on bindings to %s\n:%s"%(currExpr,node.bindings.copy()))
             expression = currExpr.evaluate(tripleStore,node.bindings.copy(),prolog)
@@ -718,11 +725,10 @@ def _ExpandJoin(node,expression,tripleStore,prolog,optionalTree=False):
                 log.debug("node bindings: %s" % node.bindings)
             exprBindings = sparql_query._createInitialBindings(expression)
             exprBindings.update(node.bindings)
-            #An indicator for whether this node has any descendant optional expansions
-            #we should consider instead
-            #in Join(LeftJoin(A,B),X), if the inner LeftJoin is successful, 
-            #then X is joined
-            #against the cumulative bindings ( instead of just A )
+            # An indicator for whether this node has any descendant optional
+            # expansions we should consider instead in Join(LeftJoin(A,B),X),
+            # if the inner LeftJoin is successful, then X is joined against
+            # the cumulative bindings ( instead of just A )
             descendantOptionals = node.optionalTrees and \
                 [o for o in node.optionalTrees if list(sparql_query._fetchBoundLeaves(o))] 
             if not descendantOptionals:
@@ -733,8 +739,8 @@ def _ExpandJoin(node,expression,tripleStore,prolog,optionalTree=False):
                 top = None
             child = None            
             if not node.clash and not descendantOptionals:
-                #It has compatible bindings and either no optional expansions
-                #or no *valid* optional expansions
+                # It has compatible bindings and either no optional expansions
+                # or no *valid* optional expansions
                 child = sparql_query._SPARQLNode(top,
                                           exprBindings,
                                           expression.patterns,
@@ -750,10 +756,10 @@ def _ExpandJoin(node,expression,tripleStore,prolog,optionalTree=False):
         else:
             assert isinstance(expression,sparql_query.Query)
             if not expression.top:
-                #already evaluated a UNION - fetch UNION branches
+                # Already evaluated a UNION - fetch UNION branches
                 child = list(fetchUnionBranchesRoots(expression))
             else:
-                #Already been evaluated (non UNION), just attach the SPARQLNode
+                # Already been evaluated (non UNION), just attach the SPARQLNode
                 child = expression.top
         if isinstance(child,sparql_query._SPARQLNode):
             if node.clash == False and child is not None:
@@ -763,7 +769,7 @@ def _ExpandJoin(node,expression,tripleStore,prolog,optionalTree=False):
         else:
             assert isinstance(child,list)
             for newChild in child:
-#                if not newChild.clash:
+                # if not newChild.clash:
                 node.children.append(newChild)
                 if prolog.DEBUG:
                     log.debug("Adding %s to %s"%(child,node))                    
@@ -814,7 +820,8 @@ class Join(NonSymmetricBinaryOperator):
             left = self.left.evaluate(tripleStore,initialBindings,prolog)
         else:
             left = self.left
-        if isinstance(left,BasicGraphPattern):        
+        if isinstance(left,BasicGraphPattern):
+            # @@FIXME unused code        
             retval = None
             bindings = sparql_query._createInitialBindings(left)
             if initialBindings:
@@ -858,12 +865,12 @@ def _ExpandLeftJoin(node,expression,tripleStore,prolog,optionalTree=False):
         if node.clash:
             continue
         assert len(node.children) == 0 
-        # this is a leaf in the original expansion
+        # This is a leaf in the original expansion
         if prolog.DEBUG:
             log.debug("Performing LeftJoin(%s,..)"%node)
         if isinstance(currExpr,AlgebraExpression):
-            #If a Graph pattern evaluate it passing on the leaf bindings
-            #(possibly as solutions to graph names
+            # If a Graph pattern evaluate it passing on the leaf bindings
+            # (possibly as solutions to graph names
             if prolog.DEBUG:
                 log.debug("evaluating B in LeftJoin(A,B)")
                 log.debug("passing on bindings to %s\n:%s"%(
@@ -885,18 +892,18 @@ def _ExpandLeftJoin(node,expression,tripleStore,prolog,optionalTree=False):
                 log.debug("Passing on bindings %s" % rightBindings)
             optTree.topLevelExpand(expression.constraints, prolog)
             for proxy in sparql_query._fetchBoundLeaves(optTree):
-                #Mark a successful evaluation of LeftJoin (new bindings were added)
-                #these become proxies for later expressions 
+                # Mark a successful evaluation of LeftJoin (new bindings were added)
+                # these become proxies for later expressions 
                 proxy.priorLeftJoin=True
         else:
             if prolog.DEBUG:
                 log.debug("Attaching previously evaluated node: %s" % expression.top)
             assert isinstance(expression,sparql_query.Query)
             if not expression.top:
-                #already evaluated a UNION - fetch UNION branches
+                # Already evaluated a UNION - fetch UNION branches
                 optTree = list(fetchUnionBranchesRoots(expression))
             else:
-                #Already been evaluated (non UNION), just attach the SPARQLNode
+                # Already been evaluated (non UNION), just attach the SPARQLNode
                 optTree = expression.top
         if prolog.DEBUG:
             log.debug("Optional tree: %s" % optTree)
@@ -909,7 +916,7 @@ def _ExpandLeftJoin(node,expression,tripleStore,prolog,optionalTree=False):
         else:
             assert isinstance(optTree,list)
             for newChild in optTree:
-#                if not newChild.clash:
+                # if not newChild.clash:
                 node.optionalTrees.append(newChild)
                 if prolog.DEBUG:
                     log.debug("Adding %s to %s"%(newChild,node.optionalTrees))                    
@@ -952,7 +959,8 @@ class LeftJoin(NonSymmetricBinaryOperator):
         else:
             left = self.left
         if isinstance(left,BasicGraphPattern):        
-            #print "expanding A in LeftJoin(A,B) - a BGP: ", left
+            # print "expanding A in LeftJoin(A,B) - a BGP: ", left
+            # @@FIXME: unused code
             retval = None
             bindings = sparql_query._createInitialBindings(left)
             if initialBindings:
@@ -1008,7 +1016,8 @@ class Union(AlgebraExpression):
         else:
             left = self.left
         if isinstance(left,BasicGraphPattern):        
-            #The left expression has not been evaluated
+            # The left expression has not been evaluated
+            # @@FIXME: unused code
             retval = None
             bindings = sparql_query._createInitialBindings(left)
             if initialBindings:
@@ -1046,13 +1055,13 @@ class Union(AlgebraExpression):
         else:
             assert isinstance(right,sparql_query.Query), repr(right)
             rightNode = right.top
-#        if prolog.DEBUG:
-#            print "### Two UNION trees ###"
-#            print self.left
-#            print_tree(top.top)
-#            print self.right                       
-#            print_tree(rightNode)
-#            print "#######################"
+        # if prolog.DEBUG:
+        #    print "### Two UNION trees ###"
+        #    print self.left
+        #    print_tree(top.top)
+        #    print self.right                       
+        #    print_tree(rightNode)
+        #    print "#######################"
             
         #The UNION semantics are implemented by the overidden __add__ method                
         return top + sparql_query.Query(rightNode, tS)
@@ -1095,7 +1104,7 @@ class GraphExpression(AlgebraExpression):
                 if prolog.DEBUG:
                     log.debug("Passing on unified graph name: %s" % initialBindings[self.iriOrVar])
                 tripleStore = graph.SPARQLGraph(
-                                            Graph(tripleStore.store,
+                                            Graph(tripleStore.graph.store,
                                                   initialBindings[self.iriOrVar])
                                             ,dSCompliance=DAWG_DATASET_COMPLIANCE)
             else: 
@@ -1113,7 +1122,7 @@ class GraphExpression(AlgebraExpression):
                 #assert len(targetGraph) == 1
                 targetGraph = targetGraph[0]
             else:
-                targetGraph = Graph(tripleStore.store,graphName)
+                targetGraph = Graph(tripleStore.graph.store,graphName)
             tripleStore = graph.SPARQLGraph(targetGraph,
                                                   dSCompliance=\
                                                   DAWG_DATASET_COMPLIANCE)
@@ -1125,219 +1134,6 @@ class GraphExpression(AlgebraExpression):
             #Attach the prepared triple store to the BGP
             self.GGP.tripleStore = tripleStore
             return self.GGP
-
-#########################################
-
-#         Tests                         # 
-
-#########################################
-
-    
-TEST1="BASE <http://example.com/> SELECT * WHERE { ?s :p1 ?v1 ; :p2 ?v2 }"
-#BGP( ?s :p1 ?v1 .?s :p2 ?v2 )
-TEST1_REPR=\
-"BGP((?s,http://example.com/p1,?v1),(?s,http://example.com/p2,?v2))"
-
-TEST2 = "BASE <http://example.com/> SELECT * WHERE { { ?s :p1 ?v1 } UNION {?s :p2 ?v2 } }"
-#Union( BGP(?s :p1 ?v1) , BGP(?s :p2 ?v2) )
-TEST2_REPR=\
-"Union(BGP((?s,http://example.com/p1,?v1)),BGP((?s,http://example.com/p2,?v2)))"
-
-TEST3 = "BASE <http://example.com/> SELECT * WHERE { ?s :p1 ?v1 OPTIONAL {?s :p2 ?v2 } }"
-#LeftJoin(BGP(?s :p1 ?v1), BGP(?s :p2 ?v2), true)
-TEST3_REPR=\
-"LeftJoin(BGP((?s,http://example.com/p1,?v1)),BGP((?s,http://example.com/p2,?v2)))"
-
-TEST4 = "BASE <http://example.com/> SELECT * WHERE { ?s :p ?o. { ?s :p1 ?v1 } UNION {?s :p2 ?v2 } }"
-#Join(BGP(?s :p ?v),Union(BGP(?s :p1 ?v1), BGP(?s :p2 ?v2)))
-TEST4_REPR=\
-"Join(BGP((?s,http://example.com/p,?o)),Union(BGP((?s,http://example.com/p1,?v1)),BGP((?s,http://example.com/p2,?v2))))"
-
-TEST5 = "BASE <http://example.com/> SELECT * WHERE { ?a ?b ?c OPTIONAL { ?s :p1 ?v1 } }"
-#Join(BGP(?s :p ?v),Union(BGP(?s :p1 ?v1), BGP(?s :p2 ?v2)))
-TEST5_REPR=\
-"LeftJoin(BGP((?a,?b,?c)),BGP((?s,http://example.com/p1,?v1)))"
-
-TEST6="BASE <http://example.com/> SELECT * WHERE { ?a :b :c OPTIONAL {:x :y :z} { :x1 :y1 :z1 } UNION { :x2 :y2 :z2 } }"
-TEST6_REPR=\
-"Join(LeftJoin(BGP((?a,http://example.com/b,http://example.com/c)),BGP((http://example.com/x,http://example.com/y,http://example.com/z))),Union(BGP((http://example.com/x1,http://example.com/y1,http://example.com/z1)),BGP((http://example.com/x2,http://example.com/y2,http://example.com/z2))))"
-
-TEST7="BASE <http://example.com/> SELECT * WHERE { ?s :p1 ?v1 OPTIONAL { ?s :p2 ?v2. FILTER( ?v1 < 3 ) } }"
-TEST7_REPR=\
-"LeftJoin(BGP((?s,http://example.com/p1,?v1)),Filter(.. a filter ..,BGP(?s,http://example.com/p2,?v2)))"
-
-TEST8="BASE <http://example.com/> SELECT * WHERE { ?s :p1 ?v1. FILTER ( ?v1 < 3 ) OPTIONAL { ?s :p3 ?v3 } }"
-TEST8_REPR=\
-"LeftJoin(Filter(.. a filter ..,BGP(?s,http://example.com/p1,?v1)),BGP((?s,http://example.com/p3,?v3)))"
-
-TEST10=\
-"""
-PREFIX  data:  <http://example.org/foaf/>
-PREFIX  foaf:  <http://xmlns.com/foaf/0.1/>
-PREFIX  rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
-
-SELECT ?mbox ?nick ?ppd
-FROM NAMED <http://example.org/foaf/aliceFoaf>
-FROM NAMED <http://example.org/foaf/bobFoaf>
-WHERE
-{
-  GRAPH data:aliceFoaf
-  {
-    ?alice foaf:mbox <mailto:alice@work.example> ;
-           foaf:knows ?whom .
-    ?whom  foaf:mbox ?mbox ;
-           rdfs:seeAlso ?ppd .
-    ?ppd  a foaf:PersonalProfileDocument .
-  } .
-  GRAPH ?ppd
-  {
-      ?w foaf:mbox ?mbox ;
-         foaf:nick ?nick
-  }
-}"""
-
-reducableSPARQL=\
-"""
-PREFIX mf: <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>
-PREFIX qt: <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT ?test ?testName ?testComment ?query ?result ?testAction
-WHERE {
-    { ?test a mf:QueryEvaluationTest }
-      UNION
-    { ?test a <http://jena.hpl.hp.com/2005/05/test-manifest-extra#TestQuery> }
-    ?test mf:name   ?testName.
-    OPTIONAL { ?test rdfs:comment ?testComment }
-    ?test mf:action    ?testAction;
-          mf:result ?result.
-    ?testAction qt:query ?query }"""
-    
-reducableSPARQLExpr=\
-"Join(LeftJoin(Join(Union(BGP((?test,http://www.w3.org/1999/02/22-rdf-syntax-ns#type,mf:QueryEvaluationTest)),BGP((?test,http://www.w3.org/1999/02/22-rdf-syntax-ns#type,http://jena.hpl.hp.com/2005/05/test-manifest-extra#TestQuery))),BGP((?test,mf:name,?testName))),BGP((?test,rdfs:comment,?testComment))),BGP((?test,mf:action,?testAction),(?test,mf:result,?result),(?testAction,qt:query,?query)))"    
-
-ExprTests = \
-[
-    (TEST1,TEST1_REPR),
-    (TEST2,TEST2_REPR),
-    (TEST3,TEST3_REPR),
-    (TEST4,TEST4_REPR),
-    (TEST5,TEST5_REPR),
-    (TEST6,TEST6_REPR),
-    (TEST7,TEST7_REPR),
-    (TEST8,TEST8_REPR),
-    (reducableSPARQL,reducableSPARQLExpr),    
-]
-
-test_graph_a = """
-@prefix  foaf:     <http://xmlns.com/foaf/0.1/> .
-@prefix  rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix  rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
-
-_:a  foaf:name     "Alice" .
-_:a  foaf:mbox     <mailto:alice@work.example> .
-_:a  foaf:knows    _:b .
-
-_:b  foaf:name     "Bob" .
-_:b  foaf:mbox     <mailto:bob@work.example> .
-_:b  foaf:nick     "Bobby" .
-_:b  rdfs:seeAlso  <http://example.org/foaf/bobFoaf> .
-
-<http://example.org/foaf/bobFoaf>
-     rdf:type      foaf:PersonalProfileDocument ."""
-     
-test_graph_b = """
-@prefix  foaf:     <http://xmlns.com/foaf/0.1/> .
-@prefix  rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix  rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
-
-_:z  foaf:mbox     <mailto:bob@work.example> .
-_:z  rdfs:seeAlso  <http://example.org/foaf/bobFoaf> .
-_:z  foaf:nick     "Robert" .
-
-<http://example.org/foaf/bobFoaf>
-     rdf:type      foaf:PersonalProfileDocument ."""     
-     
-scopingQuery=\
-"""
-PREFIX  data:  <http://example.org/foaf/>
-PREFIX  foaf:  <http://xmlns.com/foaf/0.1/>
-PREFIX  rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
-
-SELECT ?ppd
-FROM NAMED <http://example.org/foaf/aliceFoaf>
-FROM NAMED <http://example.org/foaf/bobFoaf>
-WHERE
-{
-  GRAPH ?ppd { ?b foaf:name "Bob" . } .
-  GRAPH ?ppd { ?doc a foaf:PersonalProfileDocument . }
-}"""     
-
-class TestSPARQLAlgebra(unittest.TestCase):
-    def setUp(self):
-        self.store = plugin.get('IOMemory', Store)()
-        self.graph1 = Graph(self.store,identifier=URIRef('http://example.org/foaf/aliceFoaf'))
-        self.graph1.parse(StringIO(test_graph_a), format="n3")
-        self.graph2 = Graph(self.store,identifier=URIRef('http://example.org/foaf/bobFoaf'))
-        self.graph2.parse(StringIO(test_graph_b), format="n3")
-        self.unionGraph = ReadOnlyGraphAggregate(graphs=[self.graph1,self.graph2],store=self.store)
-        
-#    def testScoping(self):
-#        from rdfextras.sparql.processor import Parse
-#        from rdfextras.sparql.QueryResult import SPARQLQueryResult
-#        from rdfextras.sparql.components import Prolog  
-#        p = Parse(scopingQuery)
-#        prolog = p.prolog
-#        if prolog is None:
-#            prolog = Prolog(u'',[])
-#            prolog.DEBUG = True
-#        rt = TopEvaluate(p,self.unionGraph,passedBindings = {},DEBUG=False)
-#        rt = SPARQLQueryResult(rt).serialize(format='python')
-#        self.failUnless(len(rt) == 1,"Expected 1 item solution set")
-#        for ppd in rt:
-#            self.failUnless(ppd == URIRef('http://example.org/foaf/aliceFoaf'),
-#                            "Unexpected ?mbox binding :\n %s" % ppd)
-
-    def testExpressions(self):
-        from rdfextras.sparql.parser import parse
-        global prolog
-        for inExpr,outExpr in ExprTests:
-            p = parse(inExpr)
-            prolog = p.prolog
-            p = p.query.whereClause.parsedGraphPattern.graphPatterns
-            if prolog is None:
-                from rdfextras.sparql.components import Prolog  
-                prolog = Prolog(u'',[])
-            if not hasattr(prolog,'DEBUG'):                
-                prolog.DEBUG = False
-            self.assertEquals(repr(reduce(ReduceToAlgebra,p,None)),outExpr)
-
-    def testSimpleGraphPattern(self):
-        from rdfextras.sparql.parser import parse
-        global prolog
-        p = parse("BASE <http://example.com/> SELECT ?ptrec WHERE { GRAPH ?ptrec { ?data :foo 'bar'. } }")
-        prolog = p.prolog
-        p = p.query.whereClause.parsedGraphPattern.graphPatterns
-        if prolog is None:
-            from rdfextras.sparql.components import Prolog  
-            prolog = Prolog(u'',[])
-            prolog.DEBUG = True
-        assert isinstance(reduce(ReduceToAlgebra,p,None),GraphExpression)
-
-#    def testGraphEvaluation(self):
-#        from rdfextras.sparql.processor import Parse
-#        p = Parse(TEST10)
-#        print TEST10
-#        rt = TopEvaluate(p,self.unionGraph,passedBindings = {})
-#        from rdfextras.sparql.QueryResult import SPARQLQueryResult
-#        rt = SPARQLQueryResult(rt).serialize(format='python')
-#        self.failUnless(len(rt) == 1,"Expected 1 item solution set")
-#        for mbox,nick,ppd in rt:
-#            self.failUnless(mbox == URIRef('mailto:bob@work.example'),
-#                            "Unexpected ?mbox binding :\n %s" % mbox)
-#            self.failUnless(nick  == Literal("Robert"),
-#                            "Unexpected ?nick binding :\n %s" % nick)
-#            self.failUnless(ppd == URIRef('http://example.org/foaf/bobFoaf'),
-#                            "Unexpected ?ppd binding :\n %s" % ppd)
 
 if __name__ == '__main__':
     unittest.main()
