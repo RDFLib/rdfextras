@@ -786,7 +786,7 @@ def _processResults(select,arr) :
     return retval
 
 
-def query(graph, selection, patterns, optionalPatterns=[], initialBindings = {}, dSCompliance=False) :
+def query(graph, selection, patterns, optionalPatterns=[], initialBindings = {}, dSCompliance=False, loadContexts=False) :
     """
     A shorthand for the creation of a :class:`~rdfextras.sparql.query.Query` instance, returning
     the result of a :meth:`~rdfextras.sparql.query.Query.select` right away.
@@ -808,7 +808,7 @@ def query(graph, selection, patterns, optionalPatterns=[], initialBindings = {},
 
     :return: list of query results as a list of tuples
     """
-    result = queryObject(graph, patterns,optionalPatterns,initialBindings,dSCompliance)
+    result = queryObject(graph, patterns,optionalPatterns,initialBindings,dSCompliance,loadContexts)
     if result == None :
         # generate some proper output for the exception :-)
         msg = "Errors in the patterns, no valid query object generated; "
@@ -819,7 +819,7 @@ def query(graph, selection, patterns, optionalPatterns=[], initialBindings = {},
         raise SPARQLError(msg)
     return result.select(selection)
 
-def queryObject(graph, patterns, optionalPatterns=[], initialBindings = None, dSCompliance=False) :
+def queryObject(graph, patterns, optionalPatterns=[], initialBindings = None, dSCompliance=False,loadContexts=False) :
     """
     Creation of a :class:`~rdfextras.sparql.query.Query` instance.
 

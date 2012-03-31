@@ -285,7 +285,8 @@ def LoadGraph(dtSet,dataSetBase,graph):
 def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False,
                 dataSetBase=None,
                 extensionFunctions={},
-                dSCompliance=False):
+                dSCompliance=False,
+                loadContexts=False):
     """
     The outcome of executing a SPARQL is defined by a series of steps, starting 
     from the SPARQL query as a string, turning that string into an abstract 
@@ -326,9 +327,12 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
                     assert isinstance(dataset,ConjunctiveGraph)
                     memGraph = dataset.default_context
                 else:
-                    memStore = plugin.get('IOMemory',Store)()
-                    memGraph = Graph(memStore)
-                LoadGraph(dtSet,dataSetBase,memGraph)
+                    if loadContexts:
+                        memGraph = dataset.get_context(dtSet)
+                    else:
+                        memStore = plugin.get('IOMemory',Store)()
+                        memGraph = Graph(memStore)
+                        LoadGraph(dtSet,dataSetBase,memGraph)
                 if memGraph.identifier not in [g.identifier for g in graphs]:
                     graphs.append(memGraph)
         tripleStore = graph.SPARQLGraph(ReadOnlyGraphAggregate(graphs,
@@ -386,7 +390,8 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
         # print "---------------"
         result = sparql_query.Query(top, tripleStore)
     elif expr is None and isinstance(query.query,DescribeQuery):
-        retval = None
+        # @@FIXME: unused code
+        # retval = None
         bindings = {}
         top = sparql_query._SPARQLNode(None,bindings,(), tripleStore,expr=expr)
         top.topLevelExpand((), query.prolog)
