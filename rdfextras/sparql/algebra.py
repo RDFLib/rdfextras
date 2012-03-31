@@ -337,6 +337,12 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
                                    for item in query.query.variables]
     else:
         query.query.variables = []
+
+    # Fix for DESCRIBE simple case, e.g. "DESCRIBE <urn:a>" with no WHERE clause
+    if query.query.whereClause.parsedGraphPattern is None:
+        query.query.whereClause.parsedGraphPattern = BasicGraphPattern([])
+        query.query.whereClause.parsedGraphPattern.graphPatterns = ()
+
     expr = reduce(ReduceToAlgebra,query.query.whereClause.parsedGraphPattern.graphPatterns,
                   None)
 
@@ -369,6 +375,16 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
             bindings.update(passedBindings)
         top = sparql_query._SPARQLNode(None,bindings,expr.patterns, tripleStore,expr=expr)
         top.topLevelExpand(expr.constraints, query.prolog)
+            
+        # for tree in sparql_query._fetchBoundLeaves(top):
+        #     print_tree(tree)
+        # print "---------------"
+        result = sparql_query.Query(top, tripleStore)
+    elif expr is None and isinstance(query.query,DescribeQuery):
+        retval = None
+        bindings = {}
+        top = sparql_query._SPARQLNode(None,bindings,(), tripleStore,expr=expr)
+        top.topLevelExpand((), query.prolog)
             
         # for tree in sparql_query._fetchBoundLeaves(top):
         #     print_tree(tree)
@@ -494,6 +510,53 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
                  orderBy,query.query.distinct,\
                  topUnionBindings
     elif isinstance(query.query,DescribeQuery):
+        # 10.4.3 Descriptions of Resources
+
+        # The RDF returned is determined by the information publisher. 
+        # It is the useful information the service has about a resource. 
+        # It may include information about other resources: for example, 
+        # the RDF data for a book may also include details about the author.
+
+        # A simple query such as
+
+        # PREFIX ent:  <http://org.example.com/employees#>
+        # DESCRIBE ?x WHERE { ?x ent:employeeId "1234" }
+        # might return a description of the employee and some other 
+        # potentially useful details:
+
+        # @prefix foaf:   <http://xmlns.com/foaf/0.1/> .
+        # @prefix vcard:  <http://www.w3.org/2001/vcard-rdf/3.0> .
+        # @prefix exOrg:  <http://org.example.com/employees#> .
+        # @prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+        # @prefix owl:    <http://www.w3.org/2002/07/owl#>
+
+        # _:a     exOrg:employeeId    "1234" ;
+               
+        #         foaf:mbox_sha1sum   "ABCD1234" ;
+        #         vcard:N
+        #          [ vcard:Family       "Smith" ;
+        #            vcard:Given        "John"  ] .
+
+        # foaf:mbox_sha1sum  rdf:type  owl:InverseFunctionalProperty .
+        # which includes the blank node closure for the vcard vocabulary 
+        # vcard:N. 
+        # Other possible mechanisms for deciding what information to return
+        # include Concise Bounded Descriptions [CBD].
+
+        # For a vocabulary such as FOAF, where the resources are typically
+        # blank nodes, returning sufficient information to identify a node
+        # such as the InverseFunctionalProperty foaf:mbox_sha1sum as well
+        # as information like name and other details recorded would be
+        # appropriate. In the example, the match to the WHERE clause was
+        # returned, but this is not required.
+
+        def create_result(vars, binding, graph):
+            # print("Creating result %s %s %s" % (vars, binding, graph))
+            # result,selectionF,allVars,orderBy,distinct,topUnion
+            return (graph.n3(), [], vars, limit, offset, [])
+        import rdflib
+        extensionFunctions = {rdflib.term.URIRef(u'http://www.w3.org/TR/rdf-sparql-query/#describe'): create_result}
+
         if query.query.solutionModifier.limitClause is not None:
             limit = int(query.query.solutionModifier.limitClause)
         else:
@@ -511,11 +574,21 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
         else:
             rt=result.top.returnResult(None)
         rtGraph=Graph(namespace_manager=dataset.namespace_manager)
-        for binding in rt:
-            g=extensionFunctions[DESCRIBE](query.query.describeVars,
-                                               binding,
-                                               tripleStore.graph)
-            return g
+        # print("rt", rt, type(rt))
+        for binding in rt: # Doesn't get here with simple test ...
+            if binding:
+                # print(query.query.describeVars,binding,tripleStore.graph)
+                g = extensionFunctions[DESCRIBE](query.query.describeVars,
+                                                   binding,
+                                                   tripleStore.graph)
+                # print("G is %s" % list(g))
+                return g
+        rtGraph.bind('', 'http://rdflib.net/store#')
+        rtGraph.bind('rdfg', 'http://www.w3.org/2004/03/trix/rdfg-1/')
+        rtGraph.add((URIRef('http://rdflib.net/store#'+tripleStore.graph.identifier),
+                     rdflib.RDF.type,
+                     URIRef('http://rdflib.net/store#Store')))
+        return rtGraph
     else:
          # 10.2 CONSTRUCT
          # The CONSTRUCT query form returns a single RDF graph specified by a

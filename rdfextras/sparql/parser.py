@@ -662,7 +662,7 @@ if DEBUG:
 
 # WhereClause:
 WHERE = Suppress(Optional(CaselessKeyword('WHERE')))
-WhereClause = (WHERE + GroupGraphPattern).setParseAction(
+WhereClause = (WHERE + Optional(GroupGraphPattern, None)).setParseAction(
   refer_component(components.WhereClause))
 if DEBUG:
     WhereClause.setName('WhereClause')

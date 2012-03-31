@@ -560,10 +560,15 @@ class DescribeQuery(object):
         self.solutionModifier = solutionModifier
 
     def __repr__(self):
+        if self.whereClause is not None:
+            parsedGP = self.whereClause.parsedGraphPattern
+        else:
+            parsedGP = None
         return "DESCRIBE %s %s %s %s"%(
                        self.describeVars,
                        self.dataSets,
-                       self.whereClause.parsedGraphPattern,
+                       parsedGP,
+                       # self.whereClause.parsedGraphPattern,
                        self.solutionModifier)
 
 
