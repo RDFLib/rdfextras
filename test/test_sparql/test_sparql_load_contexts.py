@@ -1,8 +1,8 @@
+from urllib2 import URLError
 try:
     from Ft.Lib import UriException
-except ImportError:
-    pass
-from urllib2 import URLError
+except:
+    from urllib2 import URLError as UriException
 import unittest
 from rdflib import ConjunctiveGraph, URIRef
 
