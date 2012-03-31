@@ -12,7 +12,6 @@ We define eval(D(G), graph pattern) as the evaluation of a graph pattern with re
 to a dataset D having active graph G. The active graph is initially the default graph.
 """
 import unittest
-from StringIO import StringIO
 from rdflib.graph import ConjunctiveGraph
 from rdflib.graph import Graph
 from rdflib.graph import ReadOnlyGraphAggregate
@@ -285,7 +284,8 @@ def LoadGraph(dtSet,dataSetBase,graph):
 
 def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False,
                 dataSetBase=None,
-                extensionFunctions={}):
+                extensionFunctions={},
+                dSCompliance=False):
     """
     The outcome of executing a SPARQL is defined by a series of steps, starting 
     from the SPARQL query as a string, turning that string into an abstract 
@@ -306,6 +306,7 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
     prolog.extensionFunctions.update(extensionFunctions)
     ReduceToAlgebra.prolog = prolog
     query.prolog.rightMostBGPs = set()
+    DAWG_DATASET_COMPLIANCE = dSCompliance
 
     if query.query.dataSets:
         graphs = []
@@ -403,7 +404,7 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
         result = expr.evaluate(tripleStore,passedBindings,query.prolog)
         if isinstance(result,BasicGraphPattern):
             # @@FIXME unused code
-            retval = None
+            # retval = None
             bindings = sparql_query._createInitialBindings(result)
             if passedBindings:
                 bindings.update(passedBindings)
@@ -424,7 +425,7 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
         # @@FIXME: generate some proper output for the exception :-)
         msg = "Errors in the patterns, no valid query object generated; "
         # @@FIXME basicPatterns is undefined
-        msg += ("pattern:\n%s\netc..." % basicPatterns[0])
+        # msg += ("pattern:\n%s\netc..." % basicPatterns[0])
         raise SPARQLError(msg)
 
     if isinstance(query.query,AskQuery):
@@ -456,7 +457,7 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
                 recursive_expr = reduce(
                   ReduceToAlgebra, recursive_pattern.graphPatterns, None)
             # @@FIXME: unused code
-            initial_recursive_bindings = result.top.bindings.copy()
+            # initial_recursive_bindings = result.top.bindings.copy()
 
             def get_recursive_results(recursive_bindings_update, select):
                 recursive_bindings = result.top.bindings.copy()
@@ -899,7 +900,7 @@ class Join(NonSymmetricBinaryOperator):
             left = self.left
         if isinstance(left,BasicGraphPattern):
             # @@FIXME unused code        
-            retval = None
+            # retval = None
             bindings = sparql_query._createInitialBindings(left)
             if initialBindings:
                 bindings.update(initialBindings)
@@ -1038,7 +1039,7 @@ class LeftJoin(NonSymmetricBinaryOperator):
         if isinstance(left,BasicGraphPattern):        
             # print "expanding A in LeftJoin(A,B) - a BGP: ", left
             # @@FIXME: unused code
-            retval = None
+            # retval = None
             bindings = sparql_query._createInitialBindings(left)
             if initialBindings:
                 bindings.update(initialBindings)
@@ -1095,7 +1096,7 @@ class Union(AlgebraExpression):
         if isinstance(left,BasicGraphPattern):        
             # The left expression has not been evaluated
             # @@FIXME: unused code
-            retval = None
+            # retval = None
             bindings = sparql_query._createInitialBindings(left)
             if initialBindings:
                 bindings.update(initialBindings)

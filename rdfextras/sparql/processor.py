@@ -19,7 +19,8 @@ class Processor(Processor):
               PARSE_DEBUG=False,
               dataSetBase=None,
               extensionFunctions={},
-              USE_PYPARSING=False):
+              USE_PYPARSING=False,
+              dSCompliance=False):
 
         initNs.update({u'rdfs':RDFS.uri, u'owl':OWL.uri, u'rdf':RDF.uri}) 
 
@@ -42,4 +43,5 @@ class Processor(Processor):
                            initBindings,
                            DEBUG=DEBUG,
                            dataSetBase=dataSetBase,
-                           extensionFunctions=extensionFunctions)
+                           extensionFunctions=extensionFunctions,
+                           dSCompliance=False)
