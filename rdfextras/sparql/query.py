@@ -10,6 +10,7 @@ from rdflib.term import URIRef, BNode, Variable, Identifier
 from rdflib.graph import Graph, ConjunctiveGraph, ReadOnlyGraphAggregate
 from rdflib.util import check_subject, list2set
 from rdfextras.sparql import SPARQLError
+from rdfextras.sparql.components import Prolog
 from rdfextras.sparql.graph import SPARQLGraph
 from rdfextras.sparql.graph import GraphPattern
 
@@ -198,7 +199,8 @@ class _SPARQLNode(object):
         for optional statements
     """
     
-    __slots__ = ("expr",
+    __slots__ = ("queryProlog",
+                 "expr",
                  "tripleStore",
                  "bindings",
                  "optionalTrees",
@@ -242,6 +244,13 @@ class _SPARQLNode(object):
         else :
             self.statement = None
             self.rest      = None
+        # Instead of global queryProlog
+        self.queryProlog = Prolog(None, [])
+        self.queryProlog.DEBUG = False
+        self.queryProlog.answerList = []
+        self.queryProlog.eagerLimit = None
+        self.queryProlog.rightMostBGPs = []
+
 
     def __reduce__(self):
         if self.statement:
@@ -345,9 +354,10 @@ class _SPARQLNode(object):
                 # for it's bindings)
                 # see: http://chatlogs.planetrdf.com/swig/2007-06-07.html#T19-28-43
                 if not proxies:
-                    prevBound=reduce(lambda x,y: x+y,
-                               [list(_fetchBoundLeaves(o,previousBind=True))
-                                                for o in self.optionalTrees],[])
+                    # @@FIXME: unused code
+                    # prevBound=reduce(lambda x,y: x+y,
+                    #            [list(_fetchBoundLeaves(o,previousBind=True))
+                    #                             for o in self.optionalTrees],[])
                     if self.optionalTrees and \
                         reduce(lambda x,y: x+y,
                                [list(_fetchBoundLeaves(o,previousBind=True))
@@ -444,8 +454,7 @@ class _SPARQLNode(object):
             return r
         
     def topLevelExpand(self, constraints, prolog):
-        global queryProlog
-        queryProlog = prolog
+        self.queryProlog = prolog
         try:
             self.expand(constraints)
         except EnoughAnswers:
@@ -473,7 +482,8 @@ class _SPARQLNode(object):
                         if isinstance(self.tripleStore.graph,ReadOnlyGraphAggregate):
                             graphName=None
                             for g in self.tripleStore.graph.graphs:
-                                searchRT = []
+                                # @@FIXME: unused code
+                                # searchRT = []
                                 if isinstance(g.identifier,BNode):
                                     graphName=g.identifier
                                     break
@@ -521,8 +531,8 @@ class _SPARQLNode(object):
                                     break
                             except TypeError:
                                 child.clash=True
-                        if not child.clash and self.expr in queryProlog.rightMostBGPs:
-                            child.noteTopLevelAnswer(queryProlog)                    
+                        if not child.clash and self.expr in self.queryProlog.rightMostBGPs:
+                            child.noteTopLevelAnswer(self.queryProlog)                    
                 else:
                     #If all the patterns are ground, there is no need
                     #to invoke server-side unification (no variables to batch unify)
@@ -539,8 +549,8 @@ class _SPARQLNode(object):
                             break
                     except TypeError:
                         self.clash = True
-                if not self.clash and self.expr in queryProlog.rightMostBGPs:
-                    self.noteTopLevelAnswer(queryProlog)
+                if not self.clash and self.expr in self.queryProlog.rightMostBGPs:
+                    self.noteTopLevelAnswer(self.queryProlog)
         else:
             self.expandAtClient(constraints)
 
@@ -549,12 +559,12 @@ class _SPARQLNode(object):
         prolog.answerList.append(self.bindings)
 
     def checkForEagerTermination(self):
-        if queryProlog.eagerLimit is not None:
-            if queryProlog.DEBUG:
-                print "Checking for eager termination.  No. of top-level answers: ", len(queryProlog.answerList)
-                from pprint import pprint;pprint(queryProlog.answerList) 
-            if len(queryProlog.answerList) >= queryProlog.eagerLimit:
-                if queryProlog.DEBUG:
+        if self.queryProlog.eagerLimit is not None:
+            if self.queryProlog.DEBUG:
+                print "Checking for eager termination.  No. of top-level answers: ", len(self.queryProlog.answerList)
+                from pprint import pprint;pprint(self.queryProlog.answerList) 
+            if len(self.queryProlog.answerList) >= self.queryProlog.eagerLimit:
+                if self.queryProlog.DEBUG:
                     print "Reached eager termination!"
                 # We've reached the LIMIT so halt processing
                 raise EnoughAnswers()
@@ -642,7 +652,8 @@ class _SPARQLNode(object):
                     continue
                 # create a copy of the current bindings, by also adding the new ones from result of the search
                 new_bindings = self.bindings.copy()
-                queryTerms = [s,p,o] 
+                # @@FIXME: unused code
+                # queryTerms = [s,p,o] 
                 preClash = False
                 for searchSlot,searchTerm,result in [(search_s,s,result_s),
                                                      (search_p,p,result_p),
@@ -682,8 +693,8 @@ class _SPARQLNode(object):
                             break
                     except TypeError:
                         self.clash=True
-                if not self.clash and self.expr in queryProlog.rightMostBGPs :
-                    self.noteTopLevelAnswer(queryProlog)
+                if not self.clash and self.expr in self.queryProlog.rightMostBGPs :
+                    self.noteTopLevelAnswer(self.queryProlog)
                     
     def expandOptions(self,bindings,statements,constraints) :
         """

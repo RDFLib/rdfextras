@@ -108,6 +108,7 @@ def ReduceToAlgebra(left,right):
         
     
     """
+    prolog = ReduceToAlgebra.prolog
     if not isinstance(right,AlgebraExpression):
         if isinstance(right,ParsedGroupGraphPattern):
             right = reduce(ReduceToAlgebra,right,None)
@@ -294,13 +295,16 @@ def TopEvaluate(query,dataset,passedBindings = None,DEBUG=False,exportTree=False
     """
     if not passedBindings:
         passedBindings = {}
-    global prolog
     if query.prolog:
         query.prolog.DEBUG = DEBUG
-    prolog = query.prolog    
+        prolog = query.prolog    
+    else:
+        prolog = Prolog(None, [])
+        prolog.DEBUG=False
     prolog.answerList = []
     prolog.eagerLimit = None
     prolog.extensionFunctions.update(extensionFunctions)
+    ReduceToAlgebra.prolog = prolog
     query.prolog.rightMostBGPs = set()
 
     if query.query.dataSets:
