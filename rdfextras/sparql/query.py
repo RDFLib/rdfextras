@@ -925,14 +925,6 @@ class Query :
         """Retrieve the full binding, ie, an array of binding dictionaries
         """
         if self.parent1 != None and self.parent2 != None :
-            results = self.parent1.select(None) + self.parent2.select(None)
-        else :
-            # remember: _processResult turns the expansion results (an array of dictionaries)
-            # into an array of tuples in the right, original order
-            results = self.top.returnResult(None)
-        return results
-        
-        if self.parent1 != None and self.parent2 != None :
             return self.parent1._getFullBinding() + self.parent2._getFullBinding()
         else :
             # remember: returnResult returns an array of dictionaries

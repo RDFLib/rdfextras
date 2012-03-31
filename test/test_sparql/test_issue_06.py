@@ -65,14 +65,13 @@ testgraph = """<rdf:RDF  xmlns:ex="http://temp.example.org/terms/"
 class TestIssue06(unittest.TestCase):
     debug = False
     sparql = True
-    known_issue = True    
+    # known_issue = True    
 
     def setUp(self):
         self.graph = ConjunctiveGraph()
         self.graph.parse(data=testgraph, publicID="testgraph")
 
     def test_issue_6(self):
-
         query = """
         PREFIX ex: <http://temp.example.org/terms/>
         PREFIX loc: <http://simile.mit.edu/2005/05/ontologies/location#>
@@ -80,13 +79,17 @@ class TestIssue06(unittest.TestCase):
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
         SELECT *
-        WHERE {{?event ex:date ?date .
+        WHERE { 
+            {?event ex:date ?date . 
             FILTER (xsd:date(?date) >= xsd:date("2007-12-31") && xsd:date(?date) <= xsd:date("2008-01-11"))}
-            UNION {?event ex:starts ?start; ex:finishes ?end.
-                FILTER (xsd:date(?start) >= xsd:date("2008-01-02") && xsd:date(?end) <= xsd:date("2008-01-10"))}
+            
+            UNION 
+            
+            {?event ex:starts ?start; ex:finishes ?end . 
+             FILTER (xsd:date(?start) >= xsd:date("2008-01-02") && xsd:date(?end) <= xsd:date("2008-01-10"))}
         }
         ORDER BY ?event
         """
-        self.assertRaises(SPARQLError, self.graph.query, query)
+        self.graph.query(query, DEBUG=False)
 
 
