@@ -7,7 +7,6 @@ from pyparsing import (Regex, Suppress, Combine, Optional, CaselessKeyword,
                        ParseException, col, lineno, restOfLine)
 
 import rdflib
-#from rdflib.term import URIRef
 from rdflib.namespace import XSD
 from rdfextras.sparql import components
 import logging
@@ -41,10 +40,10 @@ if DEBUG:
 
         def start_action(self, instring, loc, expr):
             self.writer.startElement(u'attempt', attributes={
-              u'class': unicode(expr.__class__.__name__),
-              u'loc': unicode(repr(loc)), u'expr': unicode(repr(expr)),
-              u'lineno': unicode(lineno(loc, instring)),
-              u'col': unicode(col(loc, instring)),})
+                u'class': unicode(expr.__class__.__name__),
+                u'loc': unicode(repr(loc)), u'expr': unicode(repr(expr)),
+                u'lineno': unicode(lineno(loc, instring)),
+                u'col': unicode(col(loc, instring)),})
 
         def success_action(self, instring, tokensStart, loc, expr, tokens):
             self.writer.simpleElement(u'success')
@@ -52,12 +51,12 @@ if DEBUG:
 
         def exception_action(self, instring, tokensStart, expr, err):
             self.writer.simpleElement(u'fail', attributes={
-              u'err': unicode(repr(err))})
+                u'err': unicode(repr(err))})
             self.writer.endElement(u'attempt')
 
         def set_debug_actions(self, parser):
             parser.setDebugActions(
-              self.start_action, self.success_action, self.exception_action)
+                self.start_action, self.success_action, self.exception_action)
 
         def parse(self, parser, input, stream):
             self.parser = parser
@@ -70,7 +69,7 @@ if DEBUG:
                 result = self.parser.parseString(input)[0]
             except ParseException, e:
                 self.writer.simpleElement(u'fail', attributes={
-                  u'err': unicode(repr(e))})
+                    u'err': unicode(repr(e))})
                 #self.writer.endElement(u'attempt')
                 self.writer.endElement(u'trace')
                 self.writer.endDocument()
@@ -99,10 +98,11 @@ if DEBUG:
             return (struct_data(item, depth, brief) for item in thing)
         d = data_dir(thing)
         if len(d) > 0:
-            if brief:
-                classname = str(thing.__class__).split('.')[-1]
-            else:
-                classname = repr(thing.__class__)
+            # @@FIXME: unused code
+            # if brief:
+            #     classname = str(thing.__class__).split('.')[-1]
+            # else:
+            #     classname = repr(thing.__class__)
 
             result = {'__class__': thing.__class__}
             for key in d:
@@ -195,13 +195,14 @@ def refer_component(component, initial_args=None, projection=None, **kwargs):
     '''
 
     if initial_args is None and projection is None:
-        def apply(results):
+        def __apply1(results):
             if DEBUG:
                 log.debug(component)
                 log.debug(results)
             return component(*results.asList(), **kwargs)
+        apply = __apply1
     else:
-        def apply(results):
+        def __apply2(results):
             if DEBUG:
                 log.debug(component)
                 debug(results)
@@ -218,6 +219,7 @@ def refer_component(component, initial_args=None, projection=None, **kwargs):
             else:
                 projected = results
             return component(*projected, **kwargs)
+        apply = __apply2
     return apply
 
 # Productions for terminals, except for those that are really only
@@ -237,7 +239,7 @@ COMMA = Suppress(',')
 PERIOD = Suppress('.')
 
 IRI = Regex(
-  r'[^<>"{}|^`\\%s]*' % ''.join('\\x%02X' % i for i in range(33)))
+    r'[^<>"{}|^`\\%s]*' % ''.join('\\x%02X' % i for i in range(33)))
 IRI_REF = LT + IRI + GT
 if DEBUG:
     IRI_REF.setName('IRI_REF')
@@ -247,7 +249,7 @@ PN_CHARS_BASE_re = '[a-zA-Z]'
 PN_CHARS_U_re = PN_CHARS_BASE_re + '|_'
 PN_CHARS_re = PN_CHARS_U_re + '|-|[0-9]'
 PN_PREFIX_re = (PN_CHARS_BASE_re +
-  '(?:(?:' + PN_CHARS_re + '|\\.)*' + '(?:'+PN_CHARS_re + '))?')
+    '(?:(?:' + PN_CHARS_re + '|\\.)*' + '(?:'+PN_CHARS_re + '))?')
 PN_PREFIX = Regex(PN_PREFIX_re)
 
 PNAME_NS = Combine(Optional(PN_PREFIX, '') + COLON)
@@ -265,7 +267,7 @@ NIL = Group(Suppress(Regex(r'\(' + WS_re + r'\)')))
 BASE = Suppress(CaselessKeyword('BASE'))
 
 BaseDecl = (BASE + IRI_REF).setParseAction(
-  refer_component(components.BaseDeclaration))
+    refer_component(components.BaseDeclaration))
 if DEBUG:
     BaseDecl.setName('BaseDecl')
 
@@ -273,14 +275,14 @@ if DEBUG:
 PREFIX = Suppress(CaselessKeyword('PREFIX'))
 
 PrefixDecl = (PREFIX + PNAME_NS + IRI_REF).setParseAction(
-  refer_component(components.PrefixDeclaration))
+    refer_component(components.PrefixDeclaration))
 if DEBUG:
     PrefixDecl.setName('PrefixDecl')
 
 # Prologue:
 Prologue = (Optional(BaseDecl, None) +
-            Group(ZeroOrMore(PrefixDecl))).setParseAction(
-  refer_component(components.Prolog))
+    Group(ZeroOrMore(PrefixDecl))).setParseAction(
+        refer_component(components.Prolog))
 if DEBUG:
     Prologue.setName('Prologue')
 
@@ -291,7 +293,7 @@ USD = Suppress('$')
 VARNAME = Regex(regex_group(PN_CHARS_U_re + '|[0-9]') +
                 regex_group(PN_CHARS_U_re + '|[0-9]') + '*')
 Var = ((QM | USD) + VARNAME).setParseAction(
-  refer_component(rdflib.term.Variable))
+    refer_component(rdflib.term.Variable))
 if DEBUG:
     Var.setName('Var')
 
@@ -302,7 +304,7 @@ if DEBUG:
 
 # IRIref:
 IRIref = (IRI_REF.setParseAction(refer_component(components.IRIRef)) |
-  PrefixedName.setParseAction(refer_component(components.QName)))
+    PrefixedName.setParseAction(refer_component(components.QName)))
 if DEBUG:
     IRIref.setName('IRIref')
 
@@ -316,10 +318,10 @@ NAMED = Suppress(CaselessKeyword('NAMED'))
 # Also, I think there is a bug in IRIRef.* in that they assume that the
 # IRIref will be a URIRef, but it could also be a QName.
 DatasetClause = (FROM + (
-  IRIref.copy().setParseAction(
-    refer_component(components.RemoteGraph)) |
-  NAMED + IRIref.copy().setParseAction(
-    refer_component(components.NamedGraph))))
+    IRIref.copy().setParseAction(
+        refer_component(components.RemoteGraph)) |
+    NAMED + IRIref.copy().setParseAction(
+        refer_component(components.NamedGraph))))
 if DEBUG:
     DatasetClause.setName('DatasetClause')
 
@@ -329,7 +331,7 @@ if DEBUG:
 # investigate a possible bug with Expression.ParsedString; it
 # doesn't look like it is properly expanding escaped characters.
 String = quotedString.setParseAction(composition2(
-  [removeQuotes, components.ParsedString]))
+    [removeQuotes, components.ParsedString]))
 if DEBUG:
     String.setName('String')
 
@@ -357,9 +359,9 @@ def unescaped_literal(value, dType):
     return rdflib.term.Literal(value, dType)
 
 RDFLiteral = ((String + DOUBLE_HAT + IRIref).setParseAction(
-    refer_component(components.ParsedDatatypedLiteral)) |
-  (String + Optional(LANGTAG, None)).setParseAction(
-    refer_component(unescaped_literal)))
+        refer_component(components.ParsedDatatypedLiteral)) |
+    (String + Optional(LANGTAG, None)).setParseAction(
+        refer_component(unescaped_literal)))
 if DEBUG:
     RDFLiteral.setName('RDFLiteral')
 
@@ -368,16 +370,18 @@ if DEBUG:
 EXPONENT_re = r'(?:[eE][+-]?[0-9]+)'
 INT_re = r'[+-]?[0-9]+'
 INT = Regex(INT_re).setParseAction(composition(
-  [refer_component(int), rdflib.term.Literal]))
+    [refer_component(int), rdflib.term.Literal]))
 INTEGER = Regex(r'[0-9]+').setParseAction(composition(
-  [refer_component(int), rdflib.term.Literal]))
+    [refer_component(int), rdflib.term.Literal]))
 DECIMAL_re = r'[+-]?(?:[0-9]+\.[0-9]*|\.[0-9]+)'
 FLOAT_re = r'[+-]?(?:[0-9]+\.[0-9]*%s|\.[0-9]+%s|[0-9]+%s)' % (
-  (EXPONENT_re,) * 3)
+    (EXPONENT_re,) * 3)
 DECIMAL = Regex(DECIMAL_re).setParseAction(composition(
-        [refer_component(float), lambda x: rdflib.term.Literal(x, datatype=XSD.decimal)]))
+    [refer_component(float), 
+        lambda x: rdflib.term.Literal(x, datatype=XSD.decimal)]))
 FLOAT = Regex(FLOAT_re).setParseAction(composition(
-  [refer_component(float), lambda x: rdflib.term.Literal(x, datatype=XSD.double)]))
+    [refer_component(float), 
+        lambda x: rdflib.term.Literal(x, datatype=XSD.double)]))
 NumericLiteral = (FLOAT | DECIMAL | INT)
 if DEBUG:
     NumericLiteral.setName('NumericLiteral')
@@ -390,9 +394,9 @@ if DEBUG:
 
 # BlankNode:
 ANON = Regex(r'\[' + WS_re + r'\]').setParseAction(
-  refer_component(rdflib.term.BNode, None, []))
+    refer_component(rdflib.term.BNode, None, []))
 BLANK_NODE_LABEL = (Suppress('_:') + PN_LOCAL).setParseAction(
-  refer_component(rdflib.term.BNode))
+    refer_component(rdflib.term.BNode))
 BlankNode = (BLANK_NODE_LABEL | ANON)
 if DEBUG:
     BlankNode.setName('BlankNode')
@@ -415,10 +419,9 @@ if DEBUG:
 
 # Verb:
 Verb = (VarOrIRIref | Keyword('a').setParseAction(
-  refer_component(getattr, [rdflib.namespace.RDF, 'type'], [0, 1])))
+    refer_component(getattr, [rdflib.namespace.RDF, 'type'], [0, 1])))
 if DEBUG:
     Verb.setName('Verb')
-
 
 # Expression:
 Expression = Forward()
@@ -440,43 +443,43 @@ sameTerm = Suppress(CaselessKeyword('sameTERM'))
 # RegexExpression
 REGEX = Suppress(CaselessKeyword('REGEX'))
 RegexExpression = (REGEX + LP + Expression + COMMA + Expression +
-                   Optional(COMMA + Expression) + RP).setParseAction(
-  refer_component(components.ParsedREGEXInvocation))
+    Optional(COMMA + Expression) + RP).setParseAction(
+        refer_component(components.ParsedREGEXInvocation))
 if DEBUG:
     RegexExpression.setName('RegexExpression')
 
 BuiltInCall = (
-  (STR + LP + Expression + RP).setParseAction(
-    refer_component(components.BuiltinFunctionCall,
+    (STR + LP + Expression + RP).setParseAction(
+        refer_component(components.BuiltinFunctionCall,
                     [components.STR])) |
-  (LANG + LP + Expression + RP).setParseAction(
-    refer_component(components.BuiltinFunctionCall,
+    (LANG + LP + Expression + RP).setParseAction(
+        refer_component(components.BuiltinFunctionCall,
                     [components.LANG])) |
-  (LANGMATCHES + LP + Expression + COMMA + Expression + RP).setParseAction(
-    refer_component(components.BuiltinFunctionCall,
+    (LANGMATCHES + LP + Expression + COMMA + Expression + RP).setParseAction(
+        refer_component(components.BuiltinFunctionCall,
                     [components.LANGMATCHES])) |
-  (DATATYPE + LP + Expression + RP).setParseAction(
-    refer_component(components.BuiltinFunctionCall,
+    (DATATYPE + LP + Expression + RP).setParseAction(
+        refer_component(components.BuiltinFunctionCall,
                     [components.DATATYPE])) |
-  (BOUND + LP + Var + RP).setParseAction(
-    refer_component(components.BuiltinFunctionCall,
+    (BOUND + LP + Var + RP).setParseAction(
+        refer_component(components.BuiltinFunctionCall,
                     [components.BOUND])) |
-  (sameTerm + LP + Expression + COMMA + Expression + RP).setParseAction(
-    refer_component(components.BuiltinFunctionCall,
+    (sameTerm + LP + Expression + COMMA + Expression + RP).setParseAction(
+        refer_component(components.BuiltinFunctionCall,
                     [components.sameTERM])) |
-  (isIRI + LP + Expression + RP).setParseAction(
-    refer_component(components.BuiltinFunctionCall,
+    (isIRI + LP + Expression + RP).setParseAction(
+        refer_component(components.BuiltinFunctionCall,
                     [components.isIRI])) |
-  (isURI + LP + Expression + RP).setParseAction(
-    refer_component(components.BuiltinFunctionCall,
+    (isURI + LP + Expression + RP).setParseAction(
+        refer_component(components.BuiltinFunctionCall,
                     [components.isURI])) |
-  (isBLANK + LP + Expression + RP).setParseAction(
-    refer_component(components.BuiltinFunctionCall,
+    (isBLANK + LP + Expression + RP).setParseAction(
+        refer_component(components.BuiltinFunctionCall,
                     [components.isBLANK])) |
-  (isLITERAL + LP + Expression + RP).setParseAction(
-    refer_component(components.BuiltinFunctionCall,
+    (isLITERAL + LP + Expression + RP).setParseAction(
+        refer_component(components.BuiltinFunctionCall,
                     [components.isLITERAL])) |
-  RegexExpression)
+    RegexExpression)
 if DEBUG:
     BuiltInCall.setName('BuiltInCall')
 
@@ -486,80 +489,86 @@ if DEBUG:
 
 # FunctionCall:
 FunctionCall = (IRIref + ArgList).setParseAction(
-  refer_component(components.FunctionCall))
+    refer_component(components.FunctionCall))
 if DEBUG:
     FunctionCall.setName('FunctionCall')
 
 BrackettedExpression = LP + Expression + RP
 if DEBUG:
     BrackettedExpression.setName('BrackettedExpression')
+
 PrimaryExpression = (BrackettedExpression | BuiltInCall | FunctionCall |
                      IRIref | RDFLiteral | NumericLiteral |
                      BooleanLiteral | Var)
 if DEBUG:
     PrimaryExpression.setName('PrimaryExpression')
+
 UnaryExpression = (
-  (Suppress('!') + PrimaryExpression).setParseAction(
-    refer_component(components.LogicalNegation)) |
-  (Suppress('+') + PrimaryExpression).setParseAction(
-    refer_component(components.NumericPositive)) |
-  (Suppress('-') + PrimaryExpression).setParseAction(
-    refer_component(components.NumericNegative)) |
-  PrimaryExpression)
+    (Suppress('!') + PrimaryExpression).setParseAction(
+        refer_component(components.LogicalNegation)) |
+    (Suppress('+') + PrimaryExpression).setParseAction(
+        refer_component(components.NumericPositive)) |
+    (Suppress('-') + PrimaryExpression).setParseAction(
+        refer_component(components.NumericNegative)) |
+    PrimaryExpression)
 if DEBUG:
     UnaryExpression.setName('UnaryExpression')
+
 MultiplicativeExpression = Group(UnaryExpression + ZeroOrMore(
-  (Literal('*') | Literal('/')) + UnaryExpression)).setParseAction(
-    refer_component(components.ParsedMultiplicativeExpressionList))
+    (Literal('*') | Literal('/')) + UnaryExpression)).setParseAction(
+        refer_component(components.ParsedMultiplicativeExpressionList))
 if DEBUG:
     MultiplicativeExpression.setName('MultiplicativeExpression')
+
 AdditiveExpression = Group(MultiplicativeExpression + ZeroOrMore(
-  (Literal('+') | Literal('-')) + MultiplicativeExpression)).setParseAction(
-    refer_component(components.ParsedAdditiveExpressionList))
+    (Literal('+') | Literal('-')) + MultiplicativeExpression)).setParseAction(
+        refer_component(components.ParsedAdditiveExpressionList))
 if DEBUG:
     AdditiveExpression.setName('AdditiveExpression')
+
 NumericExpression = AdditiveExpression
 RelationalExpression = (
-  (NumericExpression + Suppress('=') +
-   NumericExpression).setParseAction(
-    refer_component(components.EqualityOperator)) |
-  (NumericExpression + Suppress('!=') +
-   NumericExpression).setParseAction(
-    refer_component(components.NotEqualOperator)) |
-  (NumericExpression + Suppress('<') +
-   NumericExpression).setParseAction(
-    refer_component(components.LessThanOperator)) |
-  (NumericExpression + Suppress('>') +
-   NumericExpression).setParseAction(
-    refer_component(components.GreaterThanOperator)) |
-  (NumericExpression + Suppress('<=') +
-   NumericExpression).setParseAction(
-    refer_component(components.LessThanOrEqualOperator)) |
-  (NumericExpression + Suppress('>=') +
-   NumericExpression).setParseAction(
-    refer_component(components.GreaterThanOrEqualOperator)) |
-  NumericExpression)
+    (NumericExpression + Suppress('=') +
+     NumericExpression).setParseAction(
+        refer_component(components.EqualityOperator)) |
+    (NumericExpression + Suppress('!=') +
+     NumericExpression).setParseAction(
+        refer_component(components.NotEqualOperator)) |
+    (NumericExpression + Suppress('<') +
+     NumericExpression).setParseAction(
+        refer_component(components.LessThanOperator)) |
+    (NumericExpression + Suppress('>') +
+     NumericExpression).setParseAction(
+        refer_component(components.GreaterThanOperator)) |
+    (NumericExpression + Suppress('<=') +
+     NumericExpression).setParseAction(
+        refer_component(components.LessThanOrEqualOperator)) |
+    (NumericExpression + Suppress('>=') +
+     NumericExpression).setParseAction(
+        refer_component(components.GreaterThanOrEqualOperator)) |
+     NumericExpression)
 if DEBUG:
     RelationalExpression.setName('RelationalExpression')
+
 ValueLogical = RelationalExpression
 ConditionalAndExpression = Group(ValueLogical +
-  ZeroOrMore(Suppress('&&') + ValueLogical)).setParseAction(
-    refer_component(components.ParsedRelationalExpressionList))
+    ZeroOrMore(Suppress('&&') + ValueLogical)).setParseAction(
+        refer_component(components.ParsedRelationalExpressionList))
 if DEBUG:
     ConditionalAndExpression.setName('ConditionalAndExpression')
+
 ConditionalOrExpression = Group(ConditionalAndExpression +
-  ZeroOrMore(Suppress('||') +
-  ConditionalAndExpression)).setParseAction(
-    refer_component(components.ParsedConditionalAndExpressionList))
+    ZeroOrMore(Suppress('||') + ConditionalAndExpression)).setParseAction(
+        refer_component(components.ParsedConditionalAndExpressionList))
 if DEBUG:
     ConditionalOrExpression.setName('ConditionalOrExpression')
 Expression << ConditionalOrExpression
 
 # Constraint (used only in Filter):
 Constraint = ((BrackettedExpression.copy()).setParseAction(
-    refer_component(components.ParsedExpressionFilter)) |
-  (BuiltInCall | FunctionCall).setParseAction(
-    refer_component(components.ParsedFunctionFilter)))
+        refer_component(components.ParsedExpressionFilter)) |
+    (BuiltInCall | FunctionCall).setParseAction(
+        refer_component(components.ParsedFunctionFilter)))
 if DEBUG:
     Constraint.setName('Constraint')
 
@@ -576,7 +585,7 @@ if DEBUG:
 
 # Collection:
 Collection = (LP + Group(OneOrMore(GraphNode)) + RP).setParseAction(
-  refer_component(components.ParsedCollection))
+    refer_component(components.ParsedCollection))
 if DEBUG:
     Collection.setName('Collection')
 
@@ -587,32 +596,31 @@ if DEBUG:
 
 # PropertyListNotEmpty:
 PropertyListItem = (Verb + ObjectList).setParseAction(
-  refer_component(components.PropertyValue))
+    refer_component(components.PropertyValue))
 if DEBUG:
     PropertyListItem.setName('PropertyListItem')
 PropertyListNotEmpty = Group(PropertyListItem + ZeroOrMore(
-  SEMICOLON + Optional(PropertyListItem)))
+    SEMICOLON + Optional(PropertyListItem)))
 if DEBUG:
     PropertyListNotEmpty.setName('PropertyListNotEmpty')
 
 # TriplesNode:
 TriplesNode = Collection | (LB + PropertyListNotEmpty + RB).setParseAction(
-  refer_component(components.Resource, [None]))
+    refer_component(components.Resource, [None]))
 if DEBUG:
     TriplesNode.setName('TriplesNode')
 
 # GraphNode:
 GraphNode << (VarOrTerm | TriplesNode)
 
-
 # TriplesBlock:
 TriplesSameSubject = ((VarOrTerm + PropertyListNotEmpty).setParseAction(
-    refer_component(components.Resource)) |
-  (LB + PropertyListNotEmpty + RB +
-   Optional(PropertyListNotEmpty, [])).setParseAction(
-    refer_component(components.TwiceReferencedBlankNode)) |
-  (Collection + Optional(PropertyListNotEmpty, [])).setParseAction(
-    setPropertyValueList))
+        refer_component(components.Resource)) |
+    (LB + PropertyListNotEmpty + RB +
+     Optional(PropertyListNotEmpty, [])).setParseAction(
+        refer_component(components.TwiceReferencedBlankNode)) |
+    (Collection + Optional(PropertyListNotEmpty, [])).setParseAction(
+        setPropertyValueList))
 if DEBUG:
     TriplesSameSubject.setName('TriplesSameSubject')
 
@@ -626,44 +634,48 @@ if DEBUG:
 GroupGraphPattern = Forward()
 OPTIONAL = Suppress(CaselessKeyword('OPTIONAL'))
 OptionalGraphPattern = (OPTIONAL + GroupGraphPattern).setParseAction(
-  refer_component(components.ParsedOptionalGraphPattern))
+    refer_component(components.ParsedOptionalGraphPattern))
 if DEBUG:
     OptionalGraphPattern.setName('OptionalGraphPattern')
+
 UNION = Suppress(CaselessKeyword('UNION'))
 UnionGraphPattern = Group(GroupGraphPattern + OneOrMore(
-  UNION + GroupGraphPattern)).setParseAction(
-    refer_component(components.ParsedAlternativeGraphPattern))
+    UNION + GroupGraphPattern)).setParseAction(
+        refer_component(components.ParsedAlternativeGraphPattern))
 if DEBUG:
     UnionGraphPattern.setName('UnionGraphPattern')
+
 GRAPH = Suppress(CaselessKeyword('GRAPH'))
 GraphGraphPattern = (GRAPH + VarOrIRIref + GroupGraphPattern).setParseAction(
-  refer_component(components.ParsedGraphGraphPattern))
+    refer_component(components.ParsedGraphGraphPattern))
 if DEBUG:
     GraphGraphPattern.setName('GraphGraphPattern')
+
 GraphPatternNotTriples = (OptionalGraphPattern | UnionGraphPattern |
                           GraphGraphPattern | GroupGraphPattern)
 if DEBUG:
     GraphPatternNotTriples.setName('GraphPatternNotTriples')
 
 GraphPattern = ((Filter + Optional(PERIOD) +
-                Optional(Group(TriplesBlock))).setParseAction(
-    refer_component(components.GraphPattern, [None])) |
-  (GraphPatternNotTriples + Optional(PERIOD) +
-   Optional(Group(TriplesBlock), None)).setParseAction(
-    refer_component(components.GraphPattern, [None], [1, 0, 2])))
+    Optional(Group(TriplesBlock))).setParseAction(
+        refer_component(components.GraphPattern, [None])) |
+    (GraphPatternNotTriples + Optional(PERIOD) +
+     Optional(Group(TriplesBlock), None)).setParseAction(
+        refer_component(components.GraphPattern, [None], [1, 0, 2])))
 if DEBUG:
     GraphPattern.setName('GraphPattern')
 
 GroupGraphPattern << (LC + Optional(Group(TriplesBlock), None) +
-                      Group(ZeroOrMore(GraphPattern)) + RC).setParseAction(
-  refer_component(components.ParsedGroupGraphPattern))
+    Group(ZeroOrMore(GraphPattern)) + RC).setParseAction(
+        refer_component(components.ParsedGroupGraphPattern))
 if DEBUG:
     GroupGraphPattern.setName('GroupGraphPattern')
 
 # WhereClause:
 WHERE = Suppress(Optional(CaselessKeyword('WHERE')))
-WhereClause = (WHERE + Optional(GroupGraphPattern, None)).setParseAction(
-  refer_component(components.WhereClause))
+WhereClause = (WHERE + 
+    Optional(GroupGraphPattern, None)).setParseAction(
+        refer_component(components.WhereClause))
 if DEBUG:
     WhereClause.setName('WhereClause')
 
@@ -671,8 +683,8 @@ if DEBUG:
 RECUR = Suppress(CaselessKeyword('RECUR'))
 TO = Suppress(CaselessKeyword('TO'))
 RecurClause = (RECUR + Group(OneOrMore(Group(Var + TO + Var))) + 
-               Optional(GroupGraphPattern, None)).setParseAction(
-  refer_component(components.RecurClause))
+    Optional(GroupGraphPattern, None)).setParseAction(
+        refer_component(components.RecurClause))
 if DEBUG:
     RecurClause.setName('RecurClause')
 
@@ -680,38 +692,42 @@ if DEBUG:
 ASC = Suppress(Optional(CaselessKeyword('ASC')))
 DESC = Suppress(Optional(CaselessKeyword('DESC')))
 OrderCondition = (
-  (ASC + BrackettedExpression).setParseAction(
-    refer_component(components.ParsedOrderConditionExpression,
+    (ASC + BrackettedExpression).setParseAction(
+        refer_component(components.ParsedOrderConditionExpression,
                     [components.ASCENDING_ORDER], [1, 0])) |
-  (DESC + BrackettedExpression).setParseAction(
-    refer_component(components.ParsedOrderConditionExpression,
+    (DESC + BrackettedExpression).setParseAction(
+        refer_component(components.ParsedOrderConditionExpression,
                     [components.DESCENDING_ORDER], [1, 0])) |
-  BrackettedExpression.copy().setParseAction(
-    refer_component(components.ParsedOrderConditionExpression,
+     BrackettedExpression.copy().setParseAction(
+        refer_component(components.ParsedOrderConditionExpression,
                     [components.UNSPECIFIED_ORDER], [1, 0])) |
-  BuiltInCall | FunctionCall | Var)
+    BuiltInCall | FunctionCall | Var)
 if DEBUG:
     OrderCondition.setName('OrderCondition')
+
 ORDER = Suppress(Optional(CaselessKeyword('ORDER')))
 BY = Suppress(Optional(CaselessKeyword('BY')))
 OrderClause = ORDER + BY + Group(OneOrMore(OrderCondition))
 if DEBUG:
     OrderClause.setName('OrderClause')
+
 LIMIT = Suppress(Optional(CaselessKeyword('LIMIT')))
 LimitClause = LIMIT + INTEGER
 if DEBUG:
     LimitClause.setName('LimitClause')
+
 OFFSET = Suppress(Optional(CaselessKeyword('OFFSET')))
 OffsetClause = OFFSET + INTEGER
 if DEBUG:
     OffsetClause.setName('OffsetClause')
+
 SolutionModifier = (
-  (Optional(OrderClause, None) + Optional(LimitClause, None) +
-   Optional(OffsetClause, None)).setParseAction(
-    refer_component(components.SolutionModifier)) |
-  (Optional(OrderClause, None) + Optional(OffsetClause, None) +
-   Optional(LimitClause, None)).setParseAction(
-    refer_component(components.SolutionModifier,
+    (Optional(OrderClause, None) + Optional(LimitClause, None) +
+     Optional(OffsetClause, None)).setParseAction(
+        refer_component(components.SolutionModifier)) |
+    (Optional(OrderClause, None) + Optional(OffsetClause, None) +
+     Optional(LimitClause, None)).setParseAction(
+        refer_component(components.SolutionModifier,
                     projection=[0, 2, 1])))
 if DEBUG:
     SolutionModifier.setName('SolutionModifier')
@@ -721,11 +737,11 @@ SELECT = Suppress(CaselessKeyword('SELECT'))
 DISTINCT = Optional(CaselessKeyword('DISTINCT'), None)
 
 SelectQuery = (SELECT + DISTINCT + 
-  (Group(OneOrMore(Var)) | Literal('*').setParseAction(as_empty)) +
-  Group(ZeroOrMore(DatasetClause)) + 
-  WhereClause + Optional(RecurClause, None) +
-  SolutionModifier).setParseAction(
-    refer_component(components.SelectQuery,
+    (Group(OneOrMore(Var)) | Literal('*').setParseAction(as_empty)) +
+     Group(ZeroOrMore(DatasetClause)) + 
+     WhereClause + Optional(RecurClause, None) +
+     SolutionModifier).setParseAction(
+        refer_component(components.SelectQuery,
                     projection=[1, 2, 3, 4, 5, 0]))
 if DEBUG:
     SelectQuery.setName('SelectQuery')
@@ -736,9 +752,9 @@ CONSTRUCT = Suppress(CaselessKeyword('CONSTRUCT'))
 ConstructTemplate = LC + Optional(Group(TriplesBlock), []) + RC
 
 ConstructQuery = (CONSTRUCT + ConstructTemplate +
-  Group(ZeroOrMore(DatasetClause)) + WhereClause +
-  SolutionModifier).setParseAction(
-    refer_component(components.ConstructQuery))
+    Group(ZeroOrMore(DatasetClause)) + WhereClause +
+    SolutionModifier).setParseAction(
+        refer_component(components.ConstructQuery))
 if DEBUG:
     ConstructQuery.setName('ConstructQuery')
 
@@ -746,10 +762,10 @@ if DEBUG:
 DESCRIBE = Suppress(CaselessKeyword('DESCRIBE'))
 
 DescribeQuery = (DESCRIBE + 
-  (Group(OneOrMore(VarOrIRIref)) | Literal('*').setParseAction(as_empty)) +
-  Group(ZeroOrMore(DatasetClause)) + Optional(WhereClause, None) +
-  SolutionModifier).setParseAction(
-    refer_component(components.DescribeQuery))
+    (Group(OneOrMore(VarOrIRIref)) | Literal('*').setParseAction(as_empty)) +
+     Group(ZeroOrMore(DatasetClause)) + Optional(WhereClause, None) +
+     SolutionModifier).setParseAction(
+        refer_component(components.DescribeQuery))
 if DEBUG:
     DescribeQuery.setName('DescribeQuery')
 
@@ -757,15 +773,15 @@ if DEBUG:
 ASK = Suppress(CaselessKeyword('ASK'))
 
 AskQuery = (ASK + Group(ZeroOrMore(DatasetClause)) +
-            WhereClause).setParseAction(
-              refer_component(components.AskQuery))
+    WhereClause).setParseAction(
+        refer_component(components.AskQuery))
 if DEBUG:
     AskQuery.setName('AskQuery')
 
 # Query:
 Query = (Prologue + (SelectQuery | ConstructQuery |
-                     DescribeQuery | AskQuery)).setParseAction(
-  refer_component(components.Query))
+    DescribeQuery | AskQuery)).setParseAction(
+        refer_component(components.Query))
 Query.ignore( Regex( '(^| )#')+ restOfLine)
 if DEBUG:
     Query.setName('Query')
@@ -776,117 +792,3 @@ def parse(stuff):
         resultfile = open('parse-trace.xml', 'w')
         return tracer.parse(Query, stuff, resultfile)
     return Query.parseString(stuff)[0]
-
-if __name__ == "__main__":
-    testCases = [
-# basic
-"""
-SELECT ?name
-WHERE { ?a <http://xmlns.com/foaf/0.1/name> ?name }
-""",
-# simple prefix
-"""
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-SELECT ?name
-WHERE { ?a foaf:name ?name }
-""",
-# base statement
-"""
-BASE <http://xmlns.com/foaf/0.1/>
-SELECT ?name
-WHERE { ?a <name> ?name }
-""",
-# prefix and colon-only prefix
-"""
-PREFIX : <http://xmlns.com/foaf/0.1/>
-PREFIX vcard: <http://www.w3.org/2001/vcard-rdf/3.0#>
-SELECT ?name ?title
-WHERE {
-    ?a :name ?name .
-    ?a vcard:TITLE ?title
-}
-""",
-# predicate-object list notation
-"""
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-SELECT ?name ?mbox
-WHERE {
-    ?x  foaf:name  ?name ;
-        foaf:mbox  ?mbox .
-}
-""",
-# object list notation
-"""
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-SELECT ?x
-WHERE {
-    ?x foaf:nick  "Alice" ,
-                  "Alice_" .
-}
-""",
-# escaped literals
-"""
-PREFIX tag: <http://xmlns.com/foaf/0.1/>
-PREFIX vcard: <http://www.w3.org/2001/vcard-rdf/3.0#>
-SELECT ?name
-WHERE {
-    ?a tag:name ?name ;
-       vcard:TITLE "escape test vcard:TITLE " ;
-       <tag://test/escaping> "This is a ''' Test \"\"\"" ;
-       <tag://test/escaping> ?d
-}
-""",
-# key word as variable
-"""
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-SELECT ?PREFIX ?WHERE
-WHERE {
-    ?x  foaf:name  ?PREFIX ;
-        foaf:mbox  ?WHERE .
-}
-""",
-# key word as prefix
-"""
-PREFIX WHERE: <http://xmlns.com/foaf/0.1/>
-SELECT ?name ?mbox
-WHERE {
-    ?x  WHERE:name  ?name ;
-        WHERE:mbox  ?mbox .
-}
-""",
-# some test cases from grammar.py
-"SELECT ?title WHERE { <http://example.org/book/book1> <http://purl.org/dc/elements/1.1/title> ?title . }",
-
-"""PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-SELECT ?name ?mbox
-WHERE { ?person foaf:name ?name .
-OPTIONAL { ?person foaf:mbox ?mbox}
-}""",
-
-"""PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-SELECT ?name ?name2
-WHERE { ?person foaf:name ?name .
-OPTIONAL { ?person foaf:knows ?p2 . ?p2 foaf:name   ?name2 . }
-}""",
-
-"""PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-#PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-SELECT ?name ?mbox
-WHERE
-{
-{ ?person rdf:type foaf:Person } .
-OPTIONAL { ?person foaf:name  ?name } .
-OPTIONAL {?person foaf:mbox  ?mbox} .
-}"""
-    ]
-
-    print "Content-type: text/plain\n\n"
-    for query in testCases:
-        print "\n-----\n"
-        print '>>> query = """' + query.replace("\n", "\n... ") + '"""'
-        print ">>> result = doSPARQL(query, sparqlGr)\n"
-        result = _buildQueryArgs(query);
-        print "select = ", result["select"], "\n"
-        print "where = ", result["where"], "\n"
-        print "optional = ", result["optional"], "\n"
-        print "result = sparqlGr.query(select, where, optional)"
