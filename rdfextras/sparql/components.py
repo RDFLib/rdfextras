@@ -11,7 +11,7 @@ class ListRedirect(object):
     normalizing ListRedirect to the single item (and calling reduce on it
     recursively)
     """
-    reducable = True
+    reducible = True
     def __getattr__(self, attr):
         if hasattr(self._list, attr):
             return getattr(self._list, attr)
@@ -25,7 +25,7 @@ class ListRedirect(object):
         return len(self._list)
 
     def reduce(self):
-        if self.reducable and len(self._list) == 1:
+        if self.reducible and len(self._list) == 1:
             singleItem = self._list[0]
             if isinstance(singleItem,ListRedirect):
                 return singleItem.reduce()
@@ -637,7 +637,7 @@ class ParsedCollection(ListRedirect,RDFTerm):
     """
     An RDF Collection
     """
-    reducable = False
+    reducible = False
     def __init__(self,graphNodeList=None):
         self.propVals = []
         if graphNodeList:
