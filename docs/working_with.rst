@@ -249,6 +249,9 @@ RDFLib provides a built-in version of Ivan Herman's `RDFa Distiller <http://www.
 
     ...
 
+
+The GoodRelations wiki lists some other `sources of RDFa-enabled web pages <http://www.ebusiness-unibw.org/wiki/GoodRelations>`_
+
 The RDFLib Graph API presents full details of args and kwargs for `Graph.parse <http://rdflib.readthedocs.org/en/latest/modules/graphs/graph.html#rdflib.graph.Graph.parse>`_.
 
 Also see the `working with Graphs <http://rdflib.readthedocs.org/en/latest/modules/graphs/index.html#module-rdflib.graph>` section of the RDFLib documentation. 
