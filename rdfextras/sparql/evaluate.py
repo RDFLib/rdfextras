@@ -38,11 +38,11 @@ class Unbound:
             raise SPARQLError(
                 "illegal argument, variable name must be a string or unicode")
 
-    def __repr__(self) :
+    def __repr__(self):
         retval  = "?%s" % self.origName
         return retval
 
-    def __str__(self) :
+    def __str__(self):
         return self.__repr__()
 
 DEBUG = False
@@ -72,7 +72,7 @@ class Resolver:
     supportedSchemas=[None]
     def normalize(self, uriRef, baseUri):
         return baseUri+uriRef
-            
+
 class BNodeRef(BNode):
     """
     An explicit reference to a persistent BNode in the data set.
@@ -80,10 +80,10 @@ class BNodeRef(BNode):
     technically in violation of the SPARQL spec, but is also
     very useful.  If an undistinguished variable is desired,
     then an actual variable can be used as a trivial workaround.
-    
-    Support for these can be disabled by disabling the 
+
+    Support for these can be disabled by disabling the
     'EVAL_OPTION_ALLOW_BNODE_REF' evaulation option.
-    
+
     Also known as special 'session' BNodes.  I.e., BNodes at
     the query side which refer to BNodes in persistence
     """
@@ -91,13 +91,13 @@ class BNodeRef(BNode):
 
 def convertTerm(term, queryProlog):
     """
-    Utility function  for converting parsed Triple components into Unbound 
+    Utility function  for converting parsed Triple components into Unbound
     """
     if isinstance(term, Variable):
 
         if hasattr(queryProlog, 'variableBindings') \
               and term in queryProlog.variableBindings:
-            # Resolve pre-bound variables at SQL generation time 
+            # Resolve pre-bound variables at SQL generation time
             # for SPARQL-to-SQL invokations
             rt = queryProlog.variableBindings.get(term, term)
             return isinstance(rt, BNode) and BNodeRef(rt) or rt
@@ -142,16 +142,16 @@ def convertTerm(term, queryProlog):
             #     if queryProlog.UseEvalOption(EVAL_OPTION_ALLOW_BNODE_REF):
             #         # this is a 'told' BNode referencing a BNode in the data
             #         # set (i.e. previously returned by a query)
-            #         return BNodeRef(term.localname) 
+            #         return BNodeRef(term.localname)
             #     else:
             #         # follow the spec and treat it as a variable
             #         # ensure namespace doesn't overlap with variables
-            #         return BNode(term.localname + '_bnode')                        
+            #         return BNode(term.localname + '_bnode')
             import warnings
             warnings.warn("The verbatim interpretation of explicit bnode" + \
                           "identifiers is contrary to (current) DAWG stance",
                           SyntaxWarning)
-            return SessionBNode(term.localname)        
+            return SessionBNode(term.localname)
         else:
             return URIRef(Resolver().normalize(
                         term.localname,
@@ -223,20 +223,20 @@ def unRollCollection(collection, queryProlog):
 
             if isinstance(colObj, RDFTerm):
                 nestedComplexTerms.append(colObj)
-                yield (linkNode, RDF.first, 
+                yield (linkNode, RDF.first,
                        convertTerm(colObj.identifier, queryProlog))
 
             else:
                 yield (linkNode,RDF.first, convertTerm(colObj, queryProlog))
 
-            yield (prevLink,RDF.rest, linkNode)            
-            prevLink = linkNode                        
+            yield (prevLink,RDF.rest, linkNode)
+            prevLink = linkNode
 
         yield (prevLink,RDF.rest,RDF.nil)
-    
+
     for additionalItem in nestedComplexTerms:
         for item in unRollRDFTerm(additionalItem, queryProlog):
-            yield item    
+            yield item
 
 def unRollRDFTerm(item, queryProlog):
     nestedComplexTerms = []
@@ -260,7 +260,7 @@ def unRollRDFTerm(item, queryProlog):
 
     if isinstance(item,ParsedCollection):
         for rt in unRollCollection(item, queryProlog):
-            yield rt  
+            yield rt
 
     for additionalItem in nestedComplexTerms:
         for item in unRollRDFTerm(additionalItem, queryProlog):
@@ -269,9 +269,9 @@ def unRollRDFTerm(item, queryProlog):
 def unRollTripleItems(items, queryProlog):
     """
     Takes a list of Triples (nested lists or ParsedConstrainedTriples)
-    and (recursively) returns a generator over all the contained triple 
+    and (recursively) returns a generator over all the contained triple
     patterns
-    """ 
+    """
 
     if isinstance(items, RDFTerm):
         for item in unRollRDFTerm(items, queryProlog):
@@ -346,8 +346,8 @@ def mapToOperator(expr, prolog, combinationArg=None, constraint=False):
         normBuiltInName = CAMEL_CASE_BUILTINS.get(
                 normBuiltInName, 'operators.' + normBuiltInName)
         return "%s(%s)%s" % (
-            normBuiltInName, 
-            ",".join([mapToOperator(i, prolog, combinationArg, 
+            normBuiltInName,
+            ",".join([mapToOperator(i, prolog, combinationArg,
                                     constraint=constraint)
                          for i in expr.arguments]),
             combinationInvokation)
@@ -370,12 +370,12 @@ def mapToOperator(expr, prolog, combinationArg=None, constraint=False):
             return "'%s'" % convertTerm(expr, prolog)
 
     elif isinstance(expr, basestring):
-        return "'%s'" % convertTerm(expr, prolog)        
+        return "'%s'" % convertTerm(expr, prolog)
 
     elif isinstance(expr, ParsedAdditiveExpressionList):
         return 'Literal(%s)' % (
             operators.addOperator(
-                [mapToOperator(item, prolog, combinationArg='i', 
+                [mapToOperator(item, prolog, combinationArg='i',
                                 constraint=constraint)
                         for item in expr],combinationArg))
 
@@ -386,7 +386,7 @@ def mapToOperator(expr, prolog, combinationArg=None, constraint=False):
 
         if fUri in XSDToPython:
             return "operators.XSDCast(%s, '%s')%s" % (
-             mapToOperator(expr.arguments[0], prolog, combinationArg='i', 
+             mapToOperator(expr.arguments[0], prolog, combinationArg='i',
                             constraint=constraint),
              fUri,
              combinationInvokation)
@@ -395,7 +395,7 @@ def mapToOperator(expr, prolog, combinationArg=None, constraint=False):
         if fUri not in prolog.extensionFunctions:
             import warnings
             warnings.warn(
-                "Use of unregistered extension function: %s" % (fUri), 
+                "Use of unregistered extension function: %s" % (fUri),
                 UserWarning, 1)
         else:
             raise NotImplemented(
@@ -407,9 +407,9 @@ def mapToOperator(expr, prolog, combinationArg=None, constraint=False):
             expr = expr.reduce()
             if expr.pyBooleanOperator:
                 return expr.pyBooleanOperator.join(
-                       [mapToOperator(i, prolog, 
+                       [mapToOperator(i, prolog,
                                       constraint=constraint)
-                            for i in expr]) 
+                            for i in expr])
 
         raise Exception("What do i do with %s (a %s)?" % (
                     expr, type(expr).__name__))
@@ -418,7 +418,7 @@ def createSPARQLPConstraint(filter, prolog):
     """
     Takes an instance of either ParsedExpressionFilter or ParsedFunctionFilter
     and converts it to a sparql-p operator by composing a python string of
-    lambda functions and SPARQL operators. 
+    lambda functions and SPARQL operators.
     This string is then evaluated to return the actual function for sparql-p
     """
     reducedFilter = isinstance(filter.filter, ListRedirect) \
@@ -482,7 +482,7 @@ def createSPARQLPConstraint(filter, prolog):
 
         rt = """operators.EBV(rdflib.Variable("%s"))""" % reducedFilter.n3()
 
-        if prolog.DEBUG: print "sparql-p operator(s): %s" % rt        
+        if prolog.DEBUG: print "sparql-p operator(s): %s" % rt
         return eval(rt)
 
         # reducedFilter = BuiltinFunctionCall(BOUND,reducedFilter)
@@ -498,7 +498,7 @@ def createSPARQLPConstraint(filter, prolog):
                 return True
             def falseFn(arg):
                 return False
-            return reducedFilter == u'true' and trueFn or falseFn        
+            return reducedFilter == u'true' and trueFn or falseFn
 
         rt = mapToOperator(reducedFilter, prolog,
                             constraint=const)
