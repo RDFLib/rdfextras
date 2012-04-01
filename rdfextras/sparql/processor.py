@@ -23,7 +23,7 @@ class Processor(Processor):
               dSCompliance=False,
               loadContexts=False):
 
-        initNs.update({u'rdfs':RDFS.uri, u'owl':OWL.uri, u'rdf':RDF.uri})
+        initNs.update({u'rdfs':RDFS.uri, u'owl':str(OWL), u'rdf':RDF.uri})
 
         assert isinstance(strOrQuery, (basestring, Query)),"%s must be a string or an rdfextras.sparql.components.Query instance"%strOrQuery
 
