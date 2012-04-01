@@ -7,7 +7,7 @@ Working with Graphs
 ===================
 
 The RDFLib :class:`~rdflib.graph.Graph` is one of the main workhorses for
-working with RDF. 
+working with RDF.
 
 The most direct way to create a Graph is simply::
 
@@ -22,7 +22,7 @@ A BNode is automatically created as the graph's default identifier. A specific i
     >>> g
     <Graph identifier=mygraph (<class 'rdflib.graph.Graph'>)>
 
-By default a Graph is persisted in an integer-key-optimized, context-aware, 
+By default a Graph is persisted in an integer-key-optimized, context-aware,
 in-memory :class:`~rdflib.store.Store`::
 
     >>> g.store
@@ -49,10 +49,10 @@ Graph.store::
     <Partitioned SQL N3 Store: 0 contexts, 0 classification assertions, \
     0 quoted statements, 0 property/value assertions, and 0 other assertions>
 
-See the RDFLib documentation for further details of the RDFLib `Graph API 
+See the RDFLib documentation for further details of the RDFLib `Graph API
 <http://rdflib.readthedocs.org/en/latest/modules/graphs/graph.html>`_.
 
-For a list of other available RDFLib plugin Stores see the `RDFLib Github 
+For a list of other available RDFLib plugin Stores see the `RDFLib Github
 project page <http://github.com/RDFLib>`_.
 
 Working with ConjunctiveGraphs
@@ -88,7 +88,7 @@ Statements can be added to / retrieved from specific contexts::
 The ConjunctiveGraph is the aggregation of all the contexts within it::
 
     >>> list(g.contexts())
-    [<Graph identifier=http://example.org/mygraph2 (<class 'rdflib.graph.Graph'>)>, 
+    [<Graph identifier=http://example.org/mygraph2 (<class 'rdflib.graph.Graph'>)>,
      <Graph identifier=http://example.org/mygraph1 (<class 'rdflib.graph.Graph'>)>]
 
 The contexts / sub-graphs are instances of RDFLib Graph::
@@ -175,7 +175,7 @@ An example of hand-drawn statements in Notation3::
     :Gene :hasParent :Pat ;
           :gender    :female .
     :Joan :hasParent :Pat ;
-          :gender    :female . 
+          :gender    :female .
     :Pat  :gender    :male .
     :Mike :hasParent :Joan ."""
 
@@ -215,7 +215,7 @@ otherwise the format defaults to RDF/XML)::
 Working with web pages containing RDFa
 --------------------------------------
 
-RDFLib provides a built-in version of Ivan Herman's `RDFa Distiller <http://www.w3.org/2007/08/pyRdfa/>`_ so 
+RDFLib provides a built-in version of Ivan Herman's `RDFa Distiller <http://www.w3.org/2007/08/pyRdfa/>`_ so
 "external bulk data" also means "web pages containing `RDFa <http://www.w3.org/TR/rdfa-syntax>`_ markup"::
 
     >>> url = "http://www.oettl.it/"
@@ -233,7 +233,7 @@ RDFLib provides a built-in version of Ivan Herman's `RDFa Distiller <http://www.
     @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
     @prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
     @prefix xhv: <http://www.w3.org/1999/xhtml/vocab#> .
-    
+
     <http://www.oettl.it/#BusinessEntity> a gr:BusinessEntity,
             commerce:Business,
             vcard:VCard;
@@ -254,7 +254,7 @@ The GoodRelations wiki lists some other `sources of RDFa-enabled web pages <http
 
 The RDFLib Graph API presents full details of args and kwargs for `Graph.parse <http://rdflib.readthedocs.org/en/latest/modules/graphs/graph.html#rdflib.graph.Graph.parse>`_.
 
-Also see the `working with Graphs <http://rdflib.readthedocs.org/en/latest/modules/graphs/index.html#module-rdflib.graph>` section of the RDFLib documentation. 
+Also see the `working with Graphs <http://rdflib.readthedocs.org/en/latest/modules/graphs/index.html#module-rdflib.graph>` section of the RDFLib documentation.
 
 Working with individual statements
 ----------------------------------
@@ -276,15 +276,15 @@ Individual statements can be added, removed, etc.
         ns4:likes ns4:pizza .
 
 
-As before, see the RDFLib documentation for further details of the RDFLib `Graph API 
+As before, see the RDFLib documentation for further details of the RDFLib `Graph API
 <http://rdflib.readthedocs.org/en/latest/modules/graphs/graph.html>`_ for a range of useful operations on Graphs, e.g.
 
     >>> [o for o in gc1.objects(subject=graham, predicate=likes)]
     [rdflib.term.URIRef(u'urn:pizza')]
 
     >>> [o for o in gc1.predicate_objects(subject=graham)] # output prettified by hand here
-    [(rdflib.term.URIRef(u'urn:likes'), rdflib.term.URIRef(u'urn:pizza')), 
-     (rdflib.term.URIRef(u'http://www.w3.org/2000/01/rdf-schema#label'), 
+    [(rdflib.term.URIRef(u'urn:likes'), rdflib.term.URIRef(u'urn:pizza')),
+     (rdflib.term.URIRef(u'http://www.w3.org/2000/01/rdf-schema#label'),
       rdflib.term.Literal(u'Graham'))]
 
     >>> gc1.value(subject=graham, predicate=likes)
@@ -293,7 +293,7 @@ As before, see the RDFLib documentation for further details of the RDFLib `Graph
 Working with nodes
 ==================
 
-:class:`~rdflib.Literal` and :class:`~rdflib.URIRef` are the two most 
+:class:`~rdflib.Literal` and :class:`~rdflib.URIRef` are the two most
 commonly-used nodes in an RDF graph.
 
 Working with URIRefs is quite straightforward::
@@ -305,7 +305,7 @@ Working with URIRefs is quite straightforward::
     'http://example.com'
 
 
-The options for working with Literals are amply illustrated in the 
+The options for working with Literals are amply illustrated in the
 `Literal node docs <http://rdflib.readthedocs.org/en/latest/modules/node.html#rdflib.term.Literal>`_. Also see the appropriate section in the `RDF specs <http://www.w3.org/TR/rdf-concepts/#section-Graph-Literal>`_::
 
     >>> graham = Literal(u'Graham', lang="en")
@@ -323,7 +323,7 @@ Literals are permitted to have only one of the attributes datatype or lang.::
       File "<stdin>", line 1, in <module>
       File ".../rdflib/term.py", line 337, in __new__
         raise TypeError("A Literal can only have one of lang or datatype, "
-    TypeError: A Literal can only have one of lang or datatype, 
+    TypeError: A Literal can only have one of lang or datatype,
         per http://www.w3.org/TR/rdf-concepts/#section-Graph-Literal
 
 
@@ -343,8 +343,7 @@ Assuming that RDFExtras was installed with setuptools (highly recommended), SPAR
 
     >>> results = gc1.query("""SELECT ?s ?p ?o WHERE {?s ?p ?o .}""")
 
-The 'query' method API offers namespace (initNs), variable binding (initBindings)
-and debug (DEBUG) keyword args::
+The 'query' method API offers keywords to set namespace bindings - ``initNs`` (RDF, RDFS and OWL namespaces are pre-installed as a convenience to programmers but see example below for usage), variable bindings - ``initBindings`` (also see example below) and a boolean debug flag - ``DEBUG`` (ditto)::
 
     >>> FOAF = Namespace("http://xmlns.com/foaf/0.1/")
     >>> ns = dict(foaf=FOAF)
@@ -367,7 +366,7 @@ Using the following set of statements::
     :Gene :hasParent :Pat ;
           :gender    :female .
     :Joan :hasParent :Pat ;
-          :gender    :female . 
+          :gender    :female .
     :Pat  :gender    :male .
     :Mike :hasParent :Joan ."""
 
@@ -409,16 +408,16 @@ positional::
     >>> gc1.parse("http://bel-epa.com/gjh/foaf.rdf", format="xml")
     <Graph identifier=http://example.org/mygraph1 (<class 'rdflib.graph.Graph'>)>
     >>> query = """\
-    ... SELECT ?aname ?bname 
-    ... WHERE { 
-    ...     ?a foaf:knows ?b . 
-    ...     ?a foaf:name ?aname . 
-    ...     ?b foaf:name ?bname . 
+    ... SELECT ?aname ?bname
+    ... WHERE {
+    ...     ?a foaf:knows ?b .
+    ...     ?a foaf:name ?aname .
+    ...     ?b foaf:name ?bname .
     ... }"""
     >>> nses = dict(foaf=Namespace("http://xmlns.com/foaf/0.1/"))
     >>> for row in gc1.query(query, initNs=nses):
     ...     print(repr(row))
-    ... 
+    ...
     (rdflib.term.Literal(u'Graham Higgins'), rdflib.term.Literal(u'Ngaio Macfarlane'))
 
 A more detailed view of the returned SPARQLResult::
@@ -432,17 +431,17 @@ A more detailed view of the returned SPARQLResult::
     ...     ?a :name ?aname .
     ...     ?b :name ?bname .
     ... }"""
-    >>> 
+    >>>
     >>> foaf = Namespace("http://xmlns.com/foaf/0.1/")
     >>> rows = gc1.query(query, initNs={'':foaf})
     >>> for i in ['askAnswer', 'bindings', 'graph',
     ...           'selectionF', 'type', 'vars']:
     ...     v = getattr(rows, i)
     ...     print(i, type(v), v, repr(v))
-    ... 
+    ...
     ('askAnswer', <type 'NoneType'>, None, 'None')
     ('bindings', <type 'list'>, [
-        {?bname: rdflib.term.Literal(u'Ngaio Macfarlane'), 
+        {?bname: rdflib.term.Literal(u'Ngaio Macfarlane'),
          ?aname: rdflib.term.Literal(u'Graham Higgins')]")
     ('graph', <type 'NoneType'>, None, 'None')
     ('selectionF', <type 'list'>, [?aname, ?bname], '[?aname, ?bname]')
@@ -456,12 +455,12 @@ A more detailed view of the returned SPARQLResult::
     ...     print("Row", type(row), row)
     ...     for col in row:
     ...         print("Col", type(col), repr(col), str(col), col, row[col])
-    ... 
-    ('Row', <type 'dict'>, {?bname: rdflib.term.Literal(u'Ngaio Macfarlane'), 
+    ...
+    ('Row', <type 'dict'>, {?bname: rdflib.term.Literal(u'Ngaio Macfarlane'),
                             ?aname: rdflib.term.Literal(u'Graham Higgins')})
-    ('Col', <class 'rdflib.term.Variable'>, '?bname', 'bname', ?bname, 
+    ('Col', <class 'rdflib.term.Variable'>, '?bname', 'bname', ?bname,
      rdflib.term.Literal(u'Ngaio Macfarlane'))
-    ('Col', <class 'rdflib.term.Variable'>, '?aname', 'aname', ?aname, 
+    ('Col', <class 'rdflib.term.Variable'>, '?aname', 'aname', ?aname,
      rdflib.term.Literal(u'Graham Higgins'))
 
 Note the unusual \__repr__() result for the SPARQL variables, i.e. ``?aname``.
@@ -487,10 +486,10 @@ But when using the keys directly, discard the '?' prefix:
 SPARQL query result objects can be serialized as XML or JSON::
 
     >>> print("json", rows.serialize(format="json"))
-    ('json', 
-     '{"head": {"vars": ["aname", "bname"]}, 
+    ('json',
+     '{"head": {"vars": ["aname", "bname"]},
        "results": {
             "bindings": [{
-                "bname": {"type": "literal", "value": "Ngaio Macfarlane"}, 
+                "bname": {"type": "literal", "value": "Ngaio Macfarlane"},
                 "aname": {"type": "literal", "value": "Graham Higgins"}}}]}}')
 
