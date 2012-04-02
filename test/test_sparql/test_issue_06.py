@@ -1,26 +1,5 @@
 import unittest
 from rdflib.graph import ConjunctiveGraph
-from rdfextras.sparql import SPARQLError
-
-"""
-File ".../rdflib/graph.py", line 892, in query
-  return result(processorinst.query(query_object, initBindings, initNs, **kwargs))
-File ".../rdfextras/sparql/processor.py", line 45, in query
-  extensionFunctions=extensionFunctions)
-File ".../rdfextras/sparql/algebra.py", line 461, in TopEvaluate
-  offset
-File ".../rdfextras/sparql/query.py", line 1072, in select
-  results = self._orderedSelect(selectionF,orderBy,orderAscend)
-File ".../rdfextras/sparql/query.py", line 966, in _orderedSelect
-  fullBinding = self._getFullBinding()
-File ".../rdfextras/sparql/query.py", line 923, in _getFullBinding
-  results = self.parent1.select(None) + self.parent2.select(None)
-File ".../rdfextras/sparql/query.py", line 1062, in select
-  selectionF = _variablesToArray(selection,"selection")
-File ".../rdfextras/sparql/query.py", line 96, in _variablesToArray
-  raise SPARQLError("'%s' argument must be a string, a Variable, or a list of those - got %s" % (name, repr(variables)))
-rdfextras.sparql.SPARQLError: SPARQL Error: 'selection' argument must be a string, a Variable, or a list of those - got None.
-"""
 
 testgraph = """<rdf:RDF  xmlns:ex="http://temp.example.org/terms/"
     xmlns:loc="http://simile.mit.edu/2005/05/ontologies/location#"
@@ -65,7 +44,6 @@ testgraph = """<rdf:RDF  xmlns:ex="http://temp.example.org/terms/"
 class TestIssue06(unittest.TestCase):
     debug = False
     sparql = True
-    # known_issue = True    
 
     def setUp(self):
         self.graph = ConjunctiveGraph()
@@ -79,13 +57,13 @@ class TestIssue06(unittest.TestCase):
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
         SELECT *
-        WHERE { 
-            {?event ex:date ?date . 
+        WHERE {
+            {?event ex:date ?date .
             FILTER (xsd:date(?date) >= xsd:date("2007-12-31") && xsd:date(?date) <= xsd:date("2008-01-11"))}
-            
-            UNION 
-            
-            {?event ex:starts ?start; ex:finishes ?end . 
+
+            UNION
+
+            {?event ex:starts ?start; ex:finishes ?end .
              FILTER (xsd:date(?start) >= xsd:date("2008-01-02") && xsd:date(?end) <= xsd:date("2008-01-10"))}
         }
         ORDER BY ?event
