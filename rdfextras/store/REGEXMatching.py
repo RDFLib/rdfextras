@@ -17,7 +17,7 @@ PYTHON_REGEX = 1
 
 class REGEXTerm(unicode):
     """
-    REGEXTerm can be used in any term slot and is interpreted as a request to 
+    REGEXTerm can be used in any term slot and is interpreted as a request to
     perform a REGEX match (not a string comparison) using the value
     (pre-compiled) for checking rdf:type matches
     """
@@ -52,10 +52,12 @@ class REGEXMatching(Store):
     def destroy(self, configuration):
         self.storage.destroy(configuration)
 
-    def add(self, (subject, predicate, object_), context, quoted=False):
+    def add(self, triple, context, quoted=False):
+        (subject, predicate, object_) = triple
         self.storage.add((subject, predicate, object_), context, quoted)
 
-    def remove(self, (subject, predicate, object_), context=None):
+    def remove(self, triple, context=None):
+        (subject, predicate, object_) = triple
         if isinstance(subject,REGEXTerm) or \
            isinstance(predicate,REGEXTerm) or \
            isinstance(object_,REGEXTerm) or \
@@ -84,7 +86,8 @@ class REGEXMatching(Store):
         else:
             self.storage.remove((subject,predicate,object_),context)
 
-    def triples(self, (subject, predicate, object_), context=None):
+    def triples(self, triple, context=None):
+        (subject, predicate, object_) = triple
         if isinstance(subject,REGEXTerm) or \
            isinstance(predicate,REGEXTerm) or \
            isinstance(object_,REGEXTerm) or \
