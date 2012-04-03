@@ -16,10 +16,10 @@ If no files are given, read from stdin
 """)
     
 
-def main(target, _help=_help, options=""): 
+def main(target, _help=_help, options="", stdin=True): 
     """
     A main function for tools that read RDF from files given on commandline
-    or from STDIN. 
+    or from STDIN (if stdin parameter is true)
     """
 
     args, files=getopt.getopt(sys.argv[1:], "hf:o:"+options)
@@ -42,9 +42,9 @@ def main(target, _help=_help, options=""):
     else: 
         out=sys.stdout
 
-    if len(files)==0: 
-        sys.stderr.write("Reading RDF/XML from stdin...\n")
-        g.load(sys.stdin, format="xml")
+    if len(files)==0 and stdin: 
+        sys.stderr.write("Reading from stdin...\n")
+        g.load(sys.stdin, format=f)
     else: 
         for x in files:
             if f==None: 

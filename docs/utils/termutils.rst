@@ -12,24 +12,24 @@
 
 :func:`~rdfextras.utils.termutils.normalizeGraph`
 --------------------------------------------------
-.. autofunction:: normalizeGraph
+.. autofunction:: rdfextras.utils.termutils.normalizeGraph
 
 :func:`~rdfextras.utils.termutils.term2Letter`
 -----------------------------------------------
-.. autofunction:: term2Letter
+.. autofunction:: rdfextras.utils.termutils.term2Letter
 
 :func:`~rdfextras.utils.termutils.constructGraph`
 --------------------------------------------------
-.. autofunction:: constructGraph
+.. autofunction:: rdfextras.utils.termutils.constructGraph
 
 :func:`~rdfextras.utils.termutils.triplePattern2termCombinations`
 ------------------------------------------------------------------
-.. autofunction:: triplePattern2termCombinations
+.. autofunction:: rdfextras.utils.termutils.triplePattern2termCombinations
 
 :func:`~rdfextras.utils.termutils.type2TermCombination`
 --------------------------------------------------------
-.. autofunction:: type2TermCombination
+.. autofunction:: rdfextras.utils.termutils.type2TermCombination
 
 :func:`~rdfextras.utils.termutils.statement2TermCombination`
 -------------------------------------------------------------
-.. autofunction:: statement2TermCombination
+.. autofunction:: rdfextras.utils.termutils.statement2TermCombination

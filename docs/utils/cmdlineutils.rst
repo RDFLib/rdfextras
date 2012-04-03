@@ -3,9 +3,10 @@
 |today|
 
 
-==================================
+====================================
 :mod:`~rdfextras.utils.cmdlineutils`
-==================================
+====================================
+
 .. currentmodule:: rdfextras.utils.cmdlineutils
 
 .. automodule:: rdfextras.utils.cmdlineutils

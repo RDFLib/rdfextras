@@ -63,4 +63,4 @@ you'll find on the net.
 
 See also `the :meth:`~rdflib.graph.Graph.parse` method <http://readthedocs/rdflib3/rdflib.Graph.Graph-class.html#parse>`_ and
 
-`other parsers supported by rdflib 3<http://readthedocs.com/rdflib3/rdflib.syntax.parsers-module.html>`_
+`other parsers supported by rdflib 3 <http://readthedocs.com/rdflib3/rdflib.syntax.parsers-module.html>`_

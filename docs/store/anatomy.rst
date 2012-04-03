@@ -130,8 +130,8 @@ Returning to the issue of the choice of hash, btree or record-based storage,
 some of the issues that might usefully be taken into consideration are 
 outlined in the Sleepycat DB manual:
 
-    Choosing between BTree and Hash
-    -------------------------------
+    **Choosing between BTree and Hash**
+    
     
     For small working datasets that fit entirely in memory, there is no
     difference between BTree and Hash. Both will perform just as well as the
