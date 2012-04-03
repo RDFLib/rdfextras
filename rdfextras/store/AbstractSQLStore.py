@@ -328,7 +328,7 @@ class SQLGenerator:
             clauseParts = self.buildTypeMemberClause(self.normalizeTerm(subject), tableName)
             if clauseParts is not None:
                 rdf_type_memberClause = clauseParts[0]
-                parameters.extend([param for param in clauseParts[-1] if param])
+                parameters.extend([param for param in clauseParts[-1] if param is not None])
 
 
             clauseParts = self.buildTypeClassClause(self.normalizeTerm(obj), tableName)
@@ -340,7 +340,7 @@ class SQLGenerator:
             clauseParts = self.buildContextClause(context, tableName)
             if clauseParts is not None:
                 rdf_type_contextClause = clauseParts[0]
-                parameters.extend([param for param in clauseParts[-1] if param])
+                parameters.extend([param for param in clauseParts[-1] if param is not None])
 
 
             typeClauses = [rdf_type_memberClause, rdf_type_klassClause, rdf_type_contextClause]
@@ -353,37 +353,37 @@ class SQLGenerator:
             clauseParts = self.buildSubjClause(self.normalizeTerm(subject), tableName)
             if clauseParts is not None:
                 subjClause = clauseParts[0]
-                parameters.extend([param for param in clauseParts[-1] if param])
+                parameters.extend([param for param in clauseParts[-1] if param is not None])
 
 
             clauseParts = self.buildPredClause(self.normalizeTerm(predicate), tableName)
             if clauseParts is not None:
                 predClause = clauseParts[0]
-                parameters.extend([param for param in clauseParts[-1] if param])
+                parameters.extend([param for param in clauseParts[-1] if param is not None])
 
 
             clauseParts = self.buildObjClause(self.normalizeTerm(obj), tableName)
             if clauseParts is not None:
                 objClause = clauseParts[0]
-                parameters.extend([param for param in clauseParts[-1] if param])
+                parameters.extend([param for param in clauseParts[-1] if param is not None])
 
 
             clauseParts = self.buildContextClause(context, tableName)
             if clauseParts is not None:
                 contextClause = clauseParts[0]
-                parameters.extend([param for param in clauseParts[-1] if param])
+                parameters.extend([param for param in clauseParts[-1] if param is not None])
 
 
             clauseParts = self.buildLitDTypeClause(obj, tableName)
             if clauseParts is not None:
                 litDTypeClause = clauseParts[0]
-                parameters.extend([param for param in clauseParts[-1] if param])
+                parameters.extend([param for param in clauseParts[-1] if param is not None])
 
 
             clauseParts = self.buildLitLanguageClause(obj, tableName)
             if clauseParts is not None:
                 litLanguageClause = clauseParts[0]
-                parameters.extend([param for param in clauseParts[-1] if param])
+                parameters.extend([param for param in clauseParts[-1] if param is not None])
 
 
             clauses=[subjClause, predClause, objClause, contextClause, litDTypeClause, litLanguageClause]
@@ -391,7 +391,7 @@ class SQLGenerator:
             clauseString = clauseString and 'where ' + clauseString or ''
 
 
-        return clauseString, [p for p in parameters if p]
+        return clauseString, [p for p in parameters if p is not None]
 
     def buildLitDTypeClause(self, obj, tableName):
         if isinstance(obj,Literal):
