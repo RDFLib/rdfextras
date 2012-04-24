@@ -18,7 +18,7 @@ RDFExtras includes:
 
 Dependencies: 
 
- * RDFLib>=3.2.0
+ * RDFLib>=3.2.1
  * For SPARQL: pyparsing
  * For SPARQL Store: SPARQLWrapper
 

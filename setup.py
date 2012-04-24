@@ -47,7 +47,7 @@ config = dict(
     description = "RDFExtras provide tools, extra stores and such for RDFLib.",
     author = "Niklas Lindström",
     author_email = "lindstream@gmail.com",
-    url = "http://code.google.com/p/rdfextras/",
+    url = "http://github.com/RDFLib/rdfextras",
     license = "BSD",
     platforms = ["any"],
     classifiers = ["Programming Language :: Python",
@@ -79,7 +79,7 @@ else:
 
 
 install_requires = [
-    'rdflib >= 3.2.0',
+    'rdflib >= 3.2.1',
     'pyparsing'
 ]
 

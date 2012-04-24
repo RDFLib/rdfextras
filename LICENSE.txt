@@ -2,8 +2,8 @@
 RDFExtras BSD-style License
 ========================================================================
 
-Copyright (c) 2010 Niklas Lindström <lindstream@gmail.com>, Daniel Krech
-<http://eikeon.com/>.
+Copyright (c) 2010-2012 RDFLib Team
+See CONTRIBUTORS and http://github.com/RDFLib/rdflib
 
 All rights reserved.
 
