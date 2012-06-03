@@ -32,13 +32,15 @@ except ImportError:
 if getattr(sys, 'pypy_version_info', None) is not None \
       or sys.platform.startswith('java') \
       or sys.version_info[:2] < (2, 6):
-    import elementtree as etree
+    # import elementtree as etree
     from elementtree import ElementTree
 else:
     try:
         from xml import etree
+        from xml.etree import ElementTree
     except ImportError:
         import elementtree as etree
+        from elementtree import ElementTree
 
 from rdfextras.store.REGEXMatching import NATIVE_REGEX
 
@@ -53,7 +55,7 @@ import urlparse
 BNODE_IDENT_PATTERN = re.compile('(?P<label>_\:[^\s]+)')
 SPARQL_NS        = Namespace('http://www.w3.org/2005/sparql-results#')
 sparqlNsBindings = {u'sparql':SPARQL_NS}
-etree.ElementTree._namespace_map["sparql"]=SPARQL_NS
+ElementTree._namespace_map["sparql"]=SPARQL_NS
 
 def TraverseSPARQLResultDOM(doc,asDictionary=False):
     """
