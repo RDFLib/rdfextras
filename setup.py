@@ -87,7 +87,6 @@ tests_require = install_requires + \
                 []
 
 extras_require = { 
-    "SPARQLStore": ["SPARQLWrapper"],
     }
 
 
@@ -113,10 +112,6 @@ config.update(
             'xml = rdfextras.sparql.results.xmlresults:XMLResultParser',
             'json = rdfextras.sparql.results.jsonresults:JSONResultParser',
         ],
-        'rdf.plugins.store': [
-            'SPARQL = rdfextras.store.SPARQL:SPARQLStore',
-        ],
-
     },
     #namespace_packages = ['rdfextras'], # TODO: really needed?
     install_requires = install_requires,
