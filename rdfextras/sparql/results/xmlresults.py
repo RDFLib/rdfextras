@@ -27,13 +27,13 @@ Authors: Drew Perttula, Gunnar Aastrand Grimnes
 
 class XMLResultParser(ResultParser): 
     
-    def parse(self, source): 
+    def parse(self, source):         
         return XMLResult(parseSparqlResults(source.read()))
 
 
 class XMLResult(Result): 
     def __init__(self, tree):
-
+        
         boolean = tree.find(RESULTS_NS_ET + 'boolean')
         results = tree.find(RESULTS_NS_ET + 'results')
 
@@ -53,7 +53,7 @@ class XMLResult(Result):
                     r[binding.get('name')] = parseTerm(binding[0])
                 self.bindings.append(r)
 
-            self.vars=[x.get("name") for x in tree.findall(RESULTS_NS_ET+'head')]
+            self.vars=[x.get("name") for x in tree.findall('./%shead/%svariable'%(RESULTS_NS_ET, RESULTS_NS_ET))]
             
             
         elif type_=='ASK':

@@ -85,7 +85,6 @@ install_requires = [
 
 tests_require = install_requires + \
                 []
-                # ['flask', 'mimeparse']
 
 extras_require = { 
     "SPARQLStore": ["SPARQLWrapper"],
