@@ -7,17 +7,32 @@ from rdflib.term import URIRef, Variable, BNode, Literal, Identifier
 from rdflib.term import XSDToPython
 from rdfextras.sparql import _questChar
 from rdfextras.sparql import SPARQLError
-from rdfextras.sparql.components import IRIRef #, NamedGraph, RemoteGraph
+from rdfextras.sparql.components import IRIRef  # , NamedGraph, RemoteGraph
 from rdfextras.sparql.components import (
-    LessThanOperator, EqualityOperator, NotEqualOperator,
-    LessThanOrEqualOperator, GreaterThanOperator,
-    GreaterThanOrEqualOperator, LogicalNegation,
-    NumericNegative, QName, QNamePrefix, ParsedString,
-    ParsedDatatypedLiteral, RDFTerm, ParsedCollection,
-    ParsedAdditiveExpressionList, FunctionCall,
-    ParsedConditionalAndExpressionList, ParsedRelationalExpressionList,
-    ParsedConstrainedTriples, ListRedirect, UnaryOperator,
-    BinaryOperator, ParsedREGEXInvocation, BuiltinFunctionCall,
+    BinaryOperator,
+    BuiltinFunctionCall,
+    EqualityOperator,
+    FunctionCall,
+    GreaterThanOperator,
+    GreaterThanOrEqualOperator,
+    LessThanOperator,
+    LessThanOrEqualOperator,
+    ListRedirect,
+    LogicalNegation,
+    NotEqualOperator,
+    NumericNegative,
+    ParsedAdditiveExpressionList,
+    ParsedCollection,
+    ParsedConditionalAndExpressionList,
+    ParsedConstrainedTriples,
+    ParsedDatatypedLiteral,
+    ParsedREGEXInvocation,
+    ParsedRelationalExpressionList,
+    ParsedString,
+    QName,
+    QNamePrefix,
+    RDFTerm,
+    UnaryOperator,
     FUNCTION_NAMES)
 
 
@@ -34,12 +49,12 @@ class Unbound:
         if isinstance(name, basestring):
             self.name = _questChar + name
             self.origName = name
-        else :
+        else:
             raise SPARQLError(
                 "illegal argument, variable name must be a string or unicode")
 
     def __repr__(self):
-        retval  = "?%s" % self.origName
+        retval = "?%s" % self.origName
         return retval
 
     def __str__(self):
@@ -48,30 +63,33 @@ class Unbound:
 DEBUG = False
 
 BinaryOperatorMapping = {
-    LessThanOperator           : 'operators.lt(%s,%s)%s',
-    EqualityOperator           : 'operators.eq(%s,%s)%s',
-    NotEqualOperator           : 'operators.neq(%s,%s)%s',
-    LessThanOrEqualOperator    : 'operators.le(%s,%s)%s',
-    GreaterThanOperator        : 'operators.gt(%s,%s)%s',
-    GreaterThanOrEqualOperator : 'operators.ge(%s,%s)%s',
+    LessThanOperator: 'operators.lt(%s,%s)%s',
+    EqualityOperator: 'operators.eq(%s,%s)%s',
+    NotEqualOperator: 'operators.neq(%s,%s)%s',
+    LessThanOrEqualOperator: 'operators.le(%s,%s)%s',
+    GreaterThanOperator: 'operators.gt(%s,%s)%s',
+    GreaterThanOrEqualOperator: 'operators.ge(%s,%s)%s',
 }
 
 UnaryOperatorMapping = {
-    LogicalNegation : 'not(%s)',
-    NumericNegative : '-(%s)',
+    LogicalNegation: 'not(%s)',
+    NumericNegative: '-(%s)',
 }
 
 CAMEL_CASE_BUILTINS = {
-    'isuri':'operators.isURI',
-    'isiri':'operators.isIRI',
-    'isblank':'operators.isBlank',
-    'isliteral':'operators.isLiteral',
+    'isuri': 'operators.isURI',
+    'isiri': 'operators.isIRI',
+    'isblank': 'operators.isBlank',
+    'isliteral': 'operators.isLiteral',
 }
 
+
 class Resolver:
-    supportedSchemas=[None]
+    supportedSchemas = [None]
+
     def normalize(self, uriRef, baseUri):
-        return baseUri+uriRef
+        return baseUri + uriRef
+
 
 class BNodeRef(BNode):
     """
@@ -88,6 +106,7 @@ class BNodeRef(BNode):
     the query side which refer to BNodes in persistence
     """
     pass
+
 
 def convertTerm(term, queryProlog):
     """
@@ -131,12 +150,14 @@ def convertTerm(term, queryProlog):
                 else:
                     base = queryProlog.prefixBindings[u'']
 
-                return URIRef(Resolver().normalize(term.localname,base))
+                return URIRef(Resolver().normalize(term.localname, base))
 
         elif term.prefix == '_':
-            # Told BNode See: http://www.w3.org/2001/sw/DataAccess/issues#bnodeRef
+            # Told BNode See:
+            # http://www.w3.org/2001/sw/DataAccess/issues#bnodeRef
             # from rdfextras.sparql.sql.RdfSqlBuilder import RdfSqlBuilder
-            # from rdfextras.sparql.sql.RdfSqlBuilder import EVAL_OPTION_ALLOW_BNODE_REF
+            # from rdfextras.sparql.sql.RdfSqlBuilder import (
+            #    EVAL_OPTION_ALLOW_BNODE_REF)
             # from rdfextras.sparql.sql.RdfSqlBuilder import BNodeRef
             # if isinstance(queryProlog,RdfSqlBuilder):
             #     if queryProlog.UseEvalOption(EVAL_OPTION_ALLOW_BNODE_REF):
@@ -179,11 +200,12 @@ def convertTerm(term, queryProlog):
 
         return Literal(term.value, datatype=dT)
 
-    elif isinstance(term,IRIRef) and queryProlog.baseDeclaration:
+    elif isinstance(term, IRIRef) and queryProlog.baseDeclaration:
             return URIRef(Resolver().normalize(
                     term, queryProlog.baseDeclaration))
     else:
         return term
+
 
 def unRollCollection(collection, queryProlog):
     nestedComplexTerms = []
@@ -192,14 +214,14 @@ def unRollCollection(collection, queryProlog):
 
     if not collection._list:
         return
-        yield (listStart,RDF.rest,RDF.nil)
+        yield (listStart, RDF.rest, RDF.nil)
 
     elif len(collection._list) == 1:
         singleItem = collection._list[0]
 
         if isinstance(singleItem, RDFTerm):
             nestedComplexTerms.append(singleItem)
-            yield (listStart,RDF.first, convertTerm(
+            yield (listStart, RDF.first, convertTerm(
                     singleItem.identifier, queryProlog))
         else:
             yield (listStart, RDF.first, convertTerm(singleItem, queryProlog))
@@ -227,16 +249,17 @@ def unRollCollection(collection, queryProlog):
                        convertTerm(colObj.identifier, queryProlog))
 
             else:
-                yield (linkNode,RDF.first, convertTerm(colObj, queryProlog))
+                yield (linkNode, RDF.first, convertTerm(colObj, queryProlog))
 
-            yield (prevLink,RDF.rest, linkNode)
+            yield (prevLink, RDF.rest, linkNode)
             prevLink = linkNode
 
-        yield (prevLink,RDF.rest,RDF.nil)
+        yield (prevLink, RDF.rest, RDF.nil)
 
     for additionalItem in nestedComplexTerms:
         for item in unRollRDFTerm(additionalItem, queryProlog):
             yield item
+
 
 def unRollRDFTerm(item, queryProlog):
     nestedComplexTerms = []
@@ -254,17 +277,18 @@ def unRollRDFTerm(item, queryProlog):
                        convertTerm(propObj.identifier, queryProlog))
             else:
 
-               yield (convertTerm(item.identifier, queryProlog),
+                yield (convertTerm(item.identifier, queryProlog),
                       convertTerm(propVal.property, queryProlog),
                       convertTerm(propObj, queryProlog))
 
-    if isinstance(item,ParsedCollection):
+    if isinstance(item, ParsedCollection):
         for rt in unRollCollection(item, queryProlog):
             yield rt
 
     for additionalItem in nestedComplexTerms:
         for item in unRollRDFTerm(additionalItem, queryProlog):
             yield item
+
 
 def unRollTripleItems(items, queryProlog):
     """
@@ -298,12 +322,16 @@ def unRollTripleItems(items, queryProlog):
                 for i in unRollTripleItems(item, queryProlog):
                     yield item
 
+
 def mapToOperator(expr, prolog, combinationArg=None, constraint=False):
     """
     Reduces certain expressions (operator expressions, function calls, terms,
     and combinator expressions) into strings of their Python equivalent
     """
-    # print(expr, type(expr), constraint)
+    if prolog.DEBUG:
+        print('''mapToOperator:\n\texpr=%s,\n\ttype=%s,\n\tconstr=%s.\n''' % (
+            expr, type(expr), constraint))
+
     combinationInvokation = combinationArg and '(%s)' % combinationArg or ""
 
     if isinstance(expr, ListRedirect):
@@ -311,8 +339,8 @@ def mapToOperator(expr, prolog, combinationArg=None, constraint=False):
 
     if isinstance(expr, UnaryOperator):
         return UnaryOperatorMapping[type(expr)] % (
-            mapToOperator(expr.argument, prolog, combinationArg,
-                            constraint=constraint))
+                mapToOperator(expr.argument, prolog, combinationArg,
+                                constraint=constraint))
 
     elif isinstance(expr, BinaryOperator):
         return BinaryOperatorMapping[type(expr)] % (
@@ -323,23 +351,22 @@ def mapToOperator(expr, prolog, combinationArg=None, constraint=False):
                 combinationInvokation
                 )
 
-    elif isinstance(expr, (Variable, Unbound)): # GJH the only use of Unbound
+    elif isinstance(expr, (Variable, Unbound)):  # GJH the only use of Unbound
         if constraint:
             return """operators.EBV(rdflib.Variable("%s"))%s""" % (
-                            expr.n3(),combinationInvokation
-                            )
+                            expr.n3(), combinationInvokation)
         else:
             return '"?%s"' % expr
 
     elif isinstance(expr, ParsedREGEXInvocation):
         return 'operators.regex(%s, %s%s)%s' % (
-                 mapToOperator(expr.arg1, prolog, combinationArg,
+                mapToOperator(expr.arg1, prolog, combinationArg,
                                 constraint=constraint),
-                 mapToOperator(expr.arg2, prolog, combinationArg,
+                mapToOperator(expr.arg2, prolog, combinationArg,
                                 constraint=constraint),
-                 expr.arg3 and ',"' + str(expr.arg3) + '"' or '',
-                 combinationInvokation
-                 )
+                expr.arg3 and ',"' + str(expr.arg3) + '"' or '',
+                combinationInvokation
+                )
 
     elif isinstance(expr, BuiltinFunctionCall):
         normBuiltInName = FUNCTION_NAMES[expr.name].lower()
@@ -359,10 +386,10 @@ def mapToOperator(expr, prolog, combinationArg=None, constraint=False):
         else:
             return repr(lit)
 
-    elif isinstance(expr,(Literal, URIRef)):
+    elif isinstance(expr, (Literal, URIRef)):
         return repr(expr)
 
-    elif isinstance(expr,QName):
+    elif isinstance(expr, QName):
 
         if expr[:2] == '_:':
             return repr(BNode(expr[2:]))
@@ -377,7 +404,8 @@ def mapToOperator(expr, prolog, combinationArg=None, constraint=False):
             operators.addOperator(
                 [mapToOperator(item, prolog, combinationArg='i',
                                 constraint=constraint)
-                        for item in expr],combinationArg))
+                        for item in expr],
+                combinationArg))
 
     elif isinstance(expr, FunctionCall):
 
@@ -403,7 +431,7 @@ def mapToOperator(expr, prolog, combinationArg=None, constraint=False):
 
     else:
 
-        if isinstance(expr,ListRedirect):
+        if isinstance(expr, ListRedirect):
             expr = expr.reduce()
             if expr.pyBooleanOperator:
                 return expr.pyBooleanOperator.join(
@@ -413,6 +441,7 @@ def mapToOperator(expr, prolog, combinationArg=None, constraint=False):
 
         raise Exception("What do i do with %s (a %s)?" % (
                     expr, type(expr).__name__))
+
 
 def createSPARQLPConstraint(filter, prolog):
     """
@@ -425,7 +454,9 @@ def createSPARQLPConstraint(filter, prolog):
                     and filter.filter.reduce() \
                     or filter.filter
 
-    if prolog.DEBUG: print reducedFilter, type(reducedFilter)
+    if prolog.DEBUG:
+        print("createSPARQLPConstraint reducedFilter=%s, type=%s" % (
+            reducedFilter, type(reducedFilter)))
 
     if isinstance(reducedFilter, (ListRedirect,
                                   BinaryOperator,
@@ -441,48 +472,57 @@ def createSPARQLPConstraint(filter, prolog):
     else:
         const = True
 
+    if prolog.DEBUG:
+        print("createSPARQLPConst: reducedFilterType = %s, constraint = %s" % (
+            type(reducedFilter), const))
+
     if isinstance(reducedFilter, ParsedConditionalAndExpressionList):
 
-        combinationLambda = 'lambda i: %s' % (' or '.join(['%s' % \
-                mapToOperator(expr, prolog, combinationArg='i',
-                                constraint=const)
-                        for expr in reducedFilter]))
+        combinationLambda = 'lambda i: %s' % (' or '.join(
+            ['%s' % mapToOperator(expr, prolog, combinationArg='i',
+                                  constraint=const)
+                for expr in reducedFilter]))
 
-        if prolog.DEBUG: print "sparql-p operator(s): %s" % combinationLambda
+        if prolog.DEBUG:
+            print("a. sparql-p operator(s): %s" % combinationLambda)
         return eval(combinationLambda)
 
     elif isinstance(reducedFilter, ParsedRelationalExpressionList):
 
-        combinationLambda = 'lambda i: %s' % (' and '.join(['%s' % \
-                mapToOperator(expr, prolog, combinationArg='i',
-                                constraint=const)
-                         for expr in reducedFilter]))
+        combinationLambda = 'lambda i: %s' % (' and '.join(
+            ['%s' % mapToOperator(expr, prolog, combinationArg='i',
+                                  constraint=const)
+                for expr in reducedFilter]))
 
-        if prolog.DEBUG: print "sparql-p operator(s): %s" % combinationLambda
+        if prolog.DEBUG:
+            print("b. sparql-p operator(s): %s" % combinationLambda)
         return eval(combinationLambda)
 
     elif isinstance(reducedFilter, BuiltinFunctionCall):
         rt = mapToOperator(reducedFilter, prolog,
                             constraint=const)
 
-        if prolog.DEBUG: print "sparql-p operator(s): %s" % rt
+        if prolog.DEBUG:
+            print("c. sparql-p operator(s): %s" % rt)
         return eval(rt)
 
     elif isinstance(reducedFilter, (
             ParsedAdditiveExpressionList, UnaryOperator, FunctionCall)):
 
-        rt = 'lambda i: %s'%(
+        rt = 'lambda i: %s' % (
                 mapToOperator(reducedFilter, prolog, combinationArg='i',
-                                constraint=const))
+                              constraint=const))
 
-        if prolog.DEBUG: print "sparql-p operator(s): %s" % rt
+        if prolog.DEBUG:
+            print("d. sparql-p operator(s): %s" % rt)
         return eval(rt)
 
     elif isinstance(reducedFilter, Variable):
 
         rt = """operators.EBV(rdflib.Variable("%s"))""" % reducedFilter.n3()
 
-        if prolog.DEBUG: print "sparql-p operator(s): %s" % rt
+        if prolog.DEBUG:
+            print("e. sparql-p operator(s): %s" % rt)
         return eval(rt)
 
         # reducedFilter = BuiltinFunctionCall(BOUND,reducedFilter)
@@ -496,6 +536,7 @@ def createSPARQLPConstraint(filter, prolog):
         if reducedFilter == u'true' or reducedFilter == u'false':
             def trueFn(arg):
                 return True
+
             def falseFn(arg):
                 return False
             return reducedFilter == u'true' and trueFn or falseFn
@@ -503,8 +544,10 @@ def createSPARQLPConstraint(filter, prolog):
         rt = mapToOperator(reducedFilter, prolog,
                             constraint=const)
 
-        if prolog.DEBUG: print "sparql-p operator(s): %s" % rt
+        if prolog.DEBUG:
+            print("f. sparql-p operator(s): %s" % rt)
         return eval(rt)
+
 
 def isTriplePattern(nestedTriples):
     """
