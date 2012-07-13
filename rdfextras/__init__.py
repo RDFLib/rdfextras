@@ -49,21 +49,7 @@ def registerplugins():
     except:
         pass # must register plugins    
 
-    from rdflib.store import Store
-    from rdflib.parser import Parser
-    from rdflib.serializer import Serializer
     from rdflib.query import ResultParser, ResultSerializer, Result
-
-    plugin.register('rdf-json', Parser,
-        'rdfextras.parsers.rdfjson', 'RdfJsonParser')
-    plugin.register('json-ld', Parser,
-        'rdfextras.parsers.jsonld', 'JsonLDParser')
-    plugin.register('rdf-json', Serializer,
-        'rdfextras.serializers.rdfjson', 'RdfJsonSerializer')
-    plugin.register('json-ld', Serializer,
-        'rdfextras.serializers.jsonld', 'JsonLDSerializer')
-    plugin.register('html', Serializer,
-        'rdfextras.sparql.results.htmlresults', 'HTMLSerializer')
 
     plugin.register('sparql', Result,
         'rdfextras.sparql.query', 'SPARQLQueryResult')
@@ -81,5 +67,3 @@ def registerplugins():
     plugin.register('json', ResultParser,
         'rdfextras.sparql.results.jsonresults', 'JSONResultParser')
 
-    plugin.register('SPARQL', Store,
-        'rdfextras.store.SPARQL', 'SPARQLStore')
