@@ -230,18 +230,17 @@ def ReduceToAlgebra(left,right):
     else:
         return Join(left,right)
 
-# # Unreferenced anywhere else
-# def RenderSPARQLAlgebra(parsedSPARQL,nsMappings=None):
-#     nsMappings = nsMappings and nsMappings or {}
-#     global prolog
-#     prolog = parsedSPARQL.prolog
-#     if prolog is not None:
-#         prolog.DEBUG = False
-#     else:
-#         prolog = Prolog(None, [])
-#         prolog.DEBUG=False
-#     return reduce(ReduceToAlgebra,
-#                   parsedSPARQL.query.whereClause.parsedGraphPattern.graphPatterns,None)
+def RenderSPARQLAlgebra(parsedSPARQL,nsMappings=None):
+    nsMappings = nsMappings and nsMappings or {}
+    global prolog
+    prolog = parsedSPARQL.prolog
+    if prolog is not None:
+        prolog.DEBUG = False
+    else:
+        prolog = Prolog(None, [])
+        prolog.DEBUG=False
+    return reduce(ReduceToAlgebra,
+                  parsedSPARQL.query.whereClause.parsedGraphPattern.graphPatterns,None)
 
 def LoadGraph(dtSet,dataSetBase,graph):
     # An RDF URI dereference, following TAG best practices

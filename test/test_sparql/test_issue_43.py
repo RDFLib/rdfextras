@@ -10,7 +10,9 @@ testquery = """\
 SELECT ?node1 ?val1
 WHERE {
     ?node1 rdf:value ?val1 .
-    FILTER (?val1 = "never match0" || (?val1 = "never match1" && ?val1 = "never match2"))
+    FILTER (
+        ?val1="never match0" || ?val1="never match1" && ?val1="never match2"
+    )
 }
 """
 
@@ -30,6 +32,7 @@ WHERE {
 }
 """
 
+
 class TestIssue43(unittest.TestCase):
     debug = False
     sparql = True
@@ -41,16 +44,19 @@ class TestIssue43(unittest.TestCase):
         self.graph.parse(data=testgraph, format="n3", publicID=NS)
 
     def testSPARQL_disjunction(self):
-        rt = self.graph.query(disjunctionquery, initNs={'rdf':RDF }, DEBUG=False)
+        rt = self.graph.query(
+            disjunctionquery, initNs={'rdf': RDF}, DEBUG=False)
         self.assertEquals(len(list(rt)), 0)
 
     def testSPARQL_conjunction(self):
-        rt = self.graph.query(conjunctionquery, initNs={'rdf':RDF }, DEBUG=False)
+        rt = self.graph.query(
+            conjunctionquery, initNs={'rdf': RDF}, DEBUG=False)
         self.assertEquals(len(list(rt)), 0)
 
     def testSPARQL_disjunction_with_conjunction(self):
-        rt = self.graph.query(testquery, initNs={'rdf':RDF }, DEBUG=True)
-        self.assertEquals(len(list(rt)), 0)
+        rt = self.graph.query(
+            testquery, initNs={'rdf': RDF}, DEBUG=True)
+        self.assertEquals(len(list(rt)), 0, list(rt))
 
 if __name__ == '__main__':
     TestIssue43.testSPARQL_disjunction_with_conjunction()
