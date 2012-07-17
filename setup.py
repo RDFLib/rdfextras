@@ -56,8 +56,6 @@ config = dict(
                    "Operating System :: OS Independent",
                    ],
     packages = ['rdfextras',
-                'rdfextras.parsers',
-                'rdfextras.serializers',
                 'rdfextras.sparql',
                 'rdfextras.sparql.results',
                 'rdfextras.store',
