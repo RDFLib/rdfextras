@@ -3,6 +3,9 @@ from rdflib.store import Store
 from StringIO import StringIO
 import unittest
 
+"""Tests for JSON Serialization of SPARQL Results"""
+
+
 test_data = """ 
 @prefix foaf:       <http://xmlns.com/foaf/0.1/> .
 @prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .

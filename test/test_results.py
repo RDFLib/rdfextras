@@ -8,6 +8,7 @@ class TestSparqlResultsFormats(unittest.TestCase):
 
     def _test(self,s,format):
         r = rdflib.query.Result.parse(StringIO(s), format=format)
+        print r.type
         s = r.serialize(format=format)
         #print s
         r2 = rdflib.query.Result.parse(StringIO(s.decode('utf-8')), format=format)
