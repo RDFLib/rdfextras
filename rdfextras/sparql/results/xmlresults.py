@@ -8,7 +8,7 @@ try:
 except ImportError:
     from elementtree import ElementTree
 
-from rdflib import Literal, URIRef, BNode
+from rdflib import Literal, URIRef, BNode, Graph
 from rdflib.query import (
     Result,
     ResultParser,
@@ -34,11 +34,23 @@ Authors: Drew Perttula, Gunnar Aastrand Grimnes
 class XMLResultParser(ResultParser):
 
     def parse(self, source):
-        return XMLResult(parseSparqlResults(source.read()))
+        return XMLResult(source)
 
 
 class XMLResult(Result):
-    def __init__(self, tree):
+    def __init__(self, source):
+
+        xmlstring=source.read()
+
+        if isinstance(xmlstring, unicode):
+            xmlstring = xmlstring.encode('utf-8')
+        try:
+            tree=ElementTree.fromstring(xmlstring)
+        except Exception, e: 
+            try:
+                raise e.__class__("error parsing %r: %s" % (xmlstring, e))
+            except:
+                raise e
 
         boolean = tree.find(RESULTS_NS_ET + 'boolean')
         results = tree.find(RESULTS_NS_ET + 'results')
@@ -47,9 +59,16 @@ class XMLResult(Result):
             type_ = 'ASK'
         elif results != None:
             type_ = 'SELECT'
-        else:
-            raise ResultException(
-                "No result-bindings or boolean answer found!")
+        else: 
+            g=Graph()
+            try: 
+                g.parse(data=xmlstring)
+                if len(g)==0: 
+                    raise 
+                type_='CONSTRUCT'
+                    
+            except: 
+                raise ResultException("No RDF Graph, result-bindings or boolean answer found!")
 
         Result.__init__(self, type_)
         if type_ == 'SELECT':
@@ -66,6 +85,8 @@ class XMLResult(Result):
 
         elif type_ == 'ASK':
             self.askAnswer = bool(boolean.text)
+        elif type_ == 'CONSTRUCT':
+            self.graph=g
 
 
 def parseTerm(element):
@@ -88,29 +109,6 @@ def parseTerm(element):
     else:
         raise TypeError("unknown binding type %r" % element)
 
-
-def parseSparqlResults(xmlResults):
-    """
-    list of rows of {var1 : value1, var2 : value2, ...} dicts for the
-    given sparql result xml
-
-    this parser is -really- loose.
-
-    pass the ElementTree instead of the string if you want
-
-    This is the inverse of xmlResults."""
-    if isinstance(xmlResults, basestring):
-        if isinstance(xmlResults, unicode):
-            xmlResults = xmlResults.encode('utf-8')
-        try:
-            return ElementTree.fromstring(xmlResults)
-        except Exception, e:
-            try:
-                raise e.__class__("error parsing %r: %s" % (xmlResults, e))
-            except:
-                raise e
-    else:
-        return xmlResults
 
 
 class XMLResultSerializer(ResultSerializer):
