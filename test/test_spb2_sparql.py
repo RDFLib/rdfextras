@@ -112,4 +112,8 @@ def test_cases():
         yield gt, e
 
 if __name__ == "__main__":
-    test_cases()
+    for f, e in test_cases(): 
+        try: 
+            f(e)
+        except SkipTest: 
+            pass 
