@@ -38,7 +38,7 @@ def find_roots(graph,prop,roots=None):
             roots.add(y)
     return roots
 
-def get_tree(graph, root, prop, mapper=lambda x:x, done=None, dir='down' ): 
+def get_tree(graph, root, prop, mapper=lambda x:x, sortkey=None, done=None, dir='down' ): 
     """
     Return a nested list/tuple structure representing the tree 
     built by the transitive property given, starting from the root given
@@ -68,10 +68,10 @@ def get_tree(graph, root, prop, mapper=lambda x:x, done=None, dir='down' ):
         branches=graph.objects(root,prop)
 
     for branch in branches: 
-        t=get_tree(graph, branch, prop, mapper, done, dir)
+        t=get_tree(graph, branch, prop, mapper, sortkey, done, dir)
         if t: tree.append(t)
 
-    return ( mapper(root), tree )
+    return ( mapper(root), sorted(tree, key=sortkey) )
 
 VOID=rdflib.Namespace("http://rdfs.org/ns/void#")
 DCTERMS=rdflib.Namespace("http://purl.org/dc/terms/")
