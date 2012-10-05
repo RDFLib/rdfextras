@@ -1,4 +1,5 @@
 import sys
+import time
 import getopt
 import rdflib
 import codecs
@@ -42,18 +43,23 @@ def main(target, _help=_help, options="", stdin=True):
     else: 
         out=sys.stdout
 
+    start=time.time()
     if len(files)==0 and stdin: 
-        sys.stderr.write("Reading from stdin...\n")
+        sys.stderr.write("Reading from stdin as %s..."%f)
         g.load(sys.stdin, format=f)
+        sys.stderr.write("[done]\n")
     else: 
+        size=0
         for x in files:
             if f==None: 
                 f=guess_format(x)
+            start1=time.time()
             sys.stderr.write("Loading %s as %s... "%(x,f))
             g.load(x, format=f)
-            sys.stderr.write("[done]\n")
+            sys.stderr.write("done.\t(%d triples\t%.2f seconds)\n"%(len(g)-size, time.time()-start1))
+            size=len(g)
 
-    sys.stderr.write("Loaded %d triples.\n"%len(g))
+    sys.stderr.write("Loaded a total of %d triples in %.2f seconds.\n"%(len(g), time.time()-start))
     
     target(g,out,args)
 
