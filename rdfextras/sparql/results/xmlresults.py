@@ -8,7 +8,7 @@ try:
 except ImportError:
     from elementtree import ElementTree
 
-from rdflib import Literal, URIRef, BNode, Graph
+from rdflib import Literal, URIRef, BNode, Graph, Variable
 from rdflib.query import (
     Result,
     ResultParser,
@@ -76,10 +76,10 @@ class XMLResult(Result):
             for result in results:
                 r = {}
                 for binding in result:
-                    r[binding.get('name')] = parseTerm(binding[0])
+                    r[Variable(binding.get('name'))] = parseTerm(binding[0])
                 self.bindings.append(r)
 
-            self.vars = [x.get("name")
+            self.vars = [Variable(x.get("name"))
                 for x in tree.findall(
                     './%shead/%svariable' % (RESULTS_NS_ET, RESULTS_NS_ET))]
 
@@ -96,11 +96,15 @@ def parseTerm(element):
     if tag == RESULTS_NS_ET + 'literal':
         if text is None:
             text = ''
-        ret = Literal(text)
+        datatype=None
+        lang=None
         if element.get('datatype', None):
-            ret.datatype = URIRef(element.get('datatype'))
+            datatype = URIRef(element.get('datatype'))
         elif element.get(XML_NAMESPACE + '#lang', None):
-            ret.lang = element.get(XML_NAMESPACE + '#lang')
+            lang = element.get(XML_NAMESPACE + '#lang')
+
+        ret = Literal(text, datatype=datatype, lang=lang)
+
         return ret
     elif tag == RESULTS_NS_ET + 'uri':
         return URIRef(text)
