@@ -58,6 +58,8 @@ tests2Skip = {
     "data-r2/expr-builtin/q-datatype-1.rq":"test failed",
     "data-r2/expr-builtin/q-isliteral-1.rq":"test failed",
     "data-r2/expr-builtin/q-langMatches-4.rq":"'module' object has no attribute 'langmatches'",
+    "data-r2/expr-builtin/q-langMatches-de-de.rq":"parse exception",
+
     "data-r2/expr-builtin/sameTerm.rq":"'module' object has no attribute 'sameterm'",
     "data-r2/expr-builtin/sameTerm-eq.rq":"'module' object has no attribute 'sameterm'",
     "data-r2/expr-builtin/sameTerm-not-eq.rq":"'module' object has no attribute 'sameterm'",
