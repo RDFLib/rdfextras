@@ -1,6 +1,6 @@
 """Run DAWG tests against alternate SPARQL implementation."""
 import rdflib
-from rdflib import plugin
+from rdflib import plugin, URIRef
 from rdflib import Namespace
 from rdflib.graph import ConjunctiveGraph
 from rdflib.graph import Graph
@@ -236,7 +236,7 @@ def generictest(testFile):
         assert os.path.exists(manifestPath2)
         manifestPath = manifestPath2
     manifestG.default_context.parse(open(manifestPath),
-                                    publicID=TEST_BASE,
+                                    publicID=URIRef(TEST_BASE),
                                     format='n3')
     manifestData = manifestG.query(
                       MANIFEST_QUERY,
