@@ -193,7 +193,7 @@ def type2TermCombination(member,klass,context):
         return rt
     except:
         raise Exception("Unable to persist" + \
-                        "classification triple: %s %s %s" % \
+                        "classification triple: %s %s %s %s" % \
                                     (member,'rdf:type',klass,context))
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rdflib
-import rdfextras, rdfextras.tools
+import rdfextras, rdfextras.tools, rdfextras.utils.cmdlineutils
 
 import sys
 import cgi

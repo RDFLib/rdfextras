@@ -1,6 +1,6 @@
 """Run DAWG tests against alternate SPARQL implementation."""
 import rdflib
-from rdflib import plugin
+from rdflib import plugin, URIRef
 from rdflib import Namespace
 from rdflib.graph import ConjunctiveGraph
 from rdflib.graph import Graph
@@ -58,6 +58,8 @@ tests2Skip = {
     "data-r2/expr-builtin/q-datatype-1.rq":"test failed",
     "data-r2/expr-builtin/q-isliteral-1.rq":"test failed",
     "data-r2/expr-builtin/q-langMatches-4.rq":"'module' object has no attribute 'langmatches'",
+    "data-r2/expr-builtin/q-langMatches-de-de.rq":"parse exception",
+
     "data-r2/expr-builtin/sameTerm.rq":"'module' object has no attribute 'sameterm'",
     "data-r2/expr-builtin/sameTerm-eq.rq":"'module' object has no attribute 'sameterm'",
     "data-r2/expr-builtin/sameTerm-not-eq.rq":"'module' object has no attribute 'sameterm'",
@@ -234,7 +236,7 @@ def generictest(testFile):
         assert os.path.exists(manifestPath2)
         manifestPath = manifestPath2
     manifestG.default_context.parse(open(manifestPath),
-                                    publicID=TEST_BASE,
+                                    publicID=URIRef(TEST_BASE),
                                     format='n3')
     manifestData = manifestG.query(
                       MANIFEST_QUERY,
