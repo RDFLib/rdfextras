@@ -320,7 +320,7 @@ class ParsedGroupGraphPattern(object):
         self.triples = triples
         self._graphPatterns = graphPatterns
         _g = []
-        if triples:
+        if triples or graphPatterns:
             _g = [GraphPattern(triples=triples)]
         else:
             #Takes advantage of pattern transformation:
