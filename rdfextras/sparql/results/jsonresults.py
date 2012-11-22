@@ -1,5 +1,5 @@
 from rdflib.query import Result, ResultException, ResultSerializer, ResultParser
-from rdflib import Literal, URIRef, BNode
+from rdflib import Literal, URIRef, BNode, Variable
 
 import jsonlayer
 
@@ -71,13 +71,14 @@ class JSONResult(Result):
             self.askAnswer=bool(json['boolean'])
         else:
             self.bindings=self._get_bindings()
+            self.vars=[Variable(x) for x in json["head"]["vars"]]
 
     def _get_bindings(self):
         ret = []
         for row in self.json['results']['bindings']:
             outRow = {}
             for k, v in row.items():
-                outRow[k] = parseJsonTerm(v)
+                outRow[Variable(k)] = parseJsonTerm(v)
             ret.append(outRow)
         return ret
 
@@ -105,12 +106,12 @@ def parseJsonTerm(d):
 
 def termToJSON(self,term): 
     if isinstance(term, URIRef): 
-        return { 'type': 'uri', 'value': str(term) }
+        return { 'type': 'uri', 'value': unicode(term) }
     elif isinstance(term, Literal):
         if term.datatype!=None:
             return { 'type': 'typed-literal', 
                      'value': unicode(term), 
-                     'datatype': str(term.datatype) }
+                     'datatype': unicode(term.datatype) }
         else:
             r={'type': 'literal',
                'value': unicode(term) }

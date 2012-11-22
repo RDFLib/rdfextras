@@ -84,7 +84,7 @@ class XMLResult(Result):
                     './%shead/%svariable' % (RESULTS_NS_ET, RESULTS_NS_ET))]
 
         elif type_ == 'ASK':
-            self.askAnswer = bool(boolean.text)
+            self.askAnswer = boolean.text.lower().strip() == "true"
         elif type_ == 'CONSTRUCT':
             self.graph=g
 
@@ -100,9 +100,9 @@ def parseTerm(element):
         lang=None
         if element.get('datatype', None):
             datatype = URIRef(element.get('datatype'))
-        elif element.get(XML_NAMESPACE + '#lang', None):
-            lang = element.get(XML_NAMESPACE + '#lang')
-
+        elif element.get("{%s}lang"%XML_NAMESPACE, None):
+            lang = element.get("{%s}lang"%XML_NAMESPACE)
+        
         ret = Literal(text, datatype=datatype, lang=lang)
 
         return ret
