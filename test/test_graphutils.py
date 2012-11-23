@@ -5,7 +5,7 @@ except ImportError:
   from nose import SkipTest
   raise SkipTest('pydot required but not installed')
 from StringIO import StringIO
-from rdflib.extras.utils import graphutils
+from rdfextras.utils import graphutils
 from rdflib.graph import Graph
 
 n3source = """\
