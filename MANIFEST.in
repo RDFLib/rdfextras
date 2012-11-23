@@ -4,5 +4,5 @@ include ez_setup.py
 recursive-include rdfextras *.py *.pyc
 recursive-include examples *.py *.pyc
 recursive-include test *.py *.pyc
-include run_tests.py
+include run_tests*
 graft test
