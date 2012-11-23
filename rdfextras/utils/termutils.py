@@ -6,7 +6,7 @@ from rdflib import URIRef
 from rdflib import Variable
 from rdflib.term import Statement
 from rdflib.graph import QuotedGraph
-
+from rdflib.py3compat import format_doctest_out
 __all__ = ['SUBJECT', 'PREDICATE', 'OBJECT', 'CONTEXT', 'TERM_COMBINATIONS', 
            'REVERSE_TERM_COMBINATIONS', 'TERM_INSTANTIATION_DICT',
            'GRAPH_TERM_DICT', 'normalizeGraph', 'term2Letter', 
@@ -65,6 +65,7 @@ GRAPH_TERM_DICT = {
     'B': (Graph, BNode)
 }
 
+@format_doctest_out
 def normalizeGraph(graph):
     """Takes an instance of a ``Graph`` and returns the instance's identifier 
     and  ``type``. 
@@ -81,13 +82,15 @@ def normalizeGraph(graph):
     >>> memstore = plugin.get('IOMemory', Store)()
     >>> g = Graph(memstore, URIRef("http://purl.org/net/bel-epa/gjh"))
     >>> normalizeGraph(g)
-    (rdflib.term.URIRef('http://purl.org/net/bel-epa/gjh'), 'U')
-    >>> g = ConjunctiveGraph(memstore, Namespace("http://purl.org/net/bel-epa/gjh"))
-    >>> normalizeGraph(g)  #doctest: +ELLIPSIS
-    (rdflib.term.BNode(...), 'B')
+    (rdflib.term.URIRef(%(u)s'http://purl.org/net/bel-epa/gjh'), 'U')
+    >>> g = ConjunctiveGraph(
+    ...    memstore, URIRef("http://purl.org/net/bel-epa/gjh"))
+    ...
+    >>> normalizeGraph(g)
+    (rdflib.term.URIRef(%(u)s'http://purl.org/net/bel-epa/gjh'), 'U')
     >>> g = QuotedGraph(memstore, Namespace("http://purl.org/net/bel-epa/gjh"))
     >>> normalizeGraph(g)
-    (Namespace('http://purl.org/net/bel-epa/gjh'), 'F')
+    (Namespace(%(u)s'http://purl.org/net/bel-epa/gjh'), 'F')
     
     """
     if isinstance(graph,QuotedGraph):
@@ -95,7 +98,7 @@ def normalizeGraph(graph):
     else:
         return graph.identifier, term2Letter(graph.identifier)
 
-
+@format_doctest_out
 def term2Letter(term):
     """Relate a given term to one of several key types: 
      
@@ -118,9 +121,9 @@ def term2Letter(term):
     'U'
     >>> term2Letter(BNode())
     'B'
-    >>> term2Letter(Literal(u''))
+    >>> term2Letter(Literal(%(u)s''))
     'L'
-    >>> term2Letter(Variable(u'x'))
+    >>> term2Letter(Variable(%(u)s'x'))
     'V'
     >>> term2Letter(Graph())
     'B'
