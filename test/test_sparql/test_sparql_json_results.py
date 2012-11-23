@@ -103,7 +103,8 @@ class TestSparqlJsonResults(unittest.TestCase):
         result_json = json.loads(results.serialize(format='json').decode('utf-8'))
 
         msg = "Expected:\n %s \n- to contain:\n%s" % (result_json, correct)
-        self.assertEqual(result_json["head"], correct["head"], msg)
+        self.assertEqual(sorted(result_json["head"], key=repr),
+                         sorted(correct["head"], key=repr), msg)
 
         # Sort by repr - rather a hack, but currently the best way I can think
         # of to ensure the results are in the same order.
