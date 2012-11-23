@@ -42,7 +42,7 @@ See <http://nedbatchelder.com/code/modules/coverage.html> for details.
 
 NOSE_ARGS = [
         '--where=./',
-        #'--with-doctest',
+        '--with-doctest',
         #'--doctest-extension=.doctest',
         #'--doctest-tests',
         #'--with-coverage',
