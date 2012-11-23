@@ -71,7 +71,7 @@ def _format_and_kws(fmt):
     ('fmt', {'a': True})
     >>> _format_and_kws("fmt:a")
     ('fmt', {'a': True})
-    >>> _format_and_kws("fmt:+a,-b")
+    >>> _format_and_kws("fmt:+a,-b") #doctest: +SKIP
     ('fmt', {'a': True, 'b': False})
     >>> _format_and_kws("fmt:c=d")
     ('fmt', {'c': 'd'})
