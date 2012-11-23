@@ -1,8 +1,5 @@
-import sys
-if sys.version_info[:2] == (2, 4):
-    __doc__ = """"""
-else:
-    __doc__ = """
+from rdflib.py3compat import format_doctest_out
+"""
 A Describer is a stateful utility for creating RDF statements in a
 semi-declarative manner. It has methods for creating literal values, rel and
 rev resource relations (somewhat resembling RDFa).
@@ -118,6 +115,7 @@ class Describer(object):
         self._subjects = []
         self.about(about or None)
 
+    @format_doctest_out
     def about(self, subject, **kws):
         """
         Sets the current subject. Will convert the given object into an
@@ -130,7 +128,7 @@ class Describer(object):
             rdflib.term.BNode(...)
             >>> d.about("http://example.org/")
             >>> d._current()
-            rdflib.term.URIRef('http://example.org/')
+            rdflib.term.URIRef(%(u)s'http://example.org/')
 
         """
         kws.setdefault('base', self.base)
@@ -140,6 +138,7 @@ class Describer(object):
         else:
             self._subjects.append(subject)
 
+    @format_doctest_out
     def value(self, p, v, **kws):
         """
         Set a literal value for the given property. Will cast the value to an
@@ -152,18 +151,14 @@ class Describer(object):
             >>> d = Describer(about="http://example.org/")
             >>> d.value(RDFS.label, "Example")
             >>> d.graph.value(URIRef('http://example.org/'), RDFS.label)
-            rdflib.term.Literal(u'Example')
+            rdflib.term.Literal(%(u)s'Example')
 
         """
         v = cast_value(v, **kws)
         self.graph.add((self._current(), p, v))
 
+    @format_doctest_out
     def rel(self, p, o=None, **kws):
-        import sys
-        if sys.version_info[:2] == (2, 4):
-            __doc__ =""
-        else:
-            __doc__=\
         """Set an object for the given property. Will convert the given object
         into an ``URIRef`` if it's not an ``Identifier``. If none is given, a
         new ``BNode`` is used.
@@ -179,7 +174,7 @@ class Describer(object):
             >>> d = Describer(about="/", base="http://example.org/")
             >>> _ctxt = d.rel(RDFS.seeAlso, "/about")
             >>> d.graph.value(URIRef('http://example.org/'), RDFS.seeAlso)
-            rdflib.term.URIRef('http://example.org/about')
+            rdflib.term.URIRef(%(u)s'http://example.org/about')
 
             >>> with d.rel(RDFS.seeAlso, "/more"):
             ...     d.value(RDFS.label, "More")
@@ -187,7 +182,7 @@ class Describer(object):
             ...         URIRef('http://example.org/more')) in d.graph
             True
             >>> d.graph.value(URIRef('http://example.org/more'), RDFS.label)
-            rdflib.term.Literal(u'More')
+            rdflib.term.Literal(%(u)s'More')
 
         """
 
@@ -197,12 +192,8 @@ class Describer(object):
         self.graph.add((self._current(), p, o))
         return self._subject_stack(o)
 
+    @format_doctest_out
     def rev(self, p, s=None, **kws):
-        import sys
-        if sys.version_info[:2] == (2, 4):
-            __doc__ =""
-        else:
-            __doc__=\
         """
         Same as ``rel``, but uses current subject as *object* of the relation.
         The given resource is still used as subject in the returned context
@@ -220,7 +211,7 @@ class Describer(object):
             ...         URIRef('http://example.org/')) in d.graph
             True
             >>> d.graph.value(URIRef('http://example.net/'), RDFS.label)
-            rdflib.term.Literal(u'Net')
+            rdflib.term.Literal(%(u)s'Net')
 
         """
         kws.setdefault('base', self.base)
@@ -265,5 +256,3 @@ def cast_identifier(ref, **kws):
     if not isinstance(ref, Identifier):
         ref = URIRef(ref, **kws)
     return ref
-
-
