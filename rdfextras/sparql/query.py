@@ -900,7 +900,7 @@ class _SPARQLNode(object):
             for c in self.children:
                 c.expandOptions(bindings, statements, constraints)
 
-def _processResults(select, arr):
+def _processResults(select, arr, allVars):
     '''
     The result in an expansion node is in the form of an array of
     binding dictionaries.  The caller should receive an array of
@@ -916,33 +916,22 @@ def _processResults(select, arr):
     '''
     retval = []
 
-    if select:
-        for bind in arr:
-            # each result binding must be taken separately
-            qresult = []
+    if not select: select=allVars
+            
+    for bind in arr:
+        # each result binding must be taken separately
+        qresult = []
 
-            for s in select:
-                if s in bind:
-                    qresult.append(bind[s])
-                else:
-                    qresult.append(None)
+        for s in select:
+            qresult.append(bind.get(s))
 
-            # as a courtesy to the user, if the selection has one single
-            # element only, then we do not put in a tuple, just add it
-            # that way:
-            if len(select) == 1:
-                retval.append(qresult[0])
-            else:
-                retval.append(tuple(qresult))
-    else:
-
-        # this is the case corresponding to a SELECT * query call
-        for bind in arr:
-            qresult = [val for key,val in bind.items()]
-            if len(qresult) == 1:
-                retval.append(qresult[0])
-            else:
-                retval.append(tuple(qresult))
+        # as a courtesy to the user, if the selection has one single
+        # element only, then we do not put in a tuple, just add it
+        # that way:
+        if len(select) == 1:
+            retval.append(qresult[0])
+        else:
+            retval.append(tuple(qresult))
 
     return retval
 
@@ -1226,7 +1215,7 @@ class Query:
 
         # remember: _processResult turns the expansion results (an array of
         # dictionaries) into an array of tuples in the right, original order
-        retval = _processResults(selection,fullBinding)
+        retval = _processResults(selection,fullBinding, self._getAllVariables())
 
         return retval
 
@@ -1322,7 +1311,7 @@ class Query:
                       self._recur(node_results, selectionF))
                     selectionF.pop()
 
-                results = _processResults(selectionF, node_results)
+                results = _processResults(selectionF, node_results, self._getAllVariables())
 
         if distinct:
             retval = _uniquefyList(results)
