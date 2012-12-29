@@ -68,18 +68,15 @@ if sys.version_info[0] >= 3:
     from setuptools import setup
     config.update({'use_2to3': True})
     config.update({'src_root': setup_python3()})
+    install_requires = ['rdflib >= 3.2.1', 'pyparsing']
 else:
     try:
         from setuptools import setup
         config.update({'test_suite' : "nose.collector"})
     except ImportError:
         from distutils.core import setup
+    install_requires = ['rdflib >= 3.2.1', 'pyparsing<=1.5.7']
 
-
-install_requires = [
-    'rdflib >= 3.2.1',
-    'pyparsing'
-]
 
 tests_require = install_requires + \
                 []
