@@ -96,7 +96,7 @@ def prefixuri(x, prefix, class_=None):
         r=rdflib.URIRef(prefix+urllib2.quote(x.encode("utf8").replace(" ", "_"), safe=""))
     else: 
         r=rdflib.URIRef(x)
-    uris[x]=(r, class_)
+    uris[x,class_]=(r, class_)
     return r
 
 # meta-language for config
@@ -309,6 +309,7 @@ class CSV2RDF(object):
         # output types/labels for generated URIs
         classes=set()
         for l,x in uris.iteritems(): 
+            l,_=l
             u,c=x
             self.triple(u, RDFS.label, rdflib.Literal(l))
             if c: 
