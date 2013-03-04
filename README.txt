@@ -7,14 +7,16 @@ include a tools package and several "non-core-rdflib" store implementations.
 
 RDFExtras includes: 
 
- * A pure-python SPARQL implementation for in-memory stores or other store
-   that do not provide their own SPARQL implementation. 
  * A set of commandline utilities: rdfpipe, rdf2dot, rdfs2dot, csv2rdf
+ * Some RDFLib utility methods
+ * Supporting classes for stores on top of SQL databases. 
+   For concrete implementations using these, see for example: 
+   * https://github.com/RDFLib/rdflib-mysql
+   * https://github.com/RDFLib/rdflib-postgresql
 
 Dependencies: 
 
  * RDFLib>=3.2.1
- * For SPARQL: pyparsing
 
 For more information see: 
  * RDFExtras: http://github.com/RDFLib/rdfextras/

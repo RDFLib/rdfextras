@@ -5,19 +5,16 @@ Using SPARQL to query an rdflib 3 graph
 Get the SPARQL RDFLib plugin
 ============================
 
-SPARQL is no longer shipped with core RDFLib, instead it is now a part of
-`rdfextras <https://github.com/RDFLib/rdfextras/>`_
+Using SPARQL with RDFLib requires installing the rdflib-sparql project. 
 
-Assuming you have rdfextras installed with setuptools (highly recommended), 
-you can use SPARQL with RDFLib 3.X out of the box. 
+Install with PIP: 
 
-If you only have distutils, you have to add these lines somewhere at the top
-of your program:
+..code-block:: sh
 
-.. code-block:: python
+    pip install rdflib-sparql
 
-    import rdfextras
-    rdfextras.registerplugins()
+or from <http://github.com/RDFLib/rdflib-sparql>
+
 
 Create an RDFLib Graph
 ======================

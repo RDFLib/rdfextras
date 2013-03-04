@@ -330,14 +330,7 @@ Literals are permitted to have only one of the attributes datatype or lang.::
 Working with SPARQL
 ===================
 
-Assuming that RDFExtras was installed with setuptools (highly recommended), SPARQL can be used out of the box with RDFLib 3.X.
-
-.. note:: If only distutils is available, then these lines need to be included somewhere near the top of the progam code:
-
-    .. code-block:: python
-
-        import rdfextras
-        rdfextras.registerplugins()
+Assuming the rdflib-sparql package has been installed, SPARQL queries can be used out of the box with RDFLib 3.X.
 
 "SPARQL can be used out of the box" translates as: RDFLib Graph gets a 'query' method that accepts a SPARQL query string::
 

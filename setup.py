@@ -56,26 +56,25 @@ config = dict(
                    "Operating System :: OS Independent",
                    ],
     packages = ['rdfextras',
-                'rdfextras.sparql',
-                'rdfextras.sparql.results',
                 'rdfextras.store',
                 'rdfextras.store.FOPLRelationalModel',
                 'rdfextras.tools',
                 'rdfextras.utils']
 )
 
+install_requires = ['rdflib >= 3.2.1']
+
 if sys.version_info[0] >= 3:
     from setuptools import setup
     config.update({'use_2to3': True})
     config.update({'src_root': setup_python3()})
-    install_requires = ['rdflib >= 3.2.1', 'pyparsing']
+
 else:
     try:
         from setuptools import setup
         config.update({'test_suite' : "nose.collector"})
     except ImportError:
         from distutils.core import setup
-    install_requires = ['rdflib >= 3.2.1', 'pyparsing<=1.5.7']
 
 
 tests_require = install_requires + \
@@ -93,22 +92,7 @@ config.update(
             'rdf2dot = rdfextras.tools.rdf2dot:main',
             'rdfs2dot = rdfextras.tools.rdfs2dot:main',
         ],
-        'rdf.plugins.queryprocessor': [
-            'sparql = rdfextras.sparql.processor:Processor',
-        ],
-        'rdf.plugins.queryresult': [
-            'sparql = rdfextras.sparql.query:SPARQLQueryResult',
-        ],
-        'rdf.plugins.resultserializer': [
-            'xml = rdfextras.sparql.results.xmlresults:XMLResultSerializer',
-            'json = rdfextras.sparql.results.jsonresults:JSONResultSerializer',
-        ],
-        'rdf.plugins.resultparser': [
-            'xml = rdfextras.sparql.results.xmlresults:XMLResultParser',
-            'json = rdfextras.sparql.results.jsonresults:JSONResultParser',
-        ],
     },
-    #namespace_packages = ['rdfextras'], # TODO: really needed?
     install_requires = install_requires,
     tests_require = tests_require,
     extras_require = extras_require 
