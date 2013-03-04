@@ -17,10 +17,10 @@ Dependencies:
  * For SPARQL: pyparsing
 
 For more information see: 
- * RDFExtras: http://code.google.com/p/rdfextras/
+ * RDFExtras: http://github.com/RDFLib/rdfextras/
  * RDFExtras Docs: http://readthedocs.org/docs/rdfextras/
  
- * RDFLib: http://code.google.com/p/rdflib/
+ * RDFLib: http://github.com/RDFLib/rdflib/
  * RDFLib Docs: http://readthedocs.org/docs/rdflib
 
  * Discussion group: http://groups.google.com/group/rdflib-dev
