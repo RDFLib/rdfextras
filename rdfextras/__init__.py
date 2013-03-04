@@ -4,7 +4,7 @@ The RDFExtras namespace package.
 """
 
 __author__ = "Niklas Lindström"
-__version__ = "0.4"
+__version__ = "1.0-dev"
 
 # This is a namespace package.
 try:
