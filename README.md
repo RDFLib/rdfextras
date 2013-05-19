@@ -1,3 +1,8 @@
+### Note: this project is deprecated. 
+
+In RDFLib >= 4.0, rdfextras is no longer required, SPARQL support and the utilities from this project are included in core.
+
+
 ========================================================================
 RDFExtras README
 ========================================================================
