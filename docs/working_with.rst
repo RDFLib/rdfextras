@@ -140,8 +140,8 @@ Namespace instances can be accessed attribute-style or dictionary key-style::
 
 Typical use::
 
-    >>> g = Graph()
-    >>> s = BNode('someone')
+    >>> g = rdflib.Graph()
+    >>> s = rdflib.BNode('someone')
     >>> g.add((s, RDF.type, FOAF.Person))
 
 Instances of Namespace class can be bound to Graphs::
